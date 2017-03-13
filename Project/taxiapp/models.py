@@ -1,0 +1,146 @@
+from __future__ import unicode_literals
+from django.db import models
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+
+# TESTING SOME CUSTOM AUTH FUNCTIONALITY
+class MyUserManager(BaseUserManager):
+    def create_user(self, email, date_of_birth, password=None):
+        """
+        Creates and saves a User with the given email, date of
+        birth and password.
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            email=self.normalize_email(email),
+            date_of_birth=date_of_birth,
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, date_of_birth, password):
+        """
+        Creates and saves a superuser with the given email, date of
+        birth and password.
+        """
+        user = self.create_user(email,
+            password=password,
+            date_of_birth=date_of_birth
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+
+class MyUser(AbstractBaseUser):
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+    date_of_birth = models.DateField()
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = MyUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['date_of_birth']
+
+    def get_full_name(self):
+        # The user is identified by their email address
+        return self.email
+
+    def get_short_name(self):
+        # The user is identified by their email address
+        return self.email
+
+    def __str__(self):              # __unicode__ on Python 2
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_admin
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Login_Details(models.Model):
+	user_id 			= models.CharField(max_length = 20, primary_key = True)
+	password			= models.CharField(max_length = 100)
+	access_level 		= models.IntegerField()
+
+	def __unocide__(self):
+		return self.user_id
+
+	def __str__(self):
+		return self.user_id
+
+class Taxi_Details(models.Model):
+	taxi_id 			= models.CharField(max_length = 20, primary_key = True)
+	number_plate 		= models.CharField(max_length = 20)
+	driver_name 		= models.CharField(max_length = 40)
+	web_page_url 		= models.CharField(max_length = 100)
+	address 			= models.CharField(max_length = 200)
+	phone_number 		= models.IntegerField()
+	other_details 		= models.CharField(max_length = 200, blank = True)
+	num_of_complaints 	= models.IntegerField()
+
+	def __str__(self):
+		return self.driver_name
+
+
+class Complaint_Statements(models.Model):
+	complaint_id 		= models.CharField(max_length = 20, primary_key = True)
+	complaint 			= models.CharField(max_length = 100)
+
+	def __str__(self):
+		return self.complaint_id
+
+class Admin_Details(models.Model):
+	admin_id 			= models.CharField(max_length = 20, primary_key = True)
+	sms_number			= models.IntegerField()
+	whatsapp_number 	= models.IntegerField()
+	address				= models.CharField(max_length = 200, blank = True)
+	coordinate_x		= models.IntegerField()
+	coordinate_y		= models.IntegerField()
+
+	def __str__(self):
+		return self.admin_id
+
+
+class User_Complaint(models.Model):
+	complaint_number 	= models.CharField(max_length = 20, primary_key = True)
+	user_locations_x 	= models.IntegerField()
+	user_locations_y 	= models.IntegerField()
+	taxi_id 			= models.ForeignKey('Taxi_Details', on_delete=models.CASCADE)
+	complaint_id		= models.ForeignKey('Complaint_Statements', on_delete=models.CASCADE)
+	admin_id 			= models.ForeignKey('Admin_Details', on_delete=models.CASCADE) 
+
+	def __str__(self):
+		return self.complaint_number
