@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import *
 from django.template import loader
 from django.contrib.auth import authenticate, login, logout
@@ -12,10 +12,15 @@ def home1(request):
 	return HttpResponse(template.render(context, request))
 
 def home(request):
-	if request.method == 'POST':  # if the form has been filled
+    if request.user.is_authenticated:
+        if request.user.is_admin:
+            return redirect('/admin')
+        else:
+            return redirect('/drivers_list')
+            
+    if request.method == 'POST':  # if the form has been filled
 		form = UserForm(request.POST)
 
- 
 		if form.is_valid():  # All the data is valid
 			user_id = request.POST.get('user_id', '')
 			access_level = request.POST.get('access_level', '')
@@ -25,14 +30,16 @@ def home(request):
 		login_details_obj.save()
  
 		return render(request, 'taxiapp/home.html', {'user_id': user_id,'is_registered':True }) # Redirect after POST
- 
-	else:
+	
+    else:
 		form = UserForm()  # an unboundform
 		return render(request, 'taxiapp/home.html', {'form': form})
 
 
 def admin_login(request):
-    #context = RequestContext(request)
+    if request.user.is_authenticated:
+        return redirect('/drivers_list')
+
     if request.method == 'POST':
     	form 	 = AdminLoginForm(request.POST)
     	username = ''
@@ -60,5 +67,6 @@ def admin_login(request):
         return render(request, 'taxiapp/admin_login.html', {'form': form})
 
 
+#need to get the list of drivers here and send it to html
 def drivers_list(request):
 	return render(request, 'taxiapp/drivers_list.html', {})
