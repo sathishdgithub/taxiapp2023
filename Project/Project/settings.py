@@ -128,3 +128,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'taxiapp.MyUser'
+
+#Adding Security https, uncomment these lines for https security
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#SECURE_SSL_REDIRECT     = True
+#SESSION_COOKIE_SECURE   = True
+#CSRF_COOKIE_SECURE      = True
