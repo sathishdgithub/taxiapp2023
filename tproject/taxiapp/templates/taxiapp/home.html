@@ -12,7 +12,18 @@
 {% endif %}
 
 -->
-
+{% if user.is_authenticated %}
+ {% if user.is_admin %}
+ <form action="/taxi_new" method="get">
+	<input type="submit" value="Add New Taxi">
+</form>
+ {% else %}
+ <h1> Hello, Police </h1>
+ {% endif %}
+<h1> Hello, Loggedin </h1>
+{% else %}
+<h1> Hello, Loggedout </h1>
+{% endif %}
 
 <form action="/admin" method="get">
 	<input type="submit" value="Super User Login">

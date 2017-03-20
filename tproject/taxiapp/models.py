@@ -79,30 +79,7 @@ class MyUser(AbstractBaseUser):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-class Login_Details(models.Model):
-	user_id 			= models.CharField(max_length = 20, primary_key = True)
-	password			= models.CharField(max_length = 100)
-	access_level 		= models.IntegerField()
-
-	def __unocide__(self):
-		return self.user_id
-
-	def __str__(self):
-		return self.user_id
-
-class Taxi_Details(models.Model):
-	taxi_id 			= models.CharField(max_length = 20, primary_key = True)
+class Taxi_Detail(models.Model):
 	number_plate 		= models.CharField(max_length = 20)
 	driver_name 		= models.CharField(max_length = 40)
 	web_page_url 		= models.CharField(max_length = 100)
@@ -115,32 +92,20 @@ class Taxi_Details(models.Model):
 		return self.driver_name
 
 
-class Complaint_Statements(models.Model):
-	complaint_id 		= models.CharField(max_length = 20, primary_key = True)
+class Complaint_Statement(models.Model):
 	complaint 			= models.CharField(max_length = 100)
 
-	def __str__(self):
-		return self.complaint_id
-
-class Admin_Details(models.Model):
-	admin_id 			= models.CharField(max_length = 20, primary_key = True)
+class Admin_Detail(models.Model):
 	sms_number			= models.IntegerField()
 	whatsapp_number 	= models.IntegerField()
 	address				= models.CharField(max_length = 200, blank = True)
 	coordinate_x		= models.IntegerField()
 	coordinate_y		= models.IntegerField()
 
-	def __str__(self):
-		return self.admin_id
-
 
 class User_Complaint(models.Model):
-	complaint_number 	= models.CharField(max_length = 20, primary_key = True)
 	user_locations_x 	= models.IntegerField()
 	user_locations_y 	= models.IntegerField()
-	taxi_id 			= models.ForeignKey('Taxi_Details', on_delete=models.CASCADE)
-	complaint_id		= models.ForeignKey('Complaint_Statements', on_delete=models.CASCADE)
-	admin_id 			= models.ForeignKey('Admin_Details', on_delete=models.CASCADE) 
-
-	def __str__(self):
-		return self.complaint_number
+	taxi_id 			= models.ForeignKey('Taxi_Detail', on_delete=models.CASCADE)
+	complaint_id		= models.ForeignKey('Complaint_Statement', on_delete=models.CASCADE)
+	admin_id 			= models.ForeignKey('Admin_Detail', on_delete=models.CASCADE) 

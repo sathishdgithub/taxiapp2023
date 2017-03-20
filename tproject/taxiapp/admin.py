@@ -83,8 +83,7 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)
 
-admin.site.register(Login_Details)
-admin.site.register(Taxi_Details)
-admin.site.register(Complaint_Statements)
-admin.site.register(Admin_Details)
+admin.site.register(Taxi_Detail)
+admin.site.register(Complaint_Statement)
+admin.site.register(Admin_Detail)
 admin.site.register(User_Complaint)
