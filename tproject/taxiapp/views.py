@@ -60,7 +60,14 @@ def admin_login(request):
 
 
 def drivers_list(request):
-	return render(request, 'taxiapp/drivers_list.html', {})
+    if request.method == "POST":
+        form = TaxisearchForm(request.POST)
+        taxi_id = request.POST.get('taxi_id', '')
+        print taxi_id
+        return taxi_detail(request, taxi_id)
+    else:
+        form = TaxisearchForm()
+        return render(request, 'taxiapp/drivers_list.html', {'form' : form})
 
 def taxi_detail(request, pk):
     taxi = get_object_or_404(Taxi_Detail, pk=pk)
