@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from forms import *
 from models import *
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 def index(request):
 	if request.user.is_authenticated():

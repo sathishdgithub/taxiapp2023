@@ -7,8 +7,8 @@ class UserForm(forms.Form):
 	access_level = forms.IntegerField()
 
 class AdminLoginForm(forms.Form):
-	username 	= forms.EmailField()
-	password	= forms.CharField(widget = forms.PasswordInput)
+	username 	= forms.EmailField(widget=forms.TextInput(attrs={'class' : 'form-control', 'placeholder' : 'Username'}), label='')
+	password	= forms.CharField(widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder' : 'Password'}),  label='')
 
 class TaxidetailsForm(forms.ModelForm):
 
@@ -17,4 +17,4 @@ class TaxidetailsForm(forms.ModelForm):
         fields = ('driver_name', 'address', 'phone_number', 'other_details', 'number_plate')
 
 class TaxisearchForm(forms.Form):
-	taxi_id = forms.IntegerField()
+	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'Taxi ID', 'maxlength' : '64'}), label='')

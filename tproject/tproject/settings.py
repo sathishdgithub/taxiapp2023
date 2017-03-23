@@ -37,7 +37,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'taxiapp'
+    'qrcode',
+    'taxiapp',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -101,4 +102,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'taxiapp.MyUser'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'taxiapp/media')

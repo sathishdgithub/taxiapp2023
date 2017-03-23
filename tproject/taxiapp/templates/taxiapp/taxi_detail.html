@@ -104,18 +104,19 @@
   border-bottom: none;
 }
 
-.profile-usermenu ul li a {
+.profile-usermenu ul li p {
   color: #93a3b5;
   font-size: 14px;
   font-weight: 400;
 }
 
-.profile-usermenu ul li a i {
+.profile-usermenu ul li p i {
   margin-right: 8px;
   font-size: 14px;
+
 }
 
-.profile-usermenu ul li a:hover {
+.profile-usermenu ul li p:hover {
   background-color: #fafcfd;
   color: #5b9bd1;
 }
@@ -124,7 +125,7 @@
   border-bottom: none;
 }
 
-.profile-usermenu ul li.active a {
+.profile-usermenu ul li.active p {
   color: #5b9bd1;
   background-color: #f6f9fb;
   border-left: 2px solid #5b9bd1;
@@ -137,13 +138,24 @@
   background: #fff;
   min-height: 460px;
 }
+
+.qr-userpic img {
+  float: none;
+  margin: 0 auto;
+  width: 50%;
+  height: 50%;
+  max-height: 100px;
+  max-width: 100px;
+}
+
+
 </style>
 <div class="container">
     <div class="row profile">
             <div class="profile-sidebar">
                 <!-- SIDEBAR USERPIC -->
                 <div class="profile-userpic">
-                    <img src="{% static 'sandeep.jpg' %}" class="img-responsive" alt="">
+                    <img src="{{ taxi.driver_image.url }}" class="img-responsive" alt="">
                 </div>
                 <!-- END SIDEBAR USERPIC -->
                 <!-- SIDEBAR USER TITLE -->
@@ -166,24 +178,28 @@
                 <div class="profile-usermenu">
                     <ul class="nav">
                         <li class="active">
-                            <a href="#">
+                            <p>
                             <i class="glyphicon glyphicon-home"></i>
-                            Address </a>
+                            Address </p>
                         </li>
                         <li>
-                            <a href="#">
+                            <p>
                             <i class="glyphicon glyphicon-user"></i>
-                            Contact </a>
+                            Contact </p>
                         </li>
                         <li>
-                            <a href="#" target="_blank">
+                            <p>
                             <i class="glyphicon glyphicon-ok"></i>
-                            Driver ID </a>
+                            Driver ID </p>
                         </li>
                         <li>
-                            <a href="#">
+                            <p>
                             <i class="glyphicon glyphicon-flag"></i>
-                            QR code </a>
+                            QR code </p>
+
+                        <div div class="qr-userpic">
+                        <img src="{{ taxi.qr_image.url }}" class="img-responsive" alt="">
+                        </div>
                         </li>
                     </ul>
 

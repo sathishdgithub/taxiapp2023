@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+import os
 
-# TESTING SOME CUSTOM AUTH FUNCTIONALITY
+
 class MyUserManager(BaseUserManager):
     def create_user(self, email, date_of_birth, password=None):
         """
@@ -82,12 +83,14 @@ class MyUser(AbstractBaseUser):
 class Taxi_Detail(models.Model):
 	number_plate 		= models.CharField(max_length = 20)
 	driver_name 		= models.CharField(max_length = 40)
-	web_page_url 		= models.CharField(max_length = 100)
 	address 			= models.CharField(max_length = 200)
 	phone_number 		= models.IntegerField()
 	other_details 		= models.CharField(max_length = 200, blank = True)
 	num_of_complaints 	= models.IntegerField()
-
+	driver_image        = models.ImageField(upload_to='drivers',
+                              default = 'media/default_qr.png')
+	qr_image            = models.ImageField(upload_to='qr',
+                              default = 'media/default_qr.png')
 	def __str__(self):
 		return self.driver_name
 
