@@ -87,4 +87,19 @@ def taxi_new(request):
     else:
         form = TaxidetailsForm()
     return render(request, 'taxiapp/taxi_edit.html', {'form': form})
+
+def complaint_form(request,pk):
+    if request.method == "POST":
+        form = ComplaintUserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
+    else:
+        #taxi = get_object_or_404(Taxi_Detail, pk=pk)
+        form = ComplaintUserForm({'taxi':pk})
+        form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
+    	return render(request, 'taxiapp/complaint.html', {'form': form})
+
+def complaint_success(request,pk):
+    return render(request,'taxiapp/complaint_success.html',{'message':'Your complaint for Taxi has been successfully registered. Complaint Number: '+str(pk)})
     
