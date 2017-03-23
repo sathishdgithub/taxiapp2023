@@ -25,7 +25,7 @@ SECRET_KEY = '28=yz63c!&j%zmk#h!e$@-co#byb$7g#3_x6$fuh80-rb-ip=h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['revsi.pythonanywhere.com']
 
 
 # Application definition
