@@ -2,6 +2,10 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 import os
+import qrcode
+
+from django.core.urlresolvers import reverse
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 
 class MyUserManager(BaseUserManager):
@@ -89,10 +93,29 @@ class Taxi_Detail(models.Model):
 	num_of_complaints 	= models.IntegerField()
 	driver_image        = models.ImageField(upload_to='drivers',
                               default = 'media/default_qr.png')
-	qr_image            = models.ImageField(upload_to='qr',
-                              default = 'media/default_qr.png')
+	qrcode            	= models.ImageField(upload_to='qr', blank=True, null=True)
+	
 	def __str__(self):
 		return self.driver_name
+	def generate_qrcode(self):
+		qr = qrcode.QRCode(
+			version=1,
+			error_correction=qrcode.constants.ERROR_CORRECT_L,
+			box_size=6,
+			border=0,
+		)
+		qr.add_data(self.id)
+		qr.make(fit=True)
+
+		img = qr.make_image()
+
+		buffer = StringIO.StringIO()
+		img.save(buffer)
+		filename = 'qr-%s.png' % (self.id)
+		filebuffer = InMemoryUploadedFile(
+			buffer, None, filename, 'image/png', buffer.len, None)
+		self.qrcode.save(filename, filebuffer)
+
 
 
 class Complaint_Statement(models.Model):
