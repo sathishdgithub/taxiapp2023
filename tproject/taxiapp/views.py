@@ -66,7 +66,7 @@ def drivers_list(request):
         form = TaxisearchForm(request.POST)
         taxi_id = request.POST.get('taxi_id', '')
         print taxi_id
-        return taxi_detail(request, taxi_id)
+        return HttpResponseRedirect("/taxi/"+taxi_id)
     else:
         form = TaxisearchForm()
         return render(request, 'taxiapp/drivers_list.html', {'form' : form})
