@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from forms import *
 from models import *
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+import sys
 
 def index(request):
 	if request.user.is_authenticated():
@@ -134,3 +134,26 @@ def taxi_list(request):
     else:
         return HttpResponseRedirect("/admin_login")
 
+def get_distance(lat,lon,x,y):
+    return (lat-x)**2+(lon-y)**2
+
+def taxi_emergency(request,lat,lon,taxi_id):
+    rows = MyUser.objects.all()
+    lat,lon = float(lat),float(lon)
+    if len(rows) > 0:
+        if rows[0].location:
+            x,y = map(float,rows[0].location.strip().split(','))
+            police,min_distance = rows[0],get_distance(lat,lon,x,y)
+        else:
+            police,min_distance = rows[0],sys.maxint
+        for row in rows:
+            if row.location:
+                x,y = map(float,row.location.strip().split(','))
+                distance = get_distance(lat,lon,x,y)
+                if distance < min_distance:
+                    min_distance = distance
+                    police = row
+        return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
+    else:
+        return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})
+    
