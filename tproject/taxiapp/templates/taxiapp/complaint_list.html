@@ -36,9 +36,9 @@
                 {% endfor %}
                 <td>{{row.complaint}}</td>
                 {% if row.resolved == False %}
-                <td>{{'Not Resolved'}}</td>
+                <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
                 {% else %}
-                <td>{{'Already Resolved'}}</td>
+                <td>{{'Resolved'}}</td>
                 {% endif %}
             </tr>
             {% endfor %}

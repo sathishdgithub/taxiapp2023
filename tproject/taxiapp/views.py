@@ -93,7 +93,7 @@ def complaint_form(request,pk):
         form = ComplaintUserForm(request.POST)
         if form.is_valid():
             form.save()
-            t = Taxi_Detail.objects.get(id=form.instance.taxi)
+            t = Taxi_Detail.objects.get(id=form.instance.taxi.id)
             t.num_of_complaints = t.num_of_complaints+1
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
@@ -105,6 +105,19 @@ def complaint_form(request,pk):
 
 def complaint_success(request,pk):
     return render(request,'taxiapp/complaint_success.html',{'message':'Your complaint for Taxi has been successfully registered. Complaint Number: '+str(pk)})
+
+def complaint_resolve(request,pk):
+    if request.user.is_authenticated():
+        row = Complaint_Statement.objects.get(id=pk)
+        taxi = row.taxi
+        t = Taxi_Detail.objects.get(id=taxi.id)
+        t.num_of_complaints = max(0,t.num_of_complaints-1)
+        t.save()
+        row.resolved = True
+        row.save()
+        return HttpResponseRedirect("/complaint_list") 
+    else:
+        return HttpResponseRedirect("/admin_login")
 
 def complaint_list(request):
     if request.user.is_authenticated():
