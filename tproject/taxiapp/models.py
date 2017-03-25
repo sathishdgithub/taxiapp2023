@@ -86,10 +86,20 @@ class MyUser(AbstractBaseUser):
 
 class Taxi_Detail(models.Model):
 	number_plate 		= models.CharField(max_length = 20)
+        traffic_number		= models.CharField(max_length = 20)
 	driver_name 		= models.CharField(max_length = 40)
+        s_o_of                  = models.CharField(max_length = 40
 	address 		= models.CharField(max_length = 200)
-	phone_number 		= models.IntegerField()
-	other_details 		= models.CharField(max_length = 200, blank = True)
+	date_of_birth		= models.DateField()
+        phone_number 		= models.CharField(max_length=13)
+	address 		= models.CharField(max_length = 200, blank = True)
+	aadhar_number		= models.CharField(max_length=12)
+        driving_license_number  = models.CharField(max_length=30)
+        date_of_validity        = models.DateField()
+        autostand               = models.CharField(max_length=80)
+        union                   = models.CharField(max_length=100)
+        insurance               = models.DateField()
+        capacity_of_passengers  = models.CharField(max_length=10)
 	num_of_complaints 	= models.IntegerField()
 	driver_image        = models.ImageField(upload_to='drivers',
                               default = 'media/default_qr.png')
