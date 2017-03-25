@@ -104,6 +104,9 @@ def complaint_success(request,pk):
     return render(request,'taxiapp/complaint_success.html',{'message':'Your complaint for Taxi has been successfully registered. Complaint Number: '+str(pk)})
 
 def complaint_list(request):
-    rows = Complaint_Statement.objects.all()
-    reasons = Complaint_Statement.REASONS
-    return render(request,'taxiapp/complaint_list.html',{'rows':rows,'reasons':reasons})    
+    if request.user.is_authenticated():
+    	rows = Complaint_Statement.objects.all()
+    	reasons = Complaint_Statement.REASONS
+    	return render(request,'taxiapp/complaint_list.html',{'rows':rows,'reasons':reasons})
+    else:
+    	return HttpResponseRedirect("/admin_login")
