@@ -14,7 +14,7 @@ class TaxidetailsForm(forms.ModelForm):
 
     class Meta:
         model = Taxi_Detail
-        fields = ('driver_name', 'address', 'phone_number', 'other_details', 'number_plate')
+        fields = ('number_plate','driver_name', 'traffic_number','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
 
 class TaxisearchForm(forms.Form):
 	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'Taxi ID', 'maxlength' : '64'}), label='')

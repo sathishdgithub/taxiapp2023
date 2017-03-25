@@ -93,6 +93,9 @@ def complaint_form(request,pk):
         form = ComplaintUserForm(request.POST)
         if form.is_valid():
             form.save()
+            t = Taxi_Detail.objects.get(id=form.instance.taxi)
+            t.num_of_complaints = t.num_of_complaints+1
+            t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
     else:
         #taxi = get_object_or_404(Taxi_Detail, pk=pk)
@@ -110,3 +113,11 @@ def complaint_list(request):
     	return render(request,'taxiapp/complaint_list.html',{'rows':rows,'reasons':reasons})
     else:
     	return HttpResponseRedirect("/admin_login")
+
+def taxi_list(request):
+    if request.user.is_authenticated():
+        rows = Taxi_Detail.objects.all()
+        return render(request,'taxiapp/taxi_list.html',{'rows':rows})
+    else:
+        return HttpResponseRedirect("/admin_login")
+

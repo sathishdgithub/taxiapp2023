@@ -12,4 +12,5 @@ urlpatterns = [
         url(r'^complaint/(?P<pk>\d+)/$', views.complaint_form, name='complaint_form'),
         url(r'^complaint_success/(?P<pk>\d+)/$', views.complaint_success, name='complaint_success'),
         url(r'^complaint_list/$', views.complaint_list, name='complaint_list'),
+        url(r'^taxi_list/$', views.taxi_list, name='taxi_list'),
 ]
