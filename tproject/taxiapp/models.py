@@ -5,6 +5,8 @@ import os
 import qrcode
 from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import models
+from location_field.models.plain import PlainLocationField
 
 
 class MyUserManager(BaseUserManager):
@@ -46,6 +48,8 @@ class MyUser(AbstractBaseUser):
         unique=True,
     )
     date_of_birth = models.DateField()
+    city = models.CharField(max_length=255,default='Hyderabad')
+    location = PlainLocationField(based_fields=['city'], zoom=7,null=True,blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
@@ -153,6 +157,8 @@ class Admin_Detail(models.Model):
 	address				= models.CharField(max_length = 200, blank = True)
 	coordinate_x		= models.IntegerField()
 	coordinate_y		= models.IntegerField()
+        city = models.CharField(max_length=255,default='Hyderabad')
+        location = PlainLocationField(based_fields=['city'], zoom=7,null=True,blank=True)
 
 
 class User_Complaint(models.Model):
