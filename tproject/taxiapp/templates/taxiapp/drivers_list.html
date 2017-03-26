@@ -19,64 +19,117 @@
     <!-- Speaking of Google, don't forget to set your site up:
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
-
-    </head>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
 
 {% load static %}
 <style type="text/css">
 
-.form-signin
-{
-    max-width: 330px;
-    padding: 15px;
-    margin: 0 auto;
+body{
+    width:100%;
+    text-align:center;
 }
-.form-signin .form-signin-heading, .form-signin .checkbox
-{
-    margin-bottom: 10px;
+img{
+    border:0;
 }
-.form-signin .checkbox
-{
-    font-weight: normal;
+#main{
+    margin: 15px auto;
+    background:white;
+    overflow: auto;
+    width: 100%;
 }
-.form-signin .form-control
-{
-    position: relative;
-    font-size: 16px;
-    height: auto;
-    padding: 10px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+#header{
+    background:white;
+    margin-bottom:15px;
 }
-.form-signin .form-control:focus
-{
-    z-index: 2;
+#mainbody{
+    background: white;
+    width:100%;
+    display:none;
 }
-.account-wall
-{
-    margin-top: 20px;
-    padding: 40px 0px 20px 0px;
-    background-color: #f7f7f7;
-    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+#footer{
+    background:white;
 }
-.login-title
-{
-    color: #555;
-    font-size: 18px;
-    font-weight: 400;
-    display: block;
+#v{
+    width:320px;
+    height:240px;
 }
+#qr-canvas{
+    display:none;
+}
+#qrfile{
+    width:320px;
+    height:240px;
+}
+#mp1{
+    text-align:center;
+    font-size:35px;
+}
+#imghelp{
+    position:relative;
+    left:0px;
+    top:-160px;
+    z-index:100;
+    font:18px arial,sans-serif;
+    background:#f0f0f0;
+    margin-left:35px;
+    margin-right:35px;
+    padding-top:10px;
+    padding-bottom:10px;
+    border-radius:20px;
+}
+.selector{
+    margin:0;
+    padding:0;
+    cursor:pointer;
+    margin-bottom:-5px;
+}
+#outdiv
+{
+    width:320px;
+    height:240px;
+    border-width: 3px 3px 3px 3px;
+}
+#result{
+    border: solid;
+    border-width: 1px 1px 1px 1px;
+    padding:20px;
+    width:70%;
+}
+
+ul{
+    margin-bottom:0;
+    margin-right:40px;
+}
+li{
+    display:inline;
+    padding-right: 0.5em;
+    padding-left: 0.5em;
+    font-weight: bold;
+    border-right: 1px solid #333333;
+}
+li a{
+    text-decoration: none;
+    color: black;
+}
+
+#footer a{
+    color: black;
+}
+.tsel{
+    padding:0;
+}
+
 
 
 </style>
+<script type="text/javascript" src="{% static 'llqrcode.js' %}"></script>
+<script type="text/javascript" src="{% static 'webqr.js' %}"></script>
+</head>
 
+<body>
 <div class="container">
     <div class="row">
-<h1 class="text-center login-title">Search Taxi</h1>
+        <h1 class="text-center login-title">Search Taxi</h1>
         <div class="text-center">
 
         <form method="POST" class="post-form">{% csrf_token %}
@@ -84,13 +137,40 @@
         <button type="submit" class="btn btn-primary btn-sm">Submit</button>
         </form>
 
+        </div>
     </div>
+
+<br>
+<br>
+    <h1 class="text-center login-title">QR CODE</h1>
+    <div id="qr-btn" >
+    <button class="btn btn-primary btn-sm" onclick="load()">Open Camera and Scan</button>
     </div>
+        <div id="mainbody">
+        <table class="tsel" border="0" width="100%">
+        <tr>
+        <td valign="top" align="center" width="50%">
+        <table class="tsel" border="0">
+        <tr><td colspan="2" align="center">
+        <div id="outdiv">
+        </div></td></tr>
+        </table>
+        </td>
+        </tr>
+        <tr><td colspan="3" align="center">
+        <div id="result"></div>
+        </td></tr>
+        </table>
+
+        </div>
+
+
 </div>
-<h1 class="text-center login-title">QR CODE</h1>
 
 
 
-    
+<canvas id="qr-canvas" width="800" height="600"></canvas>
 
+
+</body>
 </html>
