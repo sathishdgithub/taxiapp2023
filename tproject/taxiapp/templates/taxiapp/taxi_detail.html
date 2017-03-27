@@ -1,48 +1,49 @@
-<!DOCTYPE html>
-<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="en-us"> <!--<![endif]-->
-  <head>
-    <meta charset="utf-8">
-    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
-    <!-- Always force latest IE rendering engine
-         (even in intranet) & Chrome Frame
-         Remove this if you use the .htaccess -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <!--  Mobile Viewport Fix
-          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
-          device-width: Occupy full width of the screen in its current orientation
-          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
-          user-scalable = yes allows the user to zoom in -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taxi App</title>
-    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
-    <meta name="application-name" content="plivossist">
-    <!-- Speaking of Google, don't forget to set your site up:
-         http://google.com/webmasters -->
-    <meta name="google-site-verification" content="">
-
-    </head>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
-
-{% load static %}
-
-
+{% extends "taxiapp/base.html" %}
+{% block main %}
 <style type="text/css">
-    
-    body {
-  background: #F1F3FA;
+    .user-row {
+    margin-bottom: 14px;
+}
+
+.user-row:last-child {
+    margin-bottom: 0;
+}
+
+.dropdown-user {
+    margin: 13px 0;
+    padding: 5px;
+    height: 100%;
+}
+
+.dropdown-user:hover {
+    cursor: pointer;
+}
+
+.table-user-information > tbody > tr {
+    border-top: 1px solid rgb(221, 221, 221);
+}
+
+.table-user-information > tbody > tr:first-child {
+    border-top: 0;
+}
+
+
+.table-user-information > tbody > tr > td {
+    border-top: 0;
+}
+.toppad
+{margin-top:20px;
 }
 
 /* Profile container */
 .profile {
   margin: 20px 0;
 }
-
 /* Profile sidebar */
 .profile-sidebar {
   padding: 20px 0 10px 0;
   background: #fff;
 }
-
 .profile-userpic img {
   float: none;
   margin: 0 auto;
@@ -54,19 +55,16 @@
   -moz-border-radius: 50% !important;
   border-radius: 50% !important;
 }
-
 .profile-usertitle {
   text-align: center;
   margin-top: 20px;
 }
-
 .profile-usertitle-name {
   color: #5a7391;
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 7px;
 }
-
 .profile-usertitle-job {
   text-transform: uppercase;
   color: #5b9bd1;
@@ -74,12 +72,10 @@
   font-weight: 600;
   margin-bottom: 15px;
 }
-
 .profile-userbuttons {
   text-align: center;
   margin-top: 10px;
 }
-
 .profile-userbuttons .btn {
   text-transform: uppercase;
   font-size: 11px;
@@ -87,7 +83,6 @@
   padding: 6px 15px;
   margin-right: 5px;
 }
-
 .profile-userbuttons .btn:last-child {
   margin-right: 0px;
 }
@@ -95,50 +90,40 @@
 .profile-usermenu {
   margin-top: 30px;
 }
-
 .profile-usermenu ul li {
   border-bottom: 1px solid #f0f4f7;
 }
-
 .profile-usermenu ul li:last-child {
   border-bottom: none;
 }
-
 .profile-usermenu ul li p {
   color: #93a3b5;
   font-size: 14px;
   font-weight: 400;
 }
-
 .profile-usermenu ul li p i {
   margin-right: 8px;
   font-size: 14px;
-
 }
-
 .profile-usermenu ul li p:hover {
   background-color: #fafcfd;
   color: #5b9bd1;
 }
-
 .profile-usermenu ul li.active {
   border-bottom: none;
 }
-
 .profile-usermenu ul li.active p {
   color: #5b9bd1;
   background-color: #f6f9fb;
   border-left: 2px solid #5b9bd1;
   margin-left: -2px;
 }
-
 /* Profile Content */
 .profile-content {
   padding: 20px;
   background: #fff;
   min-height: 460px;
 }
-
 .qr-userpic img {
   float: none;
   margin: 0 auto;
@@ -147,102 +132,130 @@
   max-height: 100px;
   max-width: 100px;
 }
-
-
+td.address /* Give whatever class name you want */
+{
+width:60%; /* Give whatever width you want */
+word-wrap:break-word;
+}
 </style>
-<div class="container">
-    <div class="row profile">
-            <div class="profile-sidebar">
-                <!-- SIDEBAR USERPIC -->
-                <div class="profile-userpic">
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
+   
+   
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title" style="text-align: center;">{{ taxi.driver_name }} ({{taxi.number_plate}})</h3>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+                 <div class="profile-userpic">
                     <img src="{{ taxi.driver_image.url }}" class="img-responsive" alt="">
                 </div>
-                <!-- END SIDEBAR USERPIC -->
-                <!-- SIDEBAR USER TITLE -->
-                <div class="profile-usertitle">
-                    <div class="profile-usertitle-name">
-                    {{ taxi.driver_name }}
-                    </div>
-                    <div class="profile-usertitle-job">
-                        AP 13 TA 3456
-                    </div>
-                </div>
-                <!-- END SIDEBAR USER TITLE -->
-                <!-- SIDEBAR BUTTONS -->
-                <div class="profile-userbuttons">
-                    <button type="button" class="btn btn-success btn-sm">Complaint</button>
+
+                <div class="profile-userbuttons center-block">
+                    <a href="{% url 'taxiapp:complaint_form' pk=taxi.id %}"><button type="button" class="btn btn-success btn-sm">Complaint</button></a>
                     <button type="button" onclick="geoFindMe()" class="btn btn-danger btn-sm">Emergency SOS</button>
                 </div>
-                <!-- END SIDEBAR BUTTONS -->
-                <!-- SIDEBAR MENU -->
-                <div class="profile-usermenu">
-                    <ul class="nav">
-                        <li class="active">
-                            <p>
-                            <i class="glyphicon glyphicon-home"></i>
-                            Address </p>
-                        </li>
-                        <li>
-                            <p>
-                            <i class="glyphicon glyphicon-user"></i>
-                            Contact </p>
-                        </li>
-                        <li>
-                            <p>
-                            <i class="glyphicon glyphicon-ok"></i>
-                            Driver ID </p>
-                        </li>
-                        <li>
-                            <p>
-                            <i class="glyphicon glyphicon-flag"></i>
-                            QR code </p>
-
-                        <div div class="qr-userpic">
-                        <img src="{{ taxi.qr_code.url  }}" class="img-responsive" alt="">
-                        </div>
-                        </li>
-                    </ul>
-
-                   
+                
+                <div class="center-block" style="margin: 1em;"> 
+                  <table class="table table-user-information">
+                    <tbody>
+                    <tr>
+                        <td>Auto Number</td>
+                        <td>{{ taxi.number_plate }}</td>
+                      </tr>
+                      <tr>
+                        <td>Traffic Number</td>
+                        <td>{{ taxi.traffic_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Name</td>
+                        <td>{{ taxi.driver_name }}</td>
+                      </tr>
+                    {% if user.is_authenticated %}
+                    <tr>
+                        <td>S/O</td>
+                        <td>{{ taxi.son_of }}</td>
+                      </tr>
+                    {% endif %}
+                      <tr>
+                        <td>Date of Birth</td>
+                        <td>{{ taxi.date_of_birth }} </td>
+                      </tr>    
+                        <tr>
+                        <td>Home Address</td>
+                        <td class="address">{{ taxi.address }} </td>
+                      </tr>
+                        <td>Phone Number</td>
+                        <td>{{ taxi.phone_number }} </td>       
+                        </tr>
+                    {% if user.is_authenticated %}
+                      <tr>
+                        <td>Aadhar number</td>
+                        <td>{{ taxi.aadhar_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Driving License</td>
+                        <td>{{ taxi.driving_license_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Valid Upto</td>
+                        <td>{{ taxi.date_of_validity }}</td>
+                      </tr>
+                      <tr>
+                        <td>AutoStand</td>
+                        <td>{{ taxi.autostand }}</td>
+                      </tr>
+                      <tr>
+                        <td>Union</td>
+                        <td>{{ taxi.union }}</td>
+                      </tr>
+                      <tr>
+                        <td>Insurance Valid Upto</td>
+                        <td>{{ taxi.insurance }}</td>
+                      </tr>
+                      <tr>
+                        <td>Capacity of Passengers</td>
+                        <td>{{ taxi.capacity_of_passengers }}</td>
+                      </tr>
+                      <tr>
+                        <td>Polution Valid Upto</td>
+                        <td>{{ taxi.pollution }}</td>
+                      </tr>
+                      <tr>
+                        <td>Engine number</td>
+                        <td>{{ taxi.engine_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Chasis number</td>
+                        <td>{{ taxi.chasis_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Owner/Driver</td>
+                        <td>{{ taxi.owner_driver }}</td>
+                      </tr>
+                      {% endif %}
+                     
+                    </tbody>
+                  </table>
                 </div>
-                <!-- END MENU -->
+              </div>
             </div>
-    <div id="out" class="col-md-2 col-md-offset-5" style="align-items: center; text-align: center;"></div>
-    </div>
-</div>
-<center>
-</center>
-<br>
-<br>
-<script type="text/javascript">
-    function geoFindMe() {
-  var output = document.getElementById("out");
+                 <div class="panel-footer">
+                        <span class="pull-right">
+                            <a href="{% url 'admin' %}" data-original-title="Edit this user" data-toggle="tooltip" type="button" class="btn btn-sm btn-warning"><i class="glyphicon glyphicon-edit"></i></a>
+                        </span>
+                    </div>
+            
+          </div>
+        </div>
+{% endblock %}
 
-  if (!navigator.geolocation){
-    output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
-    return;
-  }
 
-  function success(position) {
-    var latitude  = position.coords.latitude;
-    var longitude = position.coords.longitude;
 
-    output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
 
-    var img = new Image();
-    img.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + latitude + "," + longitude + "&zoom=13&size=300x300&sensor=false";
 
-    output.appendChild(img);
-  }
 
-  function error() {
-    output.innerHTML = "Unable to retrieve your location";
-  }
 
-  output.innerHTML = "<p>Locating…</p>";
 
-  navigator.geolocation.getCurrentPosition(success, error);
-}
 
-</script>
-</html>
+

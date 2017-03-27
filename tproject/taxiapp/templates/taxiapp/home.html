@@ -1,64 +1,25 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
 
-<!DOCTYPE html>
-<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="en-us"> <!--<![endif]-->
-  <head>
-    <meta charset="utf-8">
-    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
-    <!-- Always force latest IE rendering engine
-         (even in intranet) & Chrome Frame
-         Remove this if you use the .htaccess -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <!--  Mobile Viewport Fix
-          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
-          device-width: Occupy full width of the screen in its current orientation
-          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
-          user-scalable = yes allows the user to zoom in -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taxi App</title>
-    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
-    <meta name="application-name" content="plivossist">
-    <!-- Speaking of Google, don't forget to set your site up:
-         http://google.com/webmasters -->
-    <meta name="google-site-verification" content="">
+<h1 class="text-center login-title"> Welcome to T-Project </h1>
 
-    </head>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
 
-{% load static %}
-
-<h1> Hello, Welcome to Taxi App </h1>
-
-<!--
-{% if is_registered %}
-    <script>alert("You are successfully registered with user id : {{user_id}}")</script>
-    {% else %}
-    <form action="{% url 'taxiapp:home' %}" method="post">
-    {% csrf_token %}
-   {{ form }}
-    <input type="submit" value="Submit">
-    </form>
-{% endif %}
-
--->
 {% if user.is_authenticated %}
- {% if user.is_admin %}
- <form action="/taxi_new" method="get">
-	<input type="submit" value="Add New Taxi">
-</form>
- {% else %}
- <h1> Hello, Police </h1>
- {% endif %}
-<h1> Hello, Loggedin </h1>
+    {% if user.is_admin %}
+    <h1> You are logged in as admin </h1>
+    <a href="/admin/logout" class="btn btn-info" role="button">Logout</a>
+    {% else %}
+<div style="text-align: center;" class="button-box col-lg-12">
+            <a href="/taxi_list" class="btn btn-info" role="button">Taxi List</a>
+            <a href="/complaint_list" class="btn btn-info" role="button">Complaint List</a>
+</div>
+    {% endif %}
 {% else %}
-<h1> Hello, Loggedout </h1>
+<div style="text-align: center;" class="button-box col-lg-12">
+            <a href="/admin_login" class="btn btn-info" role="button">Admin Login</a>
+            <a href="/admin" class="btn btn-info" role="button">Super Admin Login</a>
+</div>
 {% endif %}
 
-<form action="/admin" method="get">
-	<input type="submit" value="Super User Login">
-</form>
 
-<form action="/admin_login" method="get">
-	<input type="submit" value="Admin Login">
-</form>
-
-</html>
+{% endblock %}
