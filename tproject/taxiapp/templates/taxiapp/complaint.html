@@ -1,9 +1,17 @@
 {% extends "taxiapp/base.html" %}
+
+{% load bootstrap3 %}
+
 {% block main %}
 <h1>Add Complaints</h1>
-    <form method="POST" class="post-form">
+    <form method="POST" class="form">
        {% csrf_token %}
-       {{ form.as_p }}
-       <button type="submit" class="save btn btn-default">Save</button>
+       {% bootstrap_form form %}
+
+        {% buttons %}
+        <button type="submit" class="btn btn-primary"> Save
+        </button>
+        {% endbuttons %}
+
 </form>
 {% endblock %}
