@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'qrcode',
     'taxiapp',
     'location_field.apps.DefaultConfig',
+    'bootstrap3',
 )
 
 MIDDLEWARE_CLASSES = (

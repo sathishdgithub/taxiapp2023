@@ -15,5 +15,5 @@ urlpatterns = [
         url(r'^complaint_list/$', views.complaint_list, name='complaint_list'),
         url(r'^complaint_resolve/(?P<pk>\d+)/$', views.complaint_resolve, name='complaint_resolve'),
         url(r'^taxi_list/$', views.taxi_list, name='taxi_list'),
-        url(r'^taxi_emergency/(?P<lat>\d+)/(?P<lon>\d+)/(?P<taxi_id>\d+)/$', views.taxi_emergency, name='taxi_emergency'),
+        url(r'^taxi_emergency/(?P<lat>(\d+(?:\.\d+)?))/(?P<lon>(\d+(?:\.\d+)?))/(?P<taxi_id>\d+)/$', views.taxi_emergency, name='taxi_emergency'),
 ]
