@@ -11,10 +11,19 @@ class AdminLoginForm(forms.Form):
 	password	= forms.CharField(widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder' : 'Password'}),  label='')
 
 class TaxidetailsForm(forms.ModelForm):
-
+    CITY_CODES = REASONS =  (
+        ('TPT', 'Tirupathi'),
+        ('HYD', 'Hyderabad'),
+        )
+    city = forms.ChoiceField(choices=CITY_CODES)
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','driver_name', 'traffic_number','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
+        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
+    
+    def save(self, *args, **kwargs):
+        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'+str((self.instance.pk)).zfill(5)
+        return super(TaxidetailsForm, self).save(*args, **kwargs)
+
 
 class TaxisearchForm(forms.Form):
 	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'Taxi ID', 'maxlength' : '64'}), label='')

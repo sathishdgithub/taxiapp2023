@@ -153,20 +153,3 @@ class Complaint_Statement(models.Model):
         resolved		     = models.BooleanField(default=False)
         def __str__(self):
              return self.taxi.driver_name+' '+self.reason
-"""
-class Admin_Detail(models.Model):
-	sms_number			= models.IntegerField()
-	whatsapp_number 	= models.IntegerField()
-	address				= models.CharField(max_length = 200, blank = True)
-	coordinate_x		= models.IntegerField()
-	coordinate_y		= models.IntegerField()
-        city = models.CharField(max_length=255,default='Hyderabad')
-        location = PlainLocationField(based_fields=['city'], zoom=7,null=True,blank=True)
-
-class User_Complaint(models.Model):
-	user_locations_x 	= models.IntegerField()
-	user_locations_y 	= models.IntegerField()
-	taxi_id 		= models.ForeignKey(Taxi_Detail, on_delete=models.CASCADE)
-	complaint_id		= models.ForeignKey(Complaint_Statement, on_delete=models.CASCADE)
-	admin_id 		= models.ForeignKey(My_User, on_delete=models.CASCADE) 
-"""

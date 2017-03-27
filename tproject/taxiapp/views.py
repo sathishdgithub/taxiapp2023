@@ -88,8 +88,12 @@ def taxi_new(request):
         form = TaxidetailsForm(request.POST)
         if form.is_valid():
             taxi = form.save(commit=False)
-            taxi.web_page_url = "/"
-            taxi.num_of_complaints = 2
+          #  print(dir(taxi))
+
+           # print(dir(form.instance))
+           # taxi.web_page_url = "/"
+            taxi.num_of_complaints = 0
+           # taxi.traffic_number = form.instance.city+'-TR-'+form.instance.id.zfill(5)
             taxi.save()
             return taxi_detail(request, taxi.pk)
     else:
