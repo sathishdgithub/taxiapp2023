@@ -21,7 +21,7 @@ class TaxidetailsForm(forms.ModelForm):
         fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
     
     def save(self, *args, **kwargs):
-        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'+str((self.instance.pk)).zfill(5)
+        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'
         return super(TaxidetailsForm, self).save(*args, **kwargs)
 
 
