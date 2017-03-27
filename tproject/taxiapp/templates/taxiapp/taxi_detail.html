@@ -274,6 +274,9 @@ word-wrap:break-word;
   }
 
   function error() {
+    var url = "http://"+"{{request.get_host}}";
+    var id = "{{taxi.id}}";
+    window.open(url+'/complaint/'+id,"_self")
     //output.innerHTML = "Unable to retrieve your location";
   }
 

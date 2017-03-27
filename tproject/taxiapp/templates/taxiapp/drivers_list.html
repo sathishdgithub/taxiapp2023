@@ -1,27 +1,6 @@
-<!DOCTYPE html>
-<!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js" lang="en-us"> <!--<![endif]-->
-  <head>
-    <meta charset="utf-8">
-    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
-    <!-- Always force latest IE rendering engine
-         (even in intranet) & Chrome Frame
-         Remove this if you use the .htaccess -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <!--  Mobile Viewport Fix
-          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
-          device-width: Occupy full width of the screen in its current orientation
-          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
-          user-scalable = yes allows the user to zoom in -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taxi App</title>
-    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
-    <meta name="application-name" content="plivossist">
-    <!-- Speaking of Google, don't forget to set your site up:
-         http://google.com/webmasters -->
-    <meta name="google-site-verification" content="">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+{% extends "taxiapp/base.html" %}
+{% block main %}
 
-{% load static %}
 <style type="text/css">
 
 body{
@@ -96,37 +75,13 @@ img{
     width:70%;
 }
 
-ul{
-    margin-bottom:0;
-    margin-right:40px;
-}
-li{
-    display:inline;
-    padding-right: 0.5em;
-    padding-left: 0.5em;
-    font-weight: bold;
-    border-right: 1px solid #333333;
-}
-li a{
-    text-decoration: none;
-    color: black;
-}
 
-#footer a{
-    color: black;
-}
-.tsel{
-    padding:0;
-}
-
+{% load static %}
 
 
 </style>
 
-</head>
 
-<body>
-<div class="container">
 <script type="text/javascript" src="{% static 'llqrcode.js' %}"></script>
 <script type="text/javascript" src="{% static 'webqr.js' %}"></script>
 
@@ -172,6 +127,4 @@ li a{
 
 <canvas id="qr-canvas" width="800" height="600"></canvas>
 <script type="text/javascript">load()</script>
-
-</body>
-</html>
+{% endblock %}

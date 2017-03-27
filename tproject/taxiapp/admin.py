@@ -79,11 +79,15 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
     filter_horizontal = ()
 
+class TaxiAdmin(admin.ModelAdmin):
+    exclude = ('qr_code','num_of_complaints')
+
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)
 
-admin.site.register(Taxi_Detail)
+admin.site.register(Taxi_Detail,TaxiAdmin)
 admin.site.register(Complaint_Statement)
+
 #admin.site.register(Admin_Detail)
 #admin.site.register(User_Complaint)
