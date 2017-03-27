@@ -60,6 +60,9 @@ def admin_login(request):
         form = AdminLoginForm()
         return render(request, 'taxiapp/admin_login.html', {'form': form})
 
+def admin_logout(request):
+    logout(request)
+    return HttpResponseRedirect("/")
 
 def drivers_list(request):
     if request.method == "POST":
