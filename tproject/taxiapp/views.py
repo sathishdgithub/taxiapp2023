@@ -33,11 +33,13 @@ def home(request):
 
 
 def admin_login(request):
+    nex = request.GET.get('next', '')
+    print nex
     if request.user.is_authenticated():
     	if request.user.is_admin:
     		return HttpResponseRedirect("/admin")
     	else:
-    		return HttpResponseRedirect("/drivers_list")
+    		return HttpResponseRedirect("/"+nex)
     if request.method == 'POST':
     	form 	 = AdminLoginForm(request.POST)
     	username = ''
@@ -50,15 +52,18 @@ def admin_login(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect("/drivers_list")
+                if nex != '':
+                    return HttpResponseRedirect("/"+nex)
+                else:
+                    return HttpResponseRedirect("/drivers_list")
             else:
                 return HttpResponse("You're account is disabled.")
         else:
-            print  "invalid login details " + username + " " + password
-            return render(request, 'taxiapp/admin_login.html', {'form': form})
+            print  "Invalid Login Details " + username + " " + password
+            return render(request, 'taxiapp/admin_login.html', {'form': form,'nex':nex})
     else:
         form = AdminLoginForm()
-        return render(request, 'taxiapp/admin_login.html', {'form': form})
+        return render(request, 'taxiapp/admin_login.html', {'form': form,'nex':nex})
 
 def admin_logout(request):
     logout(request)
@@ -120,7 +125,7 @@ def complaint_resolve(request,pk):
         row.save()
         return HttpResponseRedirect("/complaint_list") 
     else:
-        return HttpResponseRedirect("/admin_login")
+        return HttpResponseRedirect("/admin_login?next=complaint_resolve")
 
 def complaint_list(request):
     if request.user.is_authenticated():
@@ -128,14 +133,14 @@ def complaint_list(request):
     	reasons = Complaint_Statement.REASONS
     	return render(request,'taxiapp/complaint_list.html',{'rows':rows,'reasons':reasons})
     else:
-    	return HttpResponseRedirect("/admin_login")
+    	return HttpResponseRedirect("/admin_login?next=complaint_list")
 
 def taxi_list(request):
     if request.user.is_authenticated():
         rows = Taxi_Detail.objects.all()
         return render(request,'taxiapp/taxi_list.html',{'rows':rows})
     else:
-        return HttpResponseRedirect("/admin_login")
+        return HttpResponseRedirect("/admin_login?next=taxi_list")
 
 def get_distance(lat,lon,x,y):
     return (lat-x)**2+(lon-y)**2
