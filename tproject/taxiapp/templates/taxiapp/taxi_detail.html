@@ -149,7 +149,14 @@ word-wrap:break-word;
               <div class="row">
                  <div class="profile-userpic">
                     <img src="{{ taxi.driver_image.url }}" class="img-responsive" alt="">
+
                 </div>
+                               {% if taxi.qr_code %}
+
+                <div class="qr-userpic">
+                    <img src="{{ taxi.qr_code.url }}" class="img-responsive" alt="">
+                </div>
+                 {% endif %}
                 
                 {% if not user.is_authenticated %}
                 <div class="profile-userbuttons center-block">
@@ -157,12 +164,7 @@ word-wrap:break-word;
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm">Emergency SOS</button>
                 </div>
                 {% endif %}
-                {% if taxi.qrcode %}
-
-                <div class="qr-userpic ">
-                    <img src="{{ taxi.qrcode.url }}" class="img-responsive" alt="">
-                </div>
-                 {% endif %}
+ 
                 <div class="center-block" style="margin: 1em;"> 
                   <table class="table table-user-information">
                     <tbody>

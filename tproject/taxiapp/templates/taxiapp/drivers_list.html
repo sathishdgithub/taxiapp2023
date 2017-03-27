@@ -122,29 +122,18 @@ li a{
 
 
 </style>
-<script type="text/javascript" src="{% static 'llqrcode.js' %}"></script>
-<script type="text/javascript" src="{% static 'webqr.js' %}"></script>
+
 </head>
 
 <body>
 <div class="container">
-    <div class="row">
-        <h1 class="text-center login-title">Search Taxi</h1>
-        <div class="text-center">
-
-        <form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-        </form>
-
-        </div>
-    </div>
+<script type="text/javascript" src="{% static 'llqrcode.js' %}"></script>
+<script type="text/javascript" src="{% static 'webqr.js' %}"></script>
 
 <br>
 <br>
-    <h1 class="text-center login-title">QR CODE</h1>
+    <h1 class="text-center login-title">Scan QR Code</h1>
     <div id="qr-btn" >
-    <button class="btn btn-primary btn-sm" onclick="load()">Open Camera and Scan</button>
     </div>
         <div id="mainbody">
         <table class="tsel" border="0" width="100%">
@@ -165,12 +154,24 @@ li a{
         </div>
 
 
+    <div class="row">
+        <h1 class="text-center login-title">Search Taxi</h1>
+        <div class="text-center">
+
+        <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+        </form>
+
+        </div>
+    </div>
+
 </div>
 
 
 
 <canvas id="qr-canvas" width="800" height="600"></canvas>
-
+<script type="text/javascript">load()</script>
 
 </body>
 </html>

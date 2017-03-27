@@ -135,7 +135,7 @@ function error(error) {
 
 function load()
 {
-    document.getElementById("qr-btn").style.display="none";
+    //document.getElementById("qr-btn").style.display="none";
     if(isCanvasSupported() && window.File && window.FileReader)
     {
         initCanvas(800, 600);

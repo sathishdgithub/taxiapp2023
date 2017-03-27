@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from location_field.models.plain import PlainLocationField
-
+import StringIO
 
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, date_of_birth, password=None):
@@ -111,7 +111,7 @@ class Taxi_Detail(models.Model):
 	owner_driver = models.CharField(max_length=6,choices=(('Owner','Owner'),('Driver','Driver')),default='Owner',)
 	num_of_complaints = models.IntegerField(default=0)
 	driver_image = models.ImageField(upload_to='drivers',default = 'media/default_qr.png')
-	qrcode = models.ImageField(upload_to='qr', blank=True, null=True)
+	qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
 	
 	def __str__(self):
 		return self.driver_name+'('+self.number_plate+')'
@@ -158,7 +158,7 @@ class Complaint_Statement(models.Model):
 		)
 		taxi                 = models.ForeignKey(Taxi_Detail,null=True)
 		reason			     = models.CharField(max_length=2,choices=REASONS,default='R1',)
-		complaint 		     = models.CharField(max_length = 100)
+		complaint 		     = models.CharField(max_length = 100, null=True, blank=True)
 		resolved		     = models.BooleanField(default=False)
 		def __str__(self):
 			 return self.taxi.driver_name+' '+self.reason
