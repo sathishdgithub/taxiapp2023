@@ -24,21 +24,15 @@ def googl(url):
     return simplejson.loads(f.read())['id']
 
 def home(request):
-	if request.method == 'POST':
-		form = UserForm(request.POST)
+    if request.method == "POST":
+        form = TaxisearchForm(request.POST)
+        taxi_id = request.POST.get('taxi_id', '')
+        print taxi_id
+        return HttpResponseRedirect("/taxi/"+taxi_id)
+    else:
+        form = TaxisearchForm()
+        return render(request, 'taxiapp/drivers_list.html', {'form' : form})
 
- 
-		if form.is_valid():
-			user_id = request.POST.get('user_id', '')
-			access_level = request.POST.get('access_level', '')
-		login_details_obj = Login_Details(user_id=user_id, access_level=access_level)
-		login_details_obj.save()
- 
-		return render(request, 'taxiapp/home.html', {'user_id': user_id,'is_registered':True })
- 
-	else:
-		form = UserForm()
-		return render(request, 'taxiapp/home.html', {'form': form})
 
 
 def admin_login(request):
@@ -64,7 +58,7 @@ def admin_login(request):
                 if nex != '':
                     return HttpResponseRedirect("/"+nex)
                 else:
-                    return HttpResponseRedirect("/drivers_list")
+                    return HttpResponseRedirect("/")
             else:
                 return HttpResponse("You're account is disabled.")
         else:
@@ -78,15 +72,23 @@ def admin_logout(request):
     logout(request)
     return HttpResponseRedirect("/")
 
-def drivers_list(request):
-    if request.method == "POST":
-        form = TaxisearchForm(request.POST)
-        taxi_id = request.POST.get('taxi_id', '')
-        print taxi_id
-        return HttpResponseRedirect("/taxi/"+taxi_id)
+def administrator(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+
+ 
+        if form.is_valid():
+            user_id = request.POST.get('user_id', '')
+            access_level = request.POST.get('access_level', '')
+        login_details_obj = Login_Details(user_id=user_id, access_level=access_level)
+        login_details_obj.save()
+ 
+        return render(request, 'taxiapp/home.html', {'user_id': user_id,'is_registered':True })
+ 
     else:
-        form = TaxisearchForm()
-        return render(request, 'taxiapp/drivers_list.html', {'form' : form})
+        form = UserForm()
+        return render(request, 'taxiapp/home.html', {'form': form})
+
 
 def taxi_detail(request, pk):
     taxi = get_object_or_404(Taxi_Detail, pk=pk)
