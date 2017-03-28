@@ -108,6 +108,8 @@ MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'taxiapp.MyUser'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'taxiapp/media')
+GOOGLE_URL_SHORTENER_KEY = "AIzaSyDNWWg5dCIxZYiO8uo6wkPEdDUb2NwdFs4"
+
 LOCATION_FIELD_PATH = STATIC_URL + 'location_field'
 
 LOCATION_FIELD = {

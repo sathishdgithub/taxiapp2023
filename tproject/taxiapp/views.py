@@ -5,7 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from forms import *
 from models import *
+import urllib2, simplejson
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
 import sys
 
 def index(request):
@@ -13,6 +15,13 @@ def index(request):
 		return HttpResponse("Hello, you are logged in.")
 	else:
 		return HttpResponse("Hello, you are logged out.")
+
+def googl(url):
+    params = simplejson.dumps({'longUrl': url})
+    headers = { 'Content-Type' : 'application/json' }
+    req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
+    f = urllib2.urlopen(req)
+    return simplejson.loads(f.read())['id']
 
 def home(request):
 	if request.method == 'POST':
