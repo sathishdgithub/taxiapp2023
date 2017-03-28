@@ -1,0 +1,238 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+    .user-row {
+    margin-bottom: 14px;
+}
+
+.user-row:last-child {
+    margin-bottom: 0;
+}
+
+.dropdown-user {
+    margin: 13px 0;
+    padding: 5px;
+    height: 100%;
+}
+
+.dropdown-user:hover {
+    cursor: pointer;
+}
+
+.table-user-information > tbody > tr {
+    border-top: 1px solid rgb(221, 221, 221);
+}
+
+.table-user-information > tbody > tr:first-child {
+    border-top: 0;
+}
+
+
+.table-user-information > tbody > tr > td {
+    border-top: 0;
+}
+.toppad
+{margin-top:20px;
+}
+
+/* Profile container */
+.profile {
+  margin: 20px 0;
+}
+/* Profile sidebar */
+.profile-sidebar {
+  padding: 20px 0 10px 0;
+  background: #fff;
+}
+.profile-userpic img {
+  float: none;
+  margin: 0 auto;
+  width: 50%;
+  height: 50%;
+  max-height: 100px;
+  max-width: 100px;
+  -webkit-border-radius: 50% !important;
+  -moz-border-radius: 50% !important;
+  border-radius: 50% !important;
+}
+.profile-usertitle {
+  text-align: center;
+  margin-top: 20px;
+}
+.profile-usertitle-name {
+  color: #5a7391;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+.profile-usertitle-job {
+  text-transform: uppercase;
+  color: #5b9bd1;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+.profile-userbuttons {
+  text-align: center;
+  margin-top: 10px;
+}
+.profile-userbuttons .btn {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 15px;
+  margin-right: 5px;
+}
+.profile-userbuttons .btn:last-child {
+  margin-right: 0px;
+}
+    
+.profile-usermenu {
+  margin-top: 30px;
+}
+.profile-usermenu ul li {
+  border-bottom: 1px solid #f0f4f7;
+}
+.profile-usermenu ul li:last-child {
+  border-bottom: none;
+}
+.profile-usermenu ul li p {
+  color: #93a3b5;
+  font-size: 14px;
+  font-weight: 400;
+}
+.profile-usermenu ul li p i {
+  margin-right: 8px;
+  font-size: 14px;
+}
+.profile-usermenu ul li p:hover {
+  background-color: #fafcfd;
+  color: #5b9bd1;
+}
+.profile-usermenu ul li.active {
+  border-bottom: none;
+}
+.profile-usermenu ul li.active p {
+  color: #5b9bd1;
+  background-color: #f6f9fb;
+  border-left: 2px solid #5b9bd1;
+  margin-left: -2px;
+}
+/* Profile Content */
+.profile-content {
+  padding: 20px;
+  background: #fff;
+  min-height: 460px;
+}
+.qr-userpic img {
+  float: none;
+  margin: 0 auto;
+  width: 50%;
+  height: 50%;
+  max-height: 100px;
+  max-width: 100px;
+}
+td.address /* Give whatever class name you want */
+{
+width:60%; /* Give whatever width you want */
+word-wrap:break-word;
+}
+</style>
+        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
+   
+   
+          <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title" style="text-align: center;">{{ row.id }} ({{reason}})</h3>
+            </div>
+            <div class="panel-body">
+              <div class="row">
+                <div class="center-block" style="margin: 1em;"> 
+                  <table class="table table-user-information">
+                    <tbody>
+                    <tr>
+                        <td>Taxi Number Plate</td>
+                        <td>{{ row.taxi.number_plate }}</td>
+                      </tr>
+                      <tr>
+                        <td>Taxi Traffic Number</td>
+                        <td>{{ row.taxi.traffic_number }}</td>
+                      </tr>
+                      <tr>
+                        <td>Taxi Driver Name</td>
+                        <td>{{ row.taxi.driver_name }}</td>
+                      </tr>
+                       <tr>
+                        <td>Taxi Phone Number</td>
+                        <td>{{ row.taxi.phone_number }} </td>       
+                        </tr>
+                      <tr>
+                        <td>Reason</td>
+                        <td>{{reason }}</td>
+                      </tr>
+                      <tr>
+                        <td>Complaint</td>
+                        <td>{{ row.complaint }}</td>
+                      </tr>
+                      <tr>
+                        <td>Status</td>
+                        {% ifequal row.status True %}
+                        <td>Resolved</td>
+                        {% else %}
+                        <td>Not Resolved</td>
+                        {% endifequal %}
+                      </tr>
+                     
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+        </div>
+
+<script type="text/javascript">
+    function sendSOS() {
+ // var output = document.getElementById("out");
+
+  if (!navigator.geolocation){
+    output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
+    return;
+  }
+
+  function success(position) {
+    var latitude  = position.coords.latitude;
+    var longitude = position.coords.longitude;
+    var url = "http://"+"{{request.get_host}}";
+    var id = "{{taxi.id}}";
+    window.open(url+'/taxi_emergency/'+latitude+'/'+longitude+'/'+id,"_self")
+    //output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
+
+    //var img = new Image();
+   // img.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + latitude + "," + longitude + "&zoom=13&size=300x300&sensor=false";
+
+   // output.appendChild(img);
+  }
+
+  function error() {
+    var url = "http://"+"{{request.get_host}}";
+    var id = "{{taxi.id}}";
+    window.open(url+'/complaint/'+id,"_self")
+    //output.innerHTML = "Unable to retrieve your location";
+  }
+
+ // output.innerHTML = "<p>Locating…</p>";
+
+  navigator.geolocation.getCurrentPosition(success, error);
+}
+
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+

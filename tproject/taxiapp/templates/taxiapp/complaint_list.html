@@ -11,6 +11,7 @@
                 <th>Reason</th>
                 <th>Complaint</th>
                 <th>Status</th>
+                <th>More Details</th>
             </tr>
         </thead>
         <tfoot>
@@ -20,6 +21,7 @@
                 <th>Reason</th>
                 <th>Complaint</th>
                 <th>Status</th>
+                <th>More Details</th>
             </tr>
         </tfoot>
         <tbody>
@@ -38,6 +40,7 @@
                 {% else %}
                 <td>{{'Resolved'}}</td>
                 {% endif %}
+                <td><a href="{% url 'taxiapp:complaint_view' pk=row.id %}">More Details</a></td>
             </tr>
             {% endfor %}
         </tbody>

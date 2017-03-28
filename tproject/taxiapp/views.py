@@ -151,6 +151,18 @@ def complaint_list(request):
     else:
     	return HttpResponseRedirect("/admin_login?next=complaint_list")
 
+def complaint_view(request,pk):
+    if request.user.is_authenticated():
+        row = get_object_or_404(Complaint_Statement, pk=pk)
+        reasons = Complaint_Statement.REASONS
+        reason_statement = ''
+        for reason in reasons:
+            if reason[0] == row.reason:
+                reason_statement = reason[1]
+        return render(request,'taxiapp/complaint_view.html',{'row':row,'reason':reason_statement})
+    else:
+        return HttpResponseRedirect("/admin_login?next=complaint_view/"+str(pk))
+
 def taxi_list(request):
     if request.user.is_authenticated():
         rows = Taxi_Detail.objects.all()
