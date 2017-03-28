@@ -110,7 +110,7 @@ class Taxi_Detail(models.Model):
 	chasis_number = models.CharField(max_length=20)
 	owner_driver = models.CharField(max_length=6,choices=(('Owner','Owner'),('Driver','Driver')),default='Owner',)
 	num_of_complaints = models.IntegerField(default=0)
-	driver_image = models.ImageField(upload_to='drivers',default = 'media/default_qr.png')
+	driver_image = models.ImageField(upload_to='drivers',default = 'media/drivers/profile.png')
 	qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
 	
 	def __str__(self):
