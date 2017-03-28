@@ -88,15 +88,26 @@ class TaxiAdminCreationForm(forms.ModelForm):
     city = forms.ChoiceField(choices=CITY_CODES)
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
+        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
     def save(self, *args, **kwargs):
         self.instance.traffic_number = self.cleaned_data['city']+'-TR-'
         return super(TaxiAdminCreationForm, self).save(*args, **kwargs)
 
-        
+class TaxiAdminUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Taxi_Detail
+        fields = ('number_plate','driver_name','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
+
 class TaxiAdmin(admin.ModelAdmin):
     exclude = ('qr_code','num_of_complaints','traffic_number')
     form = TaxiAdminCreationForm
+    change_form = TaxiAdminUpdateForm
+
+    def get_form(self, request, obj=None, **kwargs):
+       if obj is not None:
+          kwargs['form'] = self.change_form
+       return super(TaxiAdmin, self).get_form(request, obj, **kwargs)
+
 
 
 # Now register the new UserAdmin...
