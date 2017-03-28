@@ -146,22 +146,28 @@ word-wrap:break-word;
               <h3 class="panel-title" style="text-align: center;">{{ taxi.driver_name }} ({{taxi.number_plate}})</h3>
             </div>
             <div class="panel-body">
-              <div class="row">
+            <div class="row">
+              <div class="col-md-6">
                  <div class="profile-userpic">
                     <img src="{{ taxi.driver_image.url }}" class="img-responsive" alt="">
 
                 </div>
+                </div>
                                {% if taxi.qr_code %}
+              <div class="col-md-6">
 
                 <div class="qr-userpic">
                     <img src="{{ taxi.qr_code.url }}" class="img-responsive" alt="">
                 </div>
+                </div>
                  {% endif %}
-                
+                </div>
                 {% if not user.is_authenticated %}
+                <div class="row">
                 <div class="profile-userbuttons center-block">
                     <a href="{% url 'taxiapp:complaint_form' pk=taxi.id %}"><button type="button" class="btn btn-success btn-sm">Complaint</button></a>
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm">Emergency SOS</button>
+                </div>
                 </div>
                 {% endif %}
  
@@ -255,7 +261,10 @@ word-wrap:break-word;
  // var output = document.getElementById("out");
 
   if (!navigator.geolocation){
-    output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
+    //output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
+    var url = "http://"+"{{request.get_host}}";
+    var id = "{{taxi.id}}";
+    window.open(url+'/complaint/'+id,"_self")
     return;
   }
 
