@@ -158,7 +158,8 @@ class Complaint_Statement(models.Model):
     		)
         taxi                         = models.ForeignKey(Taxi_Detail,null=True)
         reason			     = models.CharField(max_length=2,choices=REASONS,default='R1',)
-	complaint 		     = models.CharField(max_length = 100)
+        area                         = models.CharField(max_length=200)
+ 	complaint 		     = models.CharField(max_length = 100)
         resolved		     = models.BooleanField(default=False)
         def __str__(self):
              return self.taxi.driver_name+' '+self.reason

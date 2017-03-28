@@ -31,6 +31,6 @@ class TaxisearchForm(forms.Form):
 class ComplaintUserForm(forms.ModelForm):
     class Meta:
         model = Complaint_Statement
-        fields = ('taxi','reason','complaint')
+        fields = ('taxi','reason','complaint','area')
 
            

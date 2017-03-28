@@ -89,13 +89,8 @@ def taxi_new(request):
         if form.is_valid():
             form.save()
             taxi = Taxi_Detail.objects.get(id=form.instance.id)
-          #  print(dir(taxi))
-
-           # print(dir(form.instance))
-           # taxi.web_page_url = "/"
             taxi.num_of_complaints = 0
             taxi.traffic_number = taxi.traffic_number + str(taxi.id).zfill(5)
-           # taxi.traffic_number = form.instance.city+'-TR-'+form.instance.id.zfill(5)
             taxi.save()
             return taxi_detail(request, taxi.pk)
     else:
@@ -112,8 +107,12 @@ def complaint_form(request,pk):
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
     else:
-        #taxi = get_object_or_404(Taxi_Detail, pk=pk)
-        form = ComplaintUserForm({'taxi':pk})
+        point = request.GET.get('point','')
+        if point != '':
+            form = ComplaintUserForm({'taxi':pk,'area':'https://www.google.co.in/maps/@'+point+',16z'})
+            form.fields['area'].widget = forms.TextInput(attrs={'size':'200','readonly':"True"})
+        else:
+            form = ComplaintUserForm({'taxi':pk})
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
