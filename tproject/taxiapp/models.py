@@ -142,6 +142,7 @@ class Taxi_Detail(models.Model):
 		if add:
 			self.generate_qrcode()
 			kwargs['force_insert'] = False # create() uses this, which causes error.
+                        self.traffic_number = self.traffic_number + str(self.pk).zfill(5)
 			super(Taxi_Detail, self).save(*args, **kwargs)
 
 

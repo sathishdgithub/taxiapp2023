@@ -79,8 +79,25 @@ class UserAdmin(BaseUserAdmin):
     ordering = ('email',)
     filter_horizontal = ()
 
+
+class TaxiAdminCreationForm(forms.ModelForm):
+    CITY_CODES = REASONS =  (
+        ('TPT', 'Tirupathi'),
+        ('HYD', 'Hyderabad'),
+        )
+    city = forms.ChoiceField(choices=CITY_CODES)
+    class Meta:
+        model = Taxi_Detail
+        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
+    def save(self, *args, **kwargs):
+        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'
+        return super(TaxiAdminCreationForm, self).save(*args, **kwargs)
+
+        
 class TaxiAdmin(admin.ModelAdmin):
-    exclude = ('qr_code','num_of_complaints')
+    exclude = ('qr_code','num_of_complaints','traffic_number')
+    form = TaxiAdminCreationForm
+
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
