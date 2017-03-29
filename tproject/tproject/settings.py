@@ -24,7 +24,6 @@ SECRET_KEY = '28=yz63c!&j%zmk#h!e$@-co#byb$7g#3_x6$fuh80-rb-ip=h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = ['*']
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

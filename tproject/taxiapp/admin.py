@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.contrib.sites.models import Site
 
 from taxiapp.models import MyUser
 
@@ -15,7 +16,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = MyUser
-        fields = ('email', 'date_of_birth', 'whatsapp_number', 'sms_number','city','location')
+        fields = ('email','sms_number','area','city','location')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -29,6 +30,10 @@ class UserCreationForm(forms.ModelForm):
         # Save the provided password in hashed format
         user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
+        user.user_number = user.city.city_code+'-ID-'+str(self.instance.city.police_no+1).zfill(4)
+        t = City_Code.objects.get(id=self.instance.city.id)
+        t.taxi_no = t.police_no+1
+        t.save()
         if commit:
             user.save()
         return user
@@ -43,7 +48,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = MyUser
-        fields = ('email', 'password', 'date_of_birth', 'whatsapp_number', 'sms_number', 'city','location','is_active', 'is_admin')
+        fields = ('email', 'password', 'sms_number','area','city','location','is_active', 'is_admin')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -60,11 +65,11 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'date_of_birth', 'whatsapp_number', 'sms_number','city','location','is_admin')
+    list_display = ('email', 'sms_number','area','city','location','is_admin')
     list_filter = ('is_admin',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('date_of_birth', 'whatsapp_number', 'sms_number','city','location')}),
+        ('Personal info', {'fields': ('sms_number','area','city','location')}),
         ('Permissions', {'fields': ('is_admin',)}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -72,7 +77,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'date_of_birth','whatsapp_number', 'sms_number', 'city','location','password1', 'password2',)}
+            'fields': ('email', 'sms_number','area','city','location','password1', 'password2',)}
         ),
     )
     search_fields = ('email',)
@@ -81,17 +86,16 @@ class UserAdmin(BaseUserAdmin):
 
 
 class TaxiAdminCreationForm(forms.ModelForm):
-    CITY_CODES = REASONS =  (
-        ('TPT', 'Tirupathi'),
-        ('HYD', 'Hyderabad'),
-        )
-    city = forms.ChoiceField(choices=CITY_CODES)
     class Meta:
         model = Taxi_Detail
         fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
     def save(self, *args, **kwargs):
-        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'
+        self.instance.traffic_number = self.instance.city.city_code+'-TR-'+str(self.instance.city.taxi_no+1).zfill(5)
+        t = City_Code.objects.get(id=self.instance.city.id)
+        t.taxi_no = t.taxi_no+1
+        t.save()
         return super(TaxiAdminCreationForm, self).save(*args, **kwargs)
+
 
 class TaxiAdminUpdateForm(forms.ModelForm):
     class Meta:
@@ -102,20 +106,49 @@ class TaxiAdmin(admin.ModelAdmin):
     exclude = ('qr_code','num_of_complaints','traffic_number')
     form = TaxiAdminCreationForm
     change_form = TaxiAdminUpdateForm
-
+    list_display = ('number_plate', 'traffic_number','driver_name','num_of_complaints','owner_driver')
     def get_form(self, request, obj=None, **kwargs):
        if obj is not None:
           kwargs['form'] = self.change_form
        return super(TaxiAdmin, self).get_form(request, obj, **kwargs)
 
 
+class CityCodeAdmin(admin.ModelAdmin):
+    exclude = ('complaint_no','taxi_no','police_no')
+    
+class ComplaintStatementAdmin(admin.ModelAdmin):
+    list_display = ('complaint_id', 'number_plate', 'driver_name', 'reason','status','allocated_to')
+    def complaint_id(self, obj):
+        return 'CR-'+str(obj.id).zfill(3)
+    traffic_number.complaint_id.short_description = 'Complaint ID'
+    def number_plate(self, obj):
+        return obj.taxi.traffic_number
+    number_plate.short_description = 'Number Plate'
+    def driver_name(self, obj):
+        return obj.taxi.driver_name
+    traffic_number.short_description = 'Driver Name'
+    def reason(self, obj):
+        return obj.reason
+    traffic_number.short_description = 'Reason'
+    def status(self,obj):
+        if obj.status=="True":
+            m = "Resolved"
+        else:
+            m = "Not Resolved"
+        return m
+    def allocated_to(self, obj):
+        return str(obj.assigned_to.id)+' | '+str(obj.assigned_to.sms_number)
+    traffic_number.allocated_to = 'Allocated To'
+
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)
-
+admin.site.register(City_Code,CityCodeAdmin)
+admin.site.register(Reasons)
 admin.site.register(Taxi_Detail,TaxiAdmin)
-admin.site.register(Complaint_Statement)
+admin.site.register(Complaint_Statement,ComplaintStatementAdmin)
+admin.site.unregister(Site)
 
 #admin.site.register(Admin_Detail)
 #admin.site.register(User_Complaint)

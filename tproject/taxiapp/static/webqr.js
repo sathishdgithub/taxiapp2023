@@ -106,7 +106,7 @@ function read(a)
     if(a.indexOf("http://") === 0 || a.indexOf("https://") === 0)
         html+="<a target='_blank' href='"+a+"'>"+a+"</a><br>";
     html+="<b>"+htmlEntities(a)+"</b><br><br>";
-    document.getElementById("result").innerHTML=html;
+    //document.getElementById("result").innerHTML=html;
 	window.open(a,"_self")
 }   
 
@@ -187,7 +187,7 @@ function setwebcam()
 function setwebcam2(options)
 {
     console.log(options);
-    document.getElementById("result").innerHTML="- scanning -";
+    //document.getElementById("result").innerHTML="- scanning -";
     if(stype==1)
     {
         setTimeout(captureToCanvas, 500);    

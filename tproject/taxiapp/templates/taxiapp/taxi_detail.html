@@ -191,7 +191,6 @@ word-wrap:break-word;
                         <td>S/O</td>
                         <td>{{ taxi.son_of }}</td>
                       </tr>
-                    {% endif %}
                       <tr>
                         <td>Date of Birth</td>
                         <td>{{ taxi.date_of_birth }} </td>
@@ -200,9 +199,12 @@ word-wrap:break-word;
                         <td>Home Address</td>
                         <td class="address">{{ taxi.address }} </td>
                       </tr>
+
                         <td>Phone Number</td>
                         <td>{{ taxi.phone_number }} </td>       
                         </tr>
+                                    {% endif %}
+
                     {% if user.is_authenticated %}
                       <tr>
                         <td>Aadhar number</td>

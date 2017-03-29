@@ -1,0 +1,37 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+
+    <div id="block_error">
+        <div>
+         <h2>Error 404. &nbsp;Oops you've have encountered an error</h2>
+        <p>
+        It appears that Either something went wrong or the page doesn't exist anymore.<br />
+        </p>
+        <p>
+
+        </p>
+        </div>
+    </div>
+
+
+{% if user.is_authenticated %}
+    {% if user.is_admin %}
+    <h1> You are logged in as Super admin </h1>
+    <a href="/admin" class="btn btn-info" role="button">Access Admin Console</a>
+    <a href="/admin/logout" class="btn btn-info text-center" role="button">Logout</a>
+    {% else %}
+<div style="text-align: center;" class="button-box col-lg-12">
+            <a href="/taxi_list" class="btn btn-info" role="button">Taxi List</a>
+            <a href="/complaint_list" class="btn btn-info" role="button">Complaint List</a>
+            <a href="/admin_logout" class="btn btn-info" role="button">Log Out</a>
+
+</div>
+    {% endif %}
+{% else %}
+<div style="text-align: center;" class="button-box col-lg-12">
+            <a href="/admin_login" class="btn btn-info" role="button">Admin Login</a>
+</div>
+{% endif %}
+
+
+{% endblock %}

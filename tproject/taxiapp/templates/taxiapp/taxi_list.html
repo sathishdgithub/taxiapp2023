@@ -12,6 +12,7 @@
                 <th>Traffic Number</th>
                 <th>Name</th>
                 <th>Number of Complaints</th>
+                <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
         </thead>
@@ -21,6 +22,7 @@
                 <th>Traffic Number</th>
                 <th>Driver Name</th>
                 <th>Number of Complaints</th>
+                <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
         </tfoot>
@@ -31,7 +33,8 @@
                 <td>{{row.traffic_number}}</td>
                 <td>{{row.driver_name}}</td>
                 <td>{{row.num_of_complaints}}</td>
-                <td><a href="{% url 'taxiapp:taxi_detail' pk=row.id %}">{{'More Details'}}</a></td>
+                <td>{{row.owner_driver}}</td>
+                <td><a href="{% url 'taxiapp:taxi_detail' pk=row.traffic_number %}">{{'More Details'}}</a></td>
             </tr>
             {% endfor %}
         </tbody>

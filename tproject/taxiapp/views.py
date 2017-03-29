@@ -37,11 +37,11 @@ def home(request):
 
 
 def admin_login(request):
-    nex = request.GET.get('next', '')
+    nex = request.GET.get('next', 'taxi_list')
     print nex
     if request.user.is_authenticated():
     	if request.user.is_admin:
-    		return HttpResponseRedirect("/admin")
+    		return HttpResponseRedirect("/"+nex)
     	else:
     		return HttpResponseRedirect("/"+nex)
     if request.method == 'POST':
@@ -92,7 +92,8 @@ def administrator(request):
 
 
 def taxi_detail(request, pk):
-    taxi = get_object_or_404(Taxi_Detail, pk=pk)
+    pk = pk.upper()
+    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
     return render(request, 'taxiapp/taxi_detail.html', {'taxi': taxi})
 
 def taxi_new(request):
@@ -119,12 +120,7 @@ def complaint_form(request,pk):
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
     else:
-        point = request.GET.get('point','')
-        if point != '':
-            form = ComplaintUserForm({'taxi':pk,'area':'https://www.google.co.in/maps/@'+point+',16z'})
-            form.fields['area'].widget = forms.TextInput(attrs={'size':'200','readonly':"True"})
-        else:
-            form = ComplaintUserForm({'taxi':pk})
+        form = ComplaintUserForm({'taxi':pk})
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
@@ -152,8 +148,11 @@ def complaint_success(request,pk):
                     min_distance = distance
                     police = row
         phone_number = police.sms_number
+        complaint.assigned_to = police
+        complaint.save()
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
-        message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+str(googl('https://www.google.co.in/maps/@'+str(lat)+','+str(lon)+',16z'))
+        map_url = 'https://www.google.co.in/maps/@'+str(lat)+','+str(lon)+',16z'
+        message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
         r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
 
     return render(request,'taxiapp/complaint_success.html',{'message':'Your complaint for Taxi has been successfully registered. Complaint Number: '+str(pk)})
@@ -174,20 +173,16 @@ def complaint_resolve(request,pk):
 def complaint_list(request):
     if request.user.is_authenticated():
     	rows = Complaint_Statement.objects.all()
-    	reasons = Complaint_Statement.REASONS
-    	return render(request,'taxiapp/complaint_list.html',{'rows':rows,'reasons':reasons})
+    	return render(request,'taxiapp/complaint_list.html',{'rows':rows})
     else:
     	return HttpResponseRedirect("/admin_login?next=complaint_list")
 
 def complaint_view(request,pk):
     if request.user.is_authenticated():
-        row = get_object_or_404(Complaint_Statement, pk=pk)
-        reasons = Complaint_Statement.REASONS
+        pk = pk.upper()
+        row = get_object_or_404(Complaint_Statement, complaint_number=pk)
         reason_statement = ''
-        for reason in reasons:
-            if reason[0] == row.reason:
-                reason_statement = reason[1]
-        return render(request,'taxiapp/complaint_view.html',{'row':row,'reason':reason_statement})
+        return render(request,'taxiapp/complaint_view.html',{'row':row})
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_view/"+str(pk))
 
@@ -205,13 +200,13 @@ def taxi_emergency(request,lat,lon,taxi_id):
     rows = MyUser.objects.all()
     lat,lon = float(lat),float(lon)
     if len(rows) > 0:
-        if rows[0].location:
+        if rows[0].location and (not rows[0].is_admin):
             x,y = map(float,rows[0].location.strip().split(','))
             police,min_distance = rows[0],get_distance(lat,lon,x,y)
         else:
             police,min_distance = rows[0],sys.maxint
         for row in rows:
-            if row.location:
+            if row.location and (not row.is_admin):
                 x,y = map(float,row.location.strip().split(','))
                 distance = get_distance(lat,lon,x,y)
                 if distance < min_distance:
@@ -233,3 +228,13 @@ def health_check(request):
         'result': 'success',
     }
     return JsonResponse(data) 
+
+def handler404(request):
+    return render(request, 'taxiapp/error.html')
+
+
+def handler500(request):
+    response = render_to_response('taxiapp/error.html', {},
+                                  context_instance=RequestContext(request))
+    response.status_code = 500
+    return response

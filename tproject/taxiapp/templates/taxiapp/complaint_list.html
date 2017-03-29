@@ -7,9 +7,11 @@
         <thead>
             <tr>
                 <th>Complaint Id</th>
-                <th>Taxi</th>
+                <th>Number Plate</th>
+                <th>Traffic Number</th>
+                <th>Driver Name</th>
                 <th>Reason</th>
-                <th>Complaint</th>
+                <th>Assigned To</th>
                 <th>Status</th>
                 <th>More Details</th>
             </tr>
@@ -17,9 +19,11 @@
         <tfoot>
             <tr>
                 <th>Complaint Id</th>
-                <th>Taxi</th>
+                <th>Number Plate</th>
+                <th>Traffic Number</th>
+                <th>Driver Name</th>
                 <th>Reason</th>
-                <th>Complaint</th>
+                <th>Assigned To</th>
                 <th>Status</th>
                 <th>More Details</th>
             </tr>
@@ -27,20 +31,18 @@
         <tbody>
             {% for row in rows %}
             <tr>
-                <td>{{row.id}}</td>
-                <td>{{row.taxi}}</td>
-                {% for reason in reasons %}
-                {% if reason.0 == row.reason %}
-                <td>{{reason.1}}</td>
-                {% endif %}
-                {% endfor %}
-                <td>{{row.complaint}}</td>
+                <td>{{row.complaint_number}}</td>
+                <td>{{row.taxi.number_plate}}</td>
+                <td>{{row.taxi.traffic_number}}</td> 
+                <td>{{row.taxi.driver_name}}</td>
+                <td>{{row.reason.reason}}</td>
+                <td>Id:{{row.assigned_to.id}} | SMS:{{row.assigned_to.sms_number}}</td>
                 {% if row.resolved == False %}
                 <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
                 {% else %}
                 <td>{{'Resolved'}}</td>
                 {% endif %}
-                <td><a href="{% url 'taxiapp:complaint_view' pk=row.id %}">More Details</a></td>
+                <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}">More Details</a></td>
             </tr>
             {% endfor %}
         </tbody>

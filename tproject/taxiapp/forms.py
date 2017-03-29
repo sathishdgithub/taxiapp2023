@@ -11,17 +11,15 @@ class AdminLoginForm(forms.Form):
 	password	= forms.CharField(widget=forms.PasswordInput(attrs={'class' : 'form-control','placeholder' : 'Password'}),  label='')
 
 class TaxidetailsForm(forms.ModelForm):
-    CITY_CODES = REASONS =  (
-        ('TPT', 'Tirupathi'),
-        ('HYD', 'Hyderabad'),
-        )
-    city = forms.ChoiceField(choices=CITY_CODES)
     class Meta:
         model = Taxi_Detail
         fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
     
     def save(self, *args, **kwargs):
-        self.instance.traffic_number = self.cleaned_data['city']+'-TR-'
+        self.instance.traffic_number = self.instance.city.city_code+'-TR-'+str(self.instance.city.taxi_no+1).zfill(5)
+        t = City_Code.objects.get(id=self.instance.city.id)
+        t.taxi_no = t.taxi_no+1
+        t.save()
         return super(TaxidetailsForm, self).save(*args, **kwargs)
 
 
@@ -31,6 +29,13 @@ class TaxisearchForm(forms.Form):
 class ComplaintUserForm(forms.ModelForm):
     class Meta:
         model = Complaint_Statement
-        fields = ('taxi','reason','complaint','area')
+        fields = ('taxi','reason','city','complaint','area')
+    def save(self, *args, **kwargs):
+        self.instance.complaint_number = self.instance.city.city_code+'-CN-'+str(self.instance.city.complaint_no+1).zfill(7)
+        t = City_Code.objects.get(id=self.instance.city.id)
+        t.complaint_no = t.complaint_no+1
+        t.save()
+        return super(ComplaintUserForm, self).save(*args, **kwargs)
+
 
            
