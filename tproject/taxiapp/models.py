@@ -130,7 +130,7 @@ class Taxi_Detail(models.Model):
 			border=0,
 		)
                 weburl = "https://taxiapp.safeautotaxi.com/taxi"
-		qr.add_data("%s/%s" % (weburl, str(self.pk)))
+		qr.add_data("%s/%s" % (weburl, str(self.traffic_number)))
 		qr.make(fit=True)
 
 		img = qr.make_image()

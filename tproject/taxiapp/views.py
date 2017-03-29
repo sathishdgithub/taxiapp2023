@@ -120,7 +120,7 @@ def complaint_form(request,pk):
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
     else:
-        form = ComplaintUserForm({'taxi':pk})
+        form = ComplaintUserForm(initial={'taxi':pk})
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
@@ -189,7 +189,8 @@ def complaint_view(request,pk):
 def taxi_list(request):
     if request.user.is_authenticated():
         rows = Taxi_Detail.objects.all()
-        return render(request,'taxiapp/taxi_list.html',{'rows':rows})
+        rows_c = Complaint_Statement.objects.all()
+        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 

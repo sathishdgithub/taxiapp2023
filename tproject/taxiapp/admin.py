@@ -106,7 +106,19 @@ class TaxiAdmin(admin.ModelAdmin):
     exclude = ('qr_code','num_of_complaints','traffic_number')
     form = TaxiAdminCreationForm
     change_form = TaxiAdminUpdateForm
-    list_display = ('number_plate', 'traffic_number','driver_name','num_of_complaints','owner_driver')
+    list_display = ('number_plate', 'traffic_number','driver_name','num_of_complaints','owner_driver','profile_pic','qr_image')
+    def qr_image(self, obj):  # receives the instance as an argument
+        return '<img width=75 height=75 src="{thumb}" />'.format(
+            thumb=obj.qr_code.url,
+        )
+    qr_image.allow_tags = True
+    qr_image.short_description = 'QR Code'
+    def profile_pic(self, obj):  # receives the instance as an argument
+        return '<img width=75 height=75 src="{thumb}" />'.format(
+            thumb=obj.driver_image.url,
+        )
+    profile_pic.allow_tags = True
+    profile_pic.short_description = 'Driver Picture'
     def get_form(self, request, obj=None, **kwargs):
        if obj is not None:
           kwargs['form'] = self.change_form

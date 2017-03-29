@@ -5,7 +5,7 @@
 </head>
 
 <center><h3>Taxi List</h3></center>
-<table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
+<table id="taxi-list" class="table table-striped table-bordered" width="100%" cellspacing="0">
         <thead>
             <tr>
                 <th>Number Plate</th>
@@ -41,6 +41,59 @@
 </table>
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
 <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
+<script>
+$(document).ready(function() {
+    $('#taxi-list').DataTable();
+} );
+</script>
+<center><h3>Complaints</h3></center>
+<table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Complaint Id</th>
+                <th>Number Plate</th>
+                <th>Traffic Number</th>
+                <th>Driver Name</th>
+                <th>Reason</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th>More Details</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Complaint Id</th>
+                <th>Number Plate</th>
+                <th>Traffic Number</th>
+                <th>Driver Name</th>
+                <th>Reason</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th>More Details</th>
+            </tr>
+        </tfoot>
+        <tbody>
+            {% for row in rows_c %}
+            <tr>
+                <td>{{row.complaint_number}}</td>
+                <td>{{row.taxi.number_plate}}</td>
+                <td>{{row.taxi.traffic_number}}</td>
+                <td>{{row.taxi.driver_name}}</td>
+                <td>{{row.reason.reason}}</td>
+                <td>Id:{{row.assigned_to.id}} | SMS:{{row.assigned_to.sms_number}}</td>
+                {% if row.resolved == False %}
+                <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
+                {% else %}
+                <td>{{'Resolved'}}</td>
+                {% endif %}
+                <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}">More Details</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+</table>
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
+<script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
+<script>
 <script>
 $(document).ready(function() {
     $('#example').DataTable();
