@@ -51,7 +51,7 @@ class MyUser(AbstractBaseUser):
 	sms_number = models.IntegerField(null=True,blank=True)
 	whatsapp_number = models.IntegerField(null=True,blank=True)
 	address = models.CharField(max_length = 200, blank = True)
-	city = models.CharField(max_length=255,default='Hyderabad')
+	city = models.CharField(max_length=255,null=True,blank=True)
 	location = PlainLocationField(based_fields=['city'], zoom=7,null=True,blank=True)
 	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
