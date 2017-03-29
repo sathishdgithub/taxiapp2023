@@ -18,7 +18,7 @@ import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-	url(r'^', include('taxiapp.urls', namespace = "taxiapp")),
+    url(r'^', include('taxiapp.urls', namespace = "taxiapp")),
     url(r'^admin/', include(admin.site.urls)),
 ]
 

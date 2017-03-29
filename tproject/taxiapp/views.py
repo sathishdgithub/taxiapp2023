@@ -192,4 +192,12 @@ def taxi_emergency(request,lat,lon,taxi_id):
         return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
     else:
         return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})
-    
+
+
+
+
+def health_check(request):
+    data = {
+        'result': 'success',
+    }
+    return JsonResponse(data) 

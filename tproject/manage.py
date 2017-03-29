@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/ec2-user/taxi_env/bin/python
 import os
 import sys
 
