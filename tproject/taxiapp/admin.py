@@ -119,33 +119,42 @@ class CityCodeAdmin(admin.ModelAdmin):
 class ComplaintStatementAdmin(admin.ModelAdmin):
     list_display = ('complaint_id', 'number_plate', 'driver_name', 'reason','status','allocated_to')
     def complaint_id(self, obj):
-        return 'CR-'+str(obj.id).zfill(3)
-    traffic_number.complaint_id.short_description = 'Complaint ID'
+        return str(obj.complaint_number)
+    complaint_id.short_description = 'Complaint ID'
     def number_plate(self, obj):
         return obj.taxi.traffic_number
     number_plate.short_description = 'Number Plate'
     def driver_name(self, obj):
         return obj.taxi.driver_name
-    traffic_number.short_description = 'Driver Name'
+    driver_name.short_description = 'Driver Name'
     def reason(self, obj):
         return obj.reason
-    traffic_number.short_description = 'Reason'
+    reason.short_description = 'Reason'
     def status(self,obj):
-        if obj.status=="True":
+        if obj.resolved == "True":
             m = "Resolved"
         else:
             m = "Not Resolved"
         return m
     def allocated_to(self, obj):
+        if not obj.assigned_to:
+            return "Not Assigned"
         return str(obj.assigned_to.id)+' | '+str(obj.assigned_to.sms_number)
-    traffic_number.allocated_to = 'Allocated To'
+    allocated_to.short_description = 'Allocated To'
 
+class CityCodeAdmin(admin.ModelAdmin):
+    list_display = ('city','city_code')
+
+class ReasonsAdmin(admin.ModelAdmin):
+    list_display = ('reason_id','reason')
+    def reason_id(self,obj):
+        return 'CR-'+str(obj.id).zfill(3)
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(City_Code,CityCodeAdmin)
-admin.site.register(Reasons)
+admin.site.register(Reasons,ReasonsAdmin)
 admin.site.register(Taxi_Detail,TaxiAdmin)
 admin.site.register(Complaint_Statement,ComplaintStatementAdmin)
 admin.site.unregister(Site)
