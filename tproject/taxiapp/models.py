@@ -123,7 +123,8 @@ class Taxi_Detail(models.Model):
 			box_size=6,
 			border=0,
 		)
-		qr.add_data("%s#%s" % (self.driver_name, str(self.pk)))
+                weburl = "https://taxiapp.safeautotaxi.com/taxi"
+		qr.add_data("%s/%s" % (weburl, str(self.pk)))
 		qr.make(fit=True)
 
 		img = qr.make_image()
