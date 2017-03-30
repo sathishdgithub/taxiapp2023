@@ -199,11 +199,11 @@ word-wrap:break-word;
                         <td>Home Address</td>
                         <td class="address">{{ taxi.address }} </td>
                       </tr>
+                                    {% endif %}
 
                         <td>Phone Number</td>
                         <td>{{ taxi.phone_number }} </td>       
                         </tr>
-                                    {% endif %}
 
                     {% if user.is_authenticated %}
                       <tr>
