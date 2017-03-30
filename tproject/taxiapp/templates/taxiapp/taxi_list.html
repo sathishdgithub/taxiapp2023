@@ -80,7 +80,11 @@ $(document).ready(function() {
                 <td>{{row.taxi.traffic_number}}</td>
                 <td>{{row.taxi.driver_name}}</td>
                 <td>{{row.reason.reason}}</td>
-                <td>Id:{{row.assigned_to.id}} | SMS:{{row.assigned_to.sms_number}}</td>
+                {% if row.assigned_to.user_number %}
+                <td>Id: {{row.assigned_to.user_number}} | SMS: {{row.assigned_to.sms_number}}</td>
+                {% else %}
+                <td>Id: Admin | SMS: {{row.assigned_to.sms_number}}</td>
+                {% endif %}
                 {% if row.resolved == False %}
                 <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
                 {% else %}
@@ -93,7 +97,6 @@ $(document).ready(function() {
 </table>
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
 <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
-<script>
 <script>
 $(document).ready(function() {
     $('#example').DataTable();

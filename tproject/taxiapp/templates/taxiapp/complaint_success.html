@@ -1,3 +1,11 @@
-<h1>{{message}}</h1>
+{% extends "taxiapp/base.html" %}
 
-<a href="{% url 'taxiapp:home' %}"><button>Home</button></a>
+{% load bootstrap3 %}
+
+{% block main %}
+
+<center><h3>{{message2}}</h3></center>
+<center><h3>{{message1}}</h3></center>
+
+<center><a href="{% url 'taxiapp:home' %}"><button type="button" class="btn btn-primary">Home</button></a></center>
+{% endblock %}

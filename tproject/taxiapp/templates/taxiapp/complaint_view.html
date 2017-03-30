@@ -168,7 +168,7 @@ word-wrap:break-word;
                         </tr>
                       <tr>
                         <td>Reason</td>
-                        <td>{{ row.reason.reasono }}</td>
+                        <td>{{ row.reason.reason }}</td>
                       </tr>
                       <tr>
                         <td>Complaint</td>
@@ -176,7 +176,7 @@ word-wrap:break-word;
                       </tr>
                       <tr>
                         <td>Status</td>
-                        {% ifequal row.status True %}
+                        {% ifequal row.resolved True %}
                         <td>Resolved</td>
                         {% else %}
                         <td>Not Resolved</td>

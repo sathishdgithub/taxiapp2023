@@ -5,7 +5,6 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import Site
-
 from taxiapp.models import MyUser
 
 class UserCreationForm(forms.ModelForm):
@@ -127,9 +126,9 @@ class TaxiAdmin(admin.ModelAdmin):
 
 class CityCodeAdmin(admin.ModelAdmin):
     exclude = ('complaint_no','taxi_no','police_no')
-    
+ 
 class ComplaintStatementAdmin(admin.ModelAdmin):
-    list_display = ('complaint_id', 'number_plate', 'driver_name', 'reason','status','allocated_to')
+    list_display = ('complaint_id', 'number_plate', 'driver_name', 'reason','resolved','allocated_to')
     def complaint_id(self, obj):
         return str(obj.complaint_number)
     complaint_id.short_description = 'Complaint ID'
@@ -142,12 +141,6 @@ class ComplaintStatementAdmin(admin.ModelAdmin):
     def reason(self, obj):
         return obj.reason
     reason.short_description = 'Reason'
-    def status(self,obj):
-        if obj.resolved == "True":
-            m = "Resolved"
-        else:
-            m = "Not Resolved"
-        return m
     def allocated_to(self, obj):
         if not obj.assigned_to:
             return "Not Assigned"
@@ -155,6 +148,7 @@ class ComplaintStatementAdmin(admin.ModelAdmin):
     allocated_to.short_description = 'Allocated To'
 
 class CityCodeAdmin(admin.ModelAdmin):
+    exclude = ('police_no','taxi_no','complaint_no')
     list_display = ('city','city_code')
 
 class ReasonsAdmin(admin.ModelAdmin):

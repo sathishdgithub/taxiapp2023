@@ -165,7 +165,7 @@ word-wrap:break-word;
                 {% if not user.is_authenticated %}
                 <div class="row">
                 <div class="profile-userbuttons center-block">
-                    <a href="{% url 'taxiapp:complaint_form' pk=taxi.id %}"><button type="button" class="btn btn-success btn-sm">Complaint</button></a>
+                    <a href="{% url 'taxiapp:complaint_form' pk=taxi.traffic_number %}"><button type="button" class="btn btn-success btn-sm">Complaint</button></a>
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm">Emergency SOS</button>
                 </div>
                 </div>
@@ -257,36 +257,35 @@ word-wrap:break-word;
                 </div>
               </div>
         </div>
-
+<div style=" display: none;">
+<form id="emer" action="/taxi_emergency/" method="post">i
+    {% csrf_token %}
+    <input id="id" type="text" name="id" value="{{taxi.id }}">
+    <input id="point" type="text" name="point" value="">
+    <input type="submit" value="submit">
+</form>
+</div>
 <script type="text/javascript">
     function sendSOS() {
- // var output = document.getElementById("out");
 
   if (!navigator.geolocation){
     //output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
     var url = "http://"+"{{request.get_host}}";
-    var id = "{{taxi.id}}";
+    var id = "{{taxi.traffic_number}}";
     window.open(url+'/complaint/'+id,"_self")
     return;
   }
-
   function success(position) {
-    var latitude  = position.coords.latitude;
-    var longitude = position.coords.longitude;
-    var url = "http://"+"{{request.get_host}}";
-    var id = "{{taxi.id}}";
-    window.open(url+'/taxi_emergency/'+latitude+'/'+longitude+'/'+id,"_self")
-    //output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
+	var latitude  = position.coords.latitude;
+    	var longitude = position.coords.longitude;
+	document.getElementById("point").value = latitude+','+longitude;
+	document.forms.emer.submit()
 
-    //var img = new Image();
-   // img.src = "https://maps.googleapis.com/maps/api/staticmap?center=" + latitude + "," + longitude + "&zoom=13&size=300x300&sensor=false";
 
-   // output.appendChild(img);
-  }
-
+	}
   function error() {
     var url = "http://"+"{{request.get_host}}";
-    var id = "{{taxi.id}}";
+    var id = "{{taxi.traffic_number}}";
     window.open(url+'/complaint/'+id,"_self")
     //output.innerHTML = "Unable to retrieve your location";
   }

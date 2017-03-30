@@ -18,6 +18,10 @@ class City_Code(models.Model):
       def __str__(self):
           return self.city_code+' '+self.city
 
+      class Meta:
+          verbose_name = 'City Code'
+          verbose_name_plural = 'City Codes'
+
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):
 		"""
@@ -49,7 +53,7 @@ class MyUserManager(BaseUserManager):
 
 
 class MyUser(AbstractBaseUser):
-        user_number = models.CharField(max_length=10,null=True,blank=True)
+        user_number = models.CharField(max_length=20,null=True,blank=True)
 	email = models.EmailField(
 		verbose_name='email address',
 		max_length=255,
@@ -94,6 +98,9 @@ class MyUser(AbstractBaseUser):
 		return self.is_admin
 
 
+        class Meta:
+                verbose_name = 'Administrator'
+                verbose_name_plural = 'Administrators'
 
 class Taxi_Detail(models.Model):
 	number_plate = models.CharField(max_length = 20)
@@ -104,17 +111,17 @@ class Taxi_Detail(models.Model):
 	phone_number = models.CharField(max_length=13)
 	address = models.CharField(max_length = 200, blank = True)
         city = models.ForeignKey(City_Code)
-	aadhar_number = models.CharField(max_length=14)
-	driving_license_number = models.CharField(max_length=30)
+	aadhar_number = models.CharField(max_length=14,null=True,blank=True)
+	driving_license_number = models.CharField(max_length=30,null=True,blank=True)
 	date_of_validity = models.DateField(null=True,blank=True)
-	autostand = models.CharField(max_length=80)
-	union = models.CharField(max_length=100)
+	autostand = models.CharField(max_length=80,null=True,blank=True)
+	union = models.CharField(max_length=100,null=True,blank=True)
 	insurance = models.DateField(null=True,blank=True)
-	capacity_of_passengers = models.CharField(max_length=10)
+	capacity_of_passengers = models.CharField(max_length=10,null=True,blank=True)
 	pollution = models.DateField(null=True,blank=True)
-	engine_number = models.CharField(max_length=20)
-	chasis_number = models.CharField(max_length=20)
-	owner_driver = models.CharField(max_length=6,choices=(('Owner','Owner'),('Driver','Driver')),default='Owner',)
+	engine_number = models.CharField(max_length=20,null=True,blank=True)
+	chasis_number = models.CharField(max_length=20,null=True,blank=True)
+	owner_driver = models.CharField(max_length=6,choices=(('Owner','Owner'),('Driver','Driver')),default='Owner',null=True,blank=True)
 	num_of_complaints = models.IntegerField(default=0)
 	driver_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
 	qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
@@ -150,16 +157,21 @@ class Taxi_Detail(models.Model):
 			self.generate_qrcode()
 			kwargs['force_insert'] = False # create() uses this, which causes error.
 			super(Taxi_Detail, self).save(*args, **kwargs)
-
-
+       
+        class Meta:
+            verbose_name = 'Taxi Driver'
+            verbose_name_plural = 'Taxi Drivers'
 
 class Reasons(models.Model):
       reason = models.CharField(max_length=100)
       def __str__(self):
           return self.reason
+      class Meta:
+          verbose_name = 'Complaint Reason'
+          verbose_name_plural = 'Complaint Reasons'
 
 class Complaint_Statement(models.Model):
-        complaint_number             = models.CharField(max_length=10)
+        complaint_number             = models.CharField(max_length=20)
         taxi                         = models.ForeignKey(Taxi_Detail,null=True,blank=True)
         reason			     = models.ForeignKey(Reasons,default=1)
         area                         = models.CharField(max_length=200,default='')
@@ -170,5 +182,8 @@ class Complaint_Statement(models.Model):
         def __str__(self):
              return str(self.complaint_number)+' '+self.taxi.driver_name+' '+self.reason.reason
 
+        class Meta:
+            verbose_name = 'Customer Complaint'
+            verbose_name_plural = 'Customer Complaints'
 
       

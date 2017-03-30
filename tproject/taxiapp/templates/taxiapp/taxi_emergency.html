@@ -1,12 +1,17 @@
+{% extends "taxiapp/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block main %}
 {% ifequal message '' %}
 The nearest police station has been informed.<br>
 The police station is:<br>
 Email: {{police.email}}<br>
 Area: {{police.city}}<br>
 SMS Number: {{police.sms_number}}<br>
-Whatsapp Number: {{police.whatsapp_number}}<br>
 Location: {{police.location}}(latitude,longitude)<br>
 {% else %}
 {{message}}
 {% endifequal %}<br>
 <a href="{% url 'taxiapp:home' %}"><button>Home</button></a>
+{% endblock %}

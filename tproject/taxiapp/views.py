@@ -10,6 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 import sys
 import requests
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
 	if request.user.is_authenticated():
@@ -118,15 +119,16 @@ def complaint_form(request,pk):
             t = Taxi_Detail.objects.get(id=form.instance.taxi.id)
             t.num_of_complaints = t.num_of_complaints+1
             t.save()
-            return HttpResponseRedirect("/complaint_success/"+str(form.instance.id)) 
+            return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
     else:
-        form = ComplaintUserForm(initial={'taxi':pk})
+        t = Taxi_Detail.objects.get(traffic_number=pk)
+        form = ComplaintUserForm(initial={'taxi':t.id})
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
 def complaint_success(request,pk):
     rows = MyUser.objects.all()
-    complaint = Complaint_Statement.objects.get(id=int(pk))
+    complaint = Complaint_Statement.objects.get(complaint_number=pk.upper())
     area = complaint.area
     if area.startswith('https://www.google.co.in/maps/@'):
         lat,lon = map(float,area[31:-4].split(','))
@@ -155,7 +157,7 @@ def complaint_success(request,pk):
         message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
         r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
 
-    return render(request,'taxiapp/complaint_success.html',{'message':'Your complaint for Taxi has been successfully registered. Complaint Number: '+str(pk)})
+    return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
 def complaint_resolve(request,pk):
     if request.user.is_authenticated():
@@ -166,7 +168,7 @@ def complaint_resolve(request,pk):
         t.save()
         row.resolved = True
         row.save()
-        return HttpResponseRedirect("/complaint_list") 
+        return HttpResponseRedirect("/taxi_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
 
@@ -197,30 +199,36 @@ def taxi_list(request):
 def get_distance(lat,lon,x,y):
     return (lat-x)**2+(lon-y)**2
 
-def taxi_emergency(request,lat,lon,taxi_id):
-    rows = MyUser.objects.all()
-    lat,lon = float(lat),float(lon)
-    if len(rows) > 0:
-        if rows[0].location and (not rows[0].is_admin):
-            x,y = map(float,rows[0].location.strip().split(','))
-            police,min_distance = rows[0],get_distance(lat,lon,x,y)
+def taxi_emergency(request):
+    if request.method == "POST":
+        rows = MyUser.objects.all()
+        print(request.body)
+        point = request.POST.get('point','0,0')
+        print('point',point)
+        taxi_id = request.POST.get('id')
+        lat,lon = map(float,point.split(','))
+        if len(rows) > 0:
+            if rows[0].location and (not rows[0].is_admin):
+                x,y = map(float,rows[0].location.strip().split(','))
+                police,min_distance = rows[0],get_distance(lat,lon,x,y)
+            else:
+                police,min_distance = rows[0],sys.maxint
+            for row in rows:
+                if row.location and (not row.is_admin):
+                    x,y = map(float,row.location.strip().split(','))
+                    distance = get_distance(lat,lon,x,y)
+                    if distance < min_distance:
+                        min_distance = distance
+                        police = row
+            phone_number = police.sms_number
+            taxi = Taxi_Detail.objects.get(id=taxi_id)
+            message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/@'+str(lat)+','+str(lon)+',16z'))
+            r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'})
+            return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
         else:
-            police,min_distance = rows[0],sys.maxint
-        for row in rows:
-            if row.location and (not row.is_admin):
-                x,y = map(float,row.location.strip().split(','))
-                distance = get_distance(lat,lon,x,y)
-                if distance < min_distance:
-                    min_distance = distance
-                    police = row
-        phone_number = police.sms_number
-        taxi = Taxi_Detail.objects.get(id=taxi_id)
-        message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/@'+str(lat)+','+str(lon)+',16z'))
-        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'})
-        return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
+            return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})
     else:
-        return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})
-
+            return render(request,'taxiapp/error.html')
 
 
 
@@ -239,3 +247,4 @@ def handler500(request):
                                   context_instance=RequestContext(request))
     response.status_code = 500
     return response
+
