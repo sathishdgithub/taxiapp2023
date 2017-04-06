@@ -24,7 +24,7 @@ class TaxidetailsForm(forms.ModelForm):
 
 
 class TaxisearchForm(forms.Form):
-	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'Taxi ID', 'maxlength' : '64'}), label='')
+	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'Taxi ID or Auto ID', 'maxlength' : '64'}), label='')
 
 class ComplaintUserForm(forms.ModelForm):
     class Meta:

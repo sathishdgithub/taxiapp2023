@@ -22,13 +22,14 @@
 
   if (!navigator.geolocation){
     //.innerHTML = "<p>Geolocation is not supported by your browser</p>";
+	console.log("Geolocation is not supported by your browser");
     //return;
   }
 
   function success(position) {
     var latitude  = position.coords.latitude;
     var longitude = position.coords.longitude;
-    document.getElementById('id_area').value='https://www.google.co.in/maps/@'+latitude+','+longitude+',16z';
+    document.getElementById('id_area').value='https://www.google.co.in/maps/place/'+latitude+','+longitude+'';
     document.getElementById('id_area').readOnly = true;
 
     //output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
@@ -44,6 +45,8 @@
    // var id = "{{taxi.id}}";
    // window.open(url+'/complaint/'+id,"_self")
     //output.innerHTML = "Unable to retrieve your location";
+	        console.log("unable to retrieve location");
+
   }
 
  // output.innerHTML = "<p>Locating…</p>";

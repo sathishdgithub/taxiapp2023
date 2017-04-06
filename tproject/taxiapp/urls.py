@@ -1,6 +1,5 @@
 from django.conf.urls import url
 from . import views
-from django.conf.urls import handler404
 
 app_name = "taxiapp"
 
@@ -20,5 +19,6 @@ urlpatterns = [
         url(r'^health_check/$', views.health_check, name='health_check'),
         url(r'^admin/logout/$', views.admin_logout),
 ]
-handler404 = 'views.handler404'
+
+handler404 = views.handler404
 

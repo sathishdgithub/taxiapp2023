@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '28=yz63c!&j%zmk#h!e$@-co#byb$7g#3_x6$fuh80-rb-ip=h'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -56,6 +56,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+
 )
 
 ROOT_URLCONF = 'tproject.urls'
@@ -148,6 +149,7 @@ LOCATION_FIELD = {
 }
 
 
+TEMPLATE_DEBUG = DEBUG
 
 try:
     EC2_IP = requests.get('http://169.254.169.254/latest/meta-data/local-ipv4').text
