@@ -12,7 +12,9 @@ import sys
 import requests
 from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
+from whatsapp import Client
 
+client = Client(login='919701384193', password='oWWLVmJGBvzWhoxEkLdIMkKIi94=')
 
 def index(request):
 	if request.user.is_authenticated():
@@ -134,12 +136,23 @@ def complaint_form(request,pk):
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
+def send_sms(message,phone_number,kind):
+    if kind == 'emergency':
+        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
+    elif kind == 'complaint':
+        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
+    return r
+
+def send_whatsapp(message,phone_number):
+    k = client.send_message(phone_number, message)
+    return k 
+
 def complaint_success(request,pk):
     rows = MyUser.objects.all()
     complaint = Complaint_Statement.objects.get(complaint_number=pk.upper())
     area = complaint.area
-    if area.startswith('https://www.google.co.in/maps/place'):
-        lat,lon = map(float,area[31:-4].split(','))
+    if area.startswith('https://www.google.co.in/maps/place/'):
+        lat,lon = map(float,area[len('https://www.google.co.in/maps/place/'):].split(','))
     else:
         r = requests.get("https://maps.googleapis.com/maps/api/geocode/json?address="+str(area)+"&key=AIzaSyBX_xC2Jeti6f0v83GVrnzX0mvfDyZE9yc")
         m = r.json()["results"][0]["geometry"]["location"]
@@ -163,8 +176,12 @@ def complaint_success(request,pk):
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
         message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
-        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
-
+        if taxi.city.sms:
+            m = send_sms(message,phone_number,'complaint')
+            print m
+        if taxi.city.whatsapp:
+            m = send_whatsapp(message,phone_number)
+            print m
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
 def complaint_resolve(request,pk):
@@ -229,9 +246,13 @@ def taxi_emergency(request):
                         min_distance = distance
                         police = row
             phone_number = police.sms_number
+            whatsapp_number = police.whatsapp_number
             taxi = Taxi_Detail.objects.get(id=taxi_id)
             message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))
-            r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'})
+            if taxi.city.sms:
+                m = send_sms(message,phone_number,'emergency')
+            if taxi.city.whatsapp:
+                m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
         else:
             return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})

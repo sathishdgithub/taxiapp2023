@@ -12,6 +12,8 @@ import StringIO
 class City_Code(models.Model):
       city = models.CharField(max_length=40)
       city_code = models.CharField(max_length=10)
+      whatsapp = models.BooleanField(default=True)
+      sms = models.BooleanField(default=True)
       taxi_no = models.IntegerField(default=0)
       police_no = models.IntegerField(default=0)
       complaint_no = models.IntegerField(default=0)
@@ -156,7 +158,11 @@ class Taxi_Detail(models.Model):
 		if add:
 			self.generate_qrcode()
 			kwargs['force_insert'] = False # create() uses this, which causes error.
-			super(Taxi_Detail, self).save(*args, **kwargs)
+                        self.traffic_number = self.city.city_code+'-TR-'+str(self.city.taxi_no+1).zfill(5)	
+                        t = City_Code.objects.get(id=self.city.id)
+                        t.taxi_no = t.taxi_no+1
+                        t.save()
+ 		        super(Taxi_Detail, self).save(*args, **kwargs)
        
         class Meta:
             verbose_name = 'Taxi Driver'
@@ -176,7 +182,8 @@ class Complaint_Statement(models.Model):
         reason			     = models.ForeignKey(Reasons,default=1)
         area                         = models.CharField(max_length=200,default='')
         city                         = models.ForeignKey(City_Code,default=1)
- 	complaint 		     = models.CharField(max_length = 100,null=True,blank=True)
+ 	phone_number                 = models.CharField(max_length=13)
+        complaint 		     = models.CharField(max_length = 100,null=True,blank=True)
         assigned_to                  = models.ForeignKey(MyUser,null=True,blank=True)
         resolved		     = models.BooleanField(default=False)
         def __str__(self):

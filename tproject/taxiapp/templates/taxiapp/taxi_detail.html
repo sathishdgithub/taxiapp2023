@@ -202,7 +202,9 @@ word-wrap:break-word;
                                     {% endif %}
 
                         <td>Phone Number</td>
-                        <td>{{ taxi.phone_number }} </td>       
+                        <td> <a class="btn btn-primary btn-xlg" href="tel:+91-{{ taxi.phone_number }}" >
+   			<span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>{{ taxi.phone_number }}
+			    </a></td>       
                         </tr>
 
                     {% if user.is_authenticated %}
@@ -267,7 +269,8 @@ word-wrap:break-word;
 </div>
 <script type="text/javascript">
     function sendSOS() {
-
+  if(confirm("An Emergency SOS will be sent to the nearest police station with your location details. Do you want to continue?"))
+  {
   if (!navigator.geolocation){
     //output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
     var url = "http://"+"{{request.get_host}}";
@@ -294,7 +297,8 @@ word-wrap:break-word;
 
   navigator.geolocation.getCurrentPosition(success, error);
 }
-
+  else{return false;}
+}
 </script>
 {% endblock %}
 
