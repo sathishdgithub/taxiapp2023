@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
 from whatsapp import Client
 
-client = Client(login='919701384193', password='oWWLVmJGBvzWhoxEkLdIMkKIi94=')
+client = Client(login='919701384193', password='+O61QXMzUvChI/7kkKlN5ucFSKY=')
 
 def index(request):
 	if request.user.is_authenticated():
@@ -49,12 +49,8 @@ def home(request):
 
 def admin_login(request):
     nex = request.GET.get('next', 'taxi_list')
-    print nex
     if request.user.is_authenticated():
-    	if request.user.is_admin:
-    		return HttpResponseRedirect("/"+nex)
-    	else:
-    		return HttpResponseRedirect("/"+nex)
+        return HttpResponseRedirect("/"+nex)
     if request.method == 'POST':
     	form 	 = AdminLoginForm(request.POST)
     	username = ''
@@ -103,9 +99,18 @@ def administrator(request):
 
 
 def taxi_detail(request, pk):
-    pk = pk.upper()
-    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
-    return render(request, 'taxiapp/taxi_detail.html', {'taxi': taxi})
+    if ' ' in pk:
+        pk = pk.replace(' ','')
+    taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
+    if len(taxi)<1:
+        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
+    if len(taxi)<1:
+        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
+#    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
+    if len(taxi) > 0:
+        return render(request, 'taxiapp/taxi_detail.html', {'taxi': taxi[0]})
+    else:
+        return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
 def taxi_new(request):
     if request.method == "POST":
@@ -144,7 +149,8 @@ def send_sms(message,phone_number,kind):
     return r
 
 def send_whatsapp(message,phone_number):
-    k = client.send_message(phone_number, message)
+    return 
+    k = client.send_message('91'+str(phone_number), message=message)
     return k 
 
 def complaint_success(request,pk):
@@ -171,16 +177,17 @@ def complaint_success(request,pk):
                     min_distance = distance
                     police = row
         phone_number = police.sms_number
+        whatsapp_number = police.whatsapp_number
         complaint.assigned_to = police
         complaint.save()
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
+        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
         if taxi.city.sms:
             m = send_sms(message,phone_number,'complaint')
             print m
         if taxi.city.whatsapp:
-            m = send_whatsapp(message,phone_number)
+            m = send_whatsapp(message,whatsapp_number)
             print m
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
@@ -248,7 +255,7 @@ def taxi_emergency(request):
             phone_number = police.sms_number
             whatsapp_number = police.whatsapp_number
             taxi = Taxi_Detail.objects.get(id=taxi_id)
-            message = 'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))
+            message = 'SOS\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))
             if taxi.city.sms:
                 m = send_sms(message,phone_number,'emergency')
             if taxi.city.whatsapp:

@@ -62,6 +62,7 @@ class MyUser(AbstractBaseUser):
 		unique=True,
 	)
 	sms_number = models.IntegerField(null=True)
+        whatsapp_number = models.IntegerField(null=True)
         area = models.CharField(max_length=200)
 	city = models.ForeignKey(City_Code,null=True)
 	location = PlainLocationField(based_fields=['area'], zoom=7,null=True,blank=True)
@@ -106,7 +107,7 @@ class MyUser(AbstractBaseUser):
 
 class Taxi_Detail(models.Model):
 	number_plate = models.CharField(max_length = 20)
-	traffic_number = models.CharField(max_length = 20)
+	traffic_number = models.CharField(max_length = 20,default='',unique=True)
 	driver_name = models.CharField(max_length = 40)
 	son_of = models.CharField(max_length = 40)
 	date_of_birth = models.DateField(null=True,blank=True)
@@ -127,7 +128,8 @@ class Taxi_Detail(models.Model):
 	num_of_complaints = models.IntegerField(default=0)
 	driver_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
 	qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
-	
+
+            
 	def __str__(self):
 		return self.driver_name+'('+self.number_plate+')'
 
@@ -158,12 +160,19 @@ class Taxi_Detail(models.Model):
 		if add:
 			self.generate_qrcode()
 			kwargs['force_insert'] = False # create() uses this, which causes error.
-                        self.traffic_number = self.city.city_code+'-TR-'+str(self.city.taxi_no+1).zfill(5)	
+                        if self.traffic_number=='':
+                            self.traffic_number = self.city.city_code+'-TR-'+str(self.city.taxi_no+1).zfill(5)	
                         t = City_Code.objects.get(id=self.city.id)
                         t.taxi_no = t.taxi_no+1
                         t.save()
+                        if ' ' in self.number_plate:
+                             m = self.number_plate
+                             self.number_plate = m.replace(' ','')
  		        super(Taxi_Detail, self).save(*args, **kwargs)
        
+        @property
+        def get_number_plate(self):
+            return self.number_plate[:2]+'-'+self.number_plate[2:-4]+'-'+self.number_plate[-4:]
         class Meta:
             verbose_name = 'Taxi Driver'
             verbose_name_plural = 'Taxi Drivers'
