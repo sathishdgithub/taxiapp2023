@@ -139,8 +139,6 @@ word-wrap:break-word;
 }
 </style>
         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
-   
-   
           <div class="panel panel-info">
             <div class="panel-heading">
               <h3 class="panel-title" style="text-align: center;">{{ taxi.driver_name }} ({{taxi.number_plate}})</h3>
@@ -165,8 +163,13 @@ word-wrap:break-word;
                 {% if not user.is_authenticated %}
                 <div class="row">
                 <div class="profile-userbuttons center-block">
-                    <button type="button" class="btn btn-success btn-sm" onclick="sendComplaint()">Complaint</button>
-                    <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm">Emergency SOS</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="sendComplaint()" style="margin:0.5em;">Complaint</button>
+                    <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm" style="margin:0.5em;">Emergency text</button>
+                    {% if taxi.city.distress %}
+                    <a class="btn btn-warning btn-xlg" href="tel:+91-{{ taxi.city.distress_contact }}" style="margin:0.5em;">
+                        <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>Distress Call
+                    </a>
+                    {% endif %}
                 </div>
                 </div>
                 {% endif %}

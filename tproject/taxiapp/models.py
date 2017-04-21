@@ -14,6 +14,8 @@ class City_Code(models.Model):
       city_code = models.CharField(max_length=10)
       whatsapp = models.BooleanField(default=True)
       sms = models.BooleanField(default=True)
+      distress = models.BooleanField(default=False)
+      distress_contact = models.CharField(max_length=13,null=True,blank=True)
       taxi_no = models.IntegerField(default=0)
       police_no = models.IntegerField(default=0)
       complaint_no = models.IntegerField(default=0)

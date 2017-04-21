@@ -124,9 +124,6 @@ class TaxiAdmin(admin.ModelAdmin):
        return super(TaxiAdmin, self).get_form(request, obj, **kwargs)
 
 
-class CityCodeAdmin(admin.ModelAdmin):
-    exclude = ('complaint_no','taxi_no','police_no')
- 
 class ComplaintStatementAdmin(admin.ModelAdmin):
     list_display = ('complaint_id', 'number_plate', 'driver_name', 'phone_number', 'reason','resolved','allocated_to')
     def complaint_id(self, obj):
@@ -152,7 +149,7 @@ class ComplaintStatementAdmin(admin.ModelAdmin):
 
 class CityCodeAdmin(admin.ModelAdmin):
     exclude = ('police_no','taxi_no','complaint_no')
-    list_display = ('city','city_code','whatsapp','sms')
+    list_display = ('city','city_code','whatsapp','sms','distress')
 
 class ReasonsAdmin(admin.ModelAdmin):
     list_display = ('reason_id','reason')
