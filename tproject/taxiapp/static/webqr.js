@@ -8,6 +8,7 @@ var gUM=false;
 var webkit=false;
 var moz=false;
 var v=null;
+var localstream;
 
 var imghtml='<div id="qrfile"><canvas id="out-canvas" width="320" height="240"></canvas>'+
     '<div id="imghelp">drag and drop a QRCode here'+
@@ -126,15 +127,31 @@ function success(stream) {
     else
         v.src = stream;
     gUM=true;
+    localstream = stream;
+
     setTimeout(captureToCanvas, 500);
 }
-        
+
+function stopcam(){
+	v.pause();
+	v.src="";
+	localstream.getTracks()[0].stop();
+	gCtx = null;
+	gCanvas = null;
+	c=0;
+	stype=0;
+	gUM=false;
+	webkit=false;
+	moz=false;
+}   
+
+     
 function error(error) {
     gUM=false;
     return;
 }
 
-function load()
+function load(camtype)
 {
     //document.getElementById("qr-btn").style.display="none";
     if(isCanvasSupported() && window.File && window.FileReader)
@@ -142,7 +159,7 @@ function load()
         initCanvas(800, 600);
         qrcode.callback = read;
         document.getElementById("mainbody").style.display="inline";
-        setwebcam();
+        setwebcam(camtype);
     }
     else
     {
@@ -153,10 +170,12 @@ function load()
     }
 }
 
-function setwebcam()
+
+function setwebcam(camtype)
 {
     
     var options = true;
+    var counter = 0;
     if(navigator.mediaDevices && navigator.mediaDevices.enumerateDevices)
     {
         try{
@@ -164,10 +183,16 @@ function setwebcam()
             .then(function(devices) {
               devices.forEach(function(device) {
                 if (device.kind === 'videoinput') {
-                  if(device.label.toLowerCase().search("back") >-1)
+                    counter++;
+			   if (counter>1){
+        			console.log("something is wrong");
+       				 document.getElementById("togglecam").style.display="block";
+			        }
+
+		    console.log(device);
+                  if(device.label.toLowerCase().search(camtype) >-1)
                     options={'deviceId': {'exact':device.deviceId}, 'facingMode':'environment'} ;
                 }
-                console.log(device.kind + ": " + device.label +" id = " + device.deviceId);
               });
               setwebcam2(options);
             });
@@ -181,9 +206,8 @@ function setwebcam()
         console.log("no navigator.mediaDevices.enumerateDevices" );
         setwebcam2(options);
     }
-    
+ 
 }
-
 function setwebcam2(options)
 {
     console.log(options);

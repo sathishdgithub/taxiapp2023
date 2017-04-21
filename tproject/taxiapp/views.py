@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
 from whatsapp import Client
 
-client = Client(login='919701384193', password='+O61QXMzUvChI/7kkKlN5ucFSKY=')
+client = Client(login='919704807427', password='NNpCqG5QJvmHOaSy3XvyEylCmnY=')
 
 def index(request):
 	if request.user.is_authenticated():
@@ -126,7 +126,7 @@ def taxi_new(request):
         form = TaxidetailsForm()
     return render(request, 'taxiapp/taxi_edit.html', {'form': form})
 
-def complaint_form(request,pk):
+def complaint_form(request):
     if request.method == "POST":
         form = ComplaintUserForm(request.POST)
         if form.is_valid():
@@ -136,8 +136,12 @@ def complaint_form(request,pk):
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
     else:
-        t = Taxi_Detail.objects.get(traffic_number=pk)
-        form = ComplaintUserForm(initial={'taxi':t.id})
+        taxi_id = request.GET.get('id', '')
+        passenger_phone = request.GET.get('passenger_phone','')
+        passenger_origin = request.GET.get('passenger_origin','')
+        passenger_destination = request.GET.get('passenger_destination','')
+        form = ComplaintUserForm(initial={'taxi':taxi_id,'phone_number':passenger_phone,\
+               'origin_area':passenger_origin,'destination_area':passenger_destination})
         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
 
@@ -149,7 +153,6 @@ def send_sms(message,phone_number,kind):
     return r
 
 def send_whatsapp(message,phone_number):
-    return 
     k = client.send_message('91'+str(phone_number), message=message)
     return k 
 
@@ -164,13 +167,13 @@ def complaint_success(request,pk):
         m = r.json()["results"][0]["geometry"]["location"]
         lat,lon = float(m["lat"]),float(m["lng"])
     if len(rows) > 0:
-        if rows[0].location:
+        if rows[0].location and (not rows[0].is_admin):
             x,y = map(float,rows[0].location.strip().split(','))
             police,min_distance = rows[0],get_distance(lat,lon,x,y)
         else:
             police,min_distance = rows[0],sys.maxint
         for row in rows:
-            if row.location:
+            if row.location and (not row.is_admin):
                 x,y = map(float,row.location.strip().split(','))
                 distance = get_distance(lat,lon,x,y)
                 if distance < min_distance:
@@ -182,7 +185,7 @@ def complaint_success(request,pk):
         complaint.save()
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)
+        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number:'+str(complaint.phone_number)+'\nOrigin:'+str(complaint.origin_area)+'\nDestination:'+str(complaint.destination_area)
         if taxi.city.sms:
             m = send_sms(message,phone_number,'complaint')
             print m
@@ -234,10 +237,11 @@ def get_distance(lat,lon,x,y):
 def taxi_emergency(request):
     if request.method == "POST":
         rows = MyUser.objects.all()
-        print(request.body)
         point = request.POST.get('point','0,0')
-        print('point',point)
         taxi_id = request.POST.get('id')
+        p_phone = request.POST.get('passenger_phone_sos','')
+        p_origin = request.POST.get('passenger_origin_sos','')       
+        p_destination = request.POST.get('passenger_destination_sos','')       
         lat,lon = map(float,point.split(','))
         if len(rows) > 0:
             if rows[0].location and (not rows[0].is_admin):
@@ -255,7 +259,7 @@ def taxi_emergency(request):
             phone_number = police.sms_number
             whatsapp_number = police.whatsapp_number
             taxi = Taxi_Detail.objects.get(id=taxi_id)
-            message = 'SOS\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))
+            message = 'SOS\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Driver Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
             if taxi.city.sms:
                 m = send_sms(message,phone_number,'emergency')
             if taxi.city.whatsapp:

@@ -75,7 +75,62 @@ img{
     width:70%;
 }
 
+.onoffswitch4 {
+    position: relative; width: 90px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
 
+.onoffswitch4-checkbox {
+    display: none;
+}
+
+.onoffswitch4-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #27A1CA; border-radius: 0px;
+}
+
+.onoffswitch4-inner {
+    display: block; width: 200%; margin-left: -100%;
+    -moz-transition: margin 0.3s ease-in 0s; -webkit-transition: margin 0.3s ease-in 0s;
+    -o-transition: margin 0.3s ease-in 0s; transition: margin 0.3s ease-in 0s;
+}
+
+.onoffswitch4-inner:before, .onoffswitch4-inner:after {
+    display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 26px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+.onoffswitch4-inner:before {
+    content: "Cam1";
+    padding-left: 10px;
+    background-color: #FFFFFF; color: #27A1CA;
+}
+
+.onoffswitch4-inner:after {
+    content: "Cam2";
+    padding-right: 10px;
+    background-color: #FFFFFF; color: #666666;
+    text-align: right;
+}
+
+.onoffswitch4-switch {
+    display: block; width: 25px; margin: 0px;
+    background: #27A1CA;
+    position: absolute; top: 0; bottom: 0; right: 65px;
+    -moz-transition: all 0.3s ease-in 0s; -webkit-transition: all 0.3s ease-in 0s;
+    -o-transition: all 0.3s ease-in 0s; transition: all 0.3s ease-in 0s; 
+}
+
+.onoffswitch4-checkbox:checked + .onoffswitch4-label .onoffswitch4-inner {
+    margin-left: 0;
+}
+
+.onoffswitch4-checkbox:checked + .onoffswitch4-label .onoffswitch4-switch {
+    right: 0px; 
+}
 {% load static %}
 
 
@@ -95,6 +150,18 @@ img{
         <tr>
         <td valign="top" align="center" width="50%">
         <table class="tsel" border="0">
+	        <tr>
+            <td></td>
+            <td id="togglecam" style="display: none;">
+		<div class="onoffswitch4">
+             <input type="checkbox" name="onoffswitch4" onchange="handleChange(this);" class="onoffswitch4-checkbox" id="myonoffswitch4" checked>
+              <label class="onoffswitch4-label" for="myonoffswitch4">
+              <span class="onoffswitch4-inner"></span>
+              <span class="onoffswitch4-switch"></span>
+             </label>
+            </div>
+            </td>
+            </tr>
         <tr><td colspan="2" align="center">
         <div id="outdiv">
         </div></td></tr>
@@ -123,5 +190,18 @@ img{
 
 
 <canvas id="qr-canvas" width="800" height="600"></canvas>
-<script type="text/javascript">load()</script>
+<script type="text/javascript">
+	load("back");
+	function handleChange(checkbox) {
+    if(checkbox.checked == true){
+        stopcam();
+	load("back");	
+    }else{
+  	stopcam();
+        load("front");  
+   }
+}
+	
+
+</script>
 {% endblock %}
