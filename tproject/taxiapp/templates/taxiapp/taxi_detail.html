@@ -167,7 +167,7 @@ word-wrap:break-word;
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm" style="margin:0.5em;">Emergency text</button>
                     {% if taxi.city.distress %}
                     <a class="btn btn-warning btn-xlg" href="tel:+91-{{ taxi.city.distress_contact }}" style="margin:0.5em;">
-                        <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>Distress Call
+                        <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>Emergency Call
                     </a>
                     {% endif %}
                 </div>
@@ -289,6 +289,12 @@ word-wrap:break-word;
 </div>
 <script type="text/javascript">
     function sendSOS() {
+    var x = document.getElementById("passenger_phone").value;
+	if (x.length < 10) {
+            alert("Please fill in your correct Phone Number");
+            return false;
+        }
+
   if(confirm("An Emergency SOS will be sent to the nearest police station with your location details. Do you want to continue?"))
   {
   if (!navigator.geolocation){
@@ -327,7 +333,7 @@ word-wrap:break-word;
 }
 function sendComplaint() {
     var x = document.getElementById("passenger_phone").value;
-    if (x.length < 10) {
+    if (1!=1/*x.length < 10*/) {
         alert("Please fill in your correct Phone Number");
         return false;
     }

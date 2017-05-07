@@ -1,0 +1,16 @@
+Database :
+
+    'db2':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'myproject',
+        'USER': 'myprojectuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+
+
+sudo service httpd restart
+
+sudo cat /var/log/httpd/error_log
+
