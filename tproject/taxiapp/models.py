@@ -162,7 +162,7 @@ class Taxi_Detail(models.Model):
 		if add:
 			self.generate_qrcode()
 			kwargs['force_insert'] = False # create() uses this, which causes error.
-                        if self.traffic_number=='':
+                        if self.traffic_number.strip()=='' or self.traffic_number.strip()=='-':
                             self.traffic_number = self.city.city_code+'-TR-'+str(self.city.taxi_no+1).zfill(5)	
                         t = City_Code.objects.get(id=self.city.id)
                         t.taxi_no = t.taxi_no+1
@@ -176,8 +176,8 @@ class Taxi_Detail(models.Model):
         def get_number_plate(self):
             return self.number_plate[:2]+'-'+self.number_plate[2:-4]+'-'+self.number_plate[-4:]
         class Meta:
-            verbose_name = 'Taxi Driver'
-            verbose_name_plural = 'Taxi Drivers'
+            verbose_name = 'Driver/Owner'
+            verbose_name_plural = 'Drivers & Owners'
 
 class Reasons(models.Model):
       reason = models.CharField(max_length=100)
