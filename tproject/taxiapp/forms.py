@@ -13,7 +13,7 @@ class AdminLoginForm(forms.Form):
 class TaxidetailsForm(forms.ModelForm):
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
+        fields = ('number_plate','traffic_number','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver')
     
     def save(self, *args, **kwargs):
         if (self.instance.traffic_number.strip()=='') or (self.instance.traffic_number.strip()=='-'):
@@ -25,7 +25,7 @@ class TaxidetailsForm(forms.ModelForm):
 
 
 class TaxisearchForm(forms.Form):
-	taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'TPT-TR-0001', 'maxlength' : '64'}), label='')
+    taxi_id = forms.IntegerField(widget=forms.TextInput(attrs={'class' : '', 'placeholder' : 'TPT-TR-0001', 'maxlength' : '64'}), label='')
 
 class ComplaintUserForm(forms.ModelForm):
     class Meta:
@@ -38,5 +38,6 @@ class ComplaintUserForm(forms.ModelForm):
         t.save()
         return super(ComplaintUserForm, self).save(*args, **kwargs)
 
-
-           
+class TaxiDetailCsvUpload(forms.Form):
+    city = forms.ModelChoiceField(queryset=City_Code.objects.all(), label='City', help_text='All the taxi data should belong to the chosen city.', required=True)
+    taxi_csv = forms.FileField()     

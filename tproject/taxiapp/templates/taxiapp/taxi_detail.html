@@ -147,7 +147,7 @@ word-wrap:break-word;
             <div class="row">
               <div class="col-md-6">
                  <div class="profile-userpic">
-                    <img src="{{ taxi.driver_image.url }}" class="img-responsive" alt="">
+                    <img src="{{ taxi.driver_image_thumbnail.url }}" class="img-responsive" alt="">
 
                 </div>
                 </div>
@@ -179,7 +179,7 @@ word-wrap:break-word;
                     <tbody>
                     <tr>
                         <td>Number Plate</td>
-                        <td>{{ taxi.get_number_plate }}</td>
+                        <td>{{ taxi.number_plate }}</td>
                       </tr>
                       <tr>
                         <td>Traffic Number</td>

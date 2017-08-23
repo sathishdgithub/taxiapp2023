@@ -10,7 +10,6 @@ from location_field.models.plain import PlainLocationField
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 import StringIO
-from werkzeug import secure_filename
 
 class City_Code(models.Model):
       city = models.CharField(max_length=40)
@@ -19,9 +18,9 @@ class City_Code(models.Model):
       sms = models.BooleanField(default=True)
       distress = models.BooleanField(default=False)
       distress_contact = models.CharField(max_length=13,null=True,blank=True)
-      taxi_no = models.BigIntegerField(default=0)
-      police_no = models.BigIntegerField(default=0)
-      complaint_no = models.BigIntegerField(default=0)
+      taxi_no = models.IntegerField(default=0)
+      police_no = models.IntegerField(default=0)
+      complaint_no = models.IntegerField(default=0)
       def __str__(self):
           return self.city_code+' '+self.city
 
@@ -66,8 +65,8 @@ class MyUser(AbstractBaseUser):
 		max_length=255,
 		unique=True,
 	)
-	sms_number = models.BigIntegerField(null=True)
-        whatsapp_number = models.BigIntegerField(null=True)
+	sms_number = models.IntegerField(null=True)
+        whatsapp_number = models.IntegerField(null=True)
         area = models.CharField(max_length=200)
 	city = models.ForeignKey(City_Code,null=True)
 	location = PlainLocationField(based_fields=['area'], zoom=7,null=True,blank=True)
@@ -111,26 +110,26 @@ class MyUser(AbstractBaseUser):
                 verbose_name_plural = 'Administrators'
 
 class Taxi_Detail(models.Model):
-	number_plate = models.CharField(max_length = 24)
-	traffic_number = models.CharField(max_length = 28,default='',unique=True)
+	number_plate = models.CharField(max_length = 20)
+	traffic_number = models.CharField(max_length = 20,default='',unique=True)
 	driver_name = models.CharField(max_length = 40, verbose_name="Name")
 	son_of = models.CharField(max_length = 40)
 	date_of_birth = models.DateField(null=True,blank=True)
-	phone_number = models.CharField(max_length=16)
+	phone_number = models.CharField(max_length=13)
 	address = models.CharField(max_length = 200, blank = True)
         city = models.ForeignKey(City_Code, related_name='taxidetails')
-	aadhar_number = models.CharField(max_length=22,null=True,blank=True)
+	aadhar_number = models.CharField(max_length=14,null=True,blank=True)
 	driving_license_number = models.CharField(max_length=30,null=True,blank=True)
 	date_of_validity = models.DateField(null=True,blank=True)
 	autostand = models.CharField(max_length=80,null=True,blank=True, verbose_name="Stand")
 	union = models.CharField(max_length=100,null=True,blank=True)
 	insurance = models.DateField(null=True,blank=True)
-	capacity_of_passengers = models.CharField(max_length=14,null=True,blank=True)
+	capacity_of_passengers = models.CharField(max_length=10,null=True,blank=True)
 	pollution = models.DateField(null=True,blank=True)
-	engine_number = models.CharField(max_length=40,null=True,blank=True)
-	chasis_number = models.CharField(max_length=30,null=True,blank=True)
+	engine_number = models.CharField(max_length=20,null=True,blank=True)
+	chasis_number = models.CharField(max_length=20,null=True,blank=True)
 	owner_driver = models.CharField(max_length=6,choices=(('OWNER','Owner'),('DRIVER','Driver')),default='OWNER',null=True,blank=True)
-	num_of_complaints = models.BigIntegerField(default=0)
+	num_of_complaints = models.IntegerField(default=0)
 	driver_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
 	driver_image_thumbnail = ImageSpecField(source='driver_image',
                                       processors=[ResizeToFill(75, 100)],
@@ -157,7 +156,7 @@ class Taxi_Detail(models.Model):
 
 		buffer = StringIO.StringIO()
 		img.save(buffer)
-		file_name = secure_filename('%s.png' % self.traffic_number)
+		file_name = 'qr-%s.png' % self.pk
 		file_buffer = InMemoryUploadedFile(
 			buffer, None, file_name, 'image/png', buffer.len, None)
 		self.qr_code.save(file_name, file_buffer)

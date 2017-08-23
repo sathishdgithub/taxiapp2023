@@ -11,7 +11,7 @@
                 <th>Number Plate</th>
                 <th>Traffic Number</th>
                 <th>Name</th>
-                <th>Number of Complaints</th>
+                <th>Phone Number</th>
                 <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
@@ -21,7 +21,7 @@
 		<th>Number Plate</th>
                 <th>Traffic Number</th>
                 <th>Driver Name</th>
-                <th>Number of Complaints</th>
+                <th>Phone Number</th>
                 <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
@@ -29,10 +29,10 @@
         <tbody>
             {% for row in rows %}
             <tr>
-                <td>{{row.number_plate}}</td>
+                <td>{{row.get_number_plate}}</td>
                 <td>{{row.traffic_number}}</td>
                 <td>{{row.driver_name}}</td>
-                <td>{{row.num_of_complaints}}</td>
+                <td>{{row.phone_number}}</td>
                 <td>{{row.owner_driver}}</td>
                 <td><a href="{% url 'taxiapp:taxi_detail' pk=row.traffic_number %}">{{'More Details'}}</a></td>
             </tr>
@@ -76,7 +76,7 @@ $(document).ready(function() {
             {% for row in rows_c %}
             <tr>
                 <td>{{row.complaint_number}}</td>
-                <td>{{row.taxi.number_plate}}</td>
+                <td>{{row.taxi.get_number_plate}}</td>
                 <td>{{row.taxi.traffic_number}}</td>
                 <td>{{row.taxi.driver_name}}</td>
                 <td>{{row.reason.reason}}</td>

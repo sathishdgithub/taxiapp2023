@@ -80,10 +80,9 @@ class SendLayer(YowInterfaceLayer):
             logger.info("Message sent")
             raise KeyboardInterrupt()
 
-    def disconnect(self, result=None):
+    def disconnect(self, result):
         self.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_DISCONNECT))
-        if result:
-            raise ValueError(result)
+        raise ValueError(result)
 
     def on_request_upload_result(self, jid, file_path, result_entity, request_entity):
         if result_entity.isDuplicate():
@@ -140,8 +139,8 @@ class Client(object):
         self.stack.setProp(YowAuthenticationProtocolLayer.PROP_CREDENTIALS, (self.login, self.password))
         self.stack.setProp(YowNetworkLayer.PROP_ENDPOINT, YowConstants.ENDPOINTS[0])
         self.stack.setProp(YowCoderLayer.PROP_DOMAIN, YowConstants.DOMAIN)
-        self.stack.setProp(YowCoderLayer.PROP_RESOURCE, env.YowsupEnv.getCurrent().getResource())
-
+ #       self.stack.setProp(YowCoderLayer.PROP_RESOURCE, env.CURRENT_ENV.getResource())
+        self.stack.setProp(YowCoderLayer.PROP_RESOURCE,env.YowsupEnv.getCurrent().getResource())
         self.stack.setProp(SendLayer.PROP_MESSAGES, [([to, message, is_media])])
         self.stack.broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))
         try:
@@ -154,4 +153,3 @@ class Client(object):
 
     def send_media(self, to, path):
         self._send_message(to, path, is_media=True)
-

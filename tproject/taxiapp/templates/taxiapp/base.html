@@ -152,6 +152,7 @@
               {% if user.is_authenticated %}
                 {% if user.is_admin %}
                 <li><a href="/admin">Access Super Admin Console</a></li>
+		<li><a href="/taxi_csv_upload">Bulk Upload Taxi Data</a></li>
                 {% else %}
                 <li><a href="/taxi_list">Taxi List</a></li>
                 {% endif %}

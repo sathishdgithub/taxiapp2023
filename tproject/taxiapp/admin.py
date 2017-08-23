@@ -6,6 +6,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import Site
 from taxiapp.models import MyUser
+from django.core.urlresolvers import reverse
+from imagekit.admin import AdminThumbnail
+
 
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
@@ -87,7 +90,7 @@ class UserAdmin(BaseUserAdmin):
 class TaxiAdminCreationForm(forms.ModelForm):
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
+        fields = ('number_plate','traffic_number','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
     def save(self, *args, **kwargs):
         self.instance.traffic_number = self.instance.city.city_code+'-TR-'+str(self.instance.city.taxi_no+1).zfill(5)
         t = City_Code.objects.get(id=self.instance.city.id)
@@ -99,13 +102,13 @@ class TaxiAdminCreationForm(forms.ModelForm):
 class TaxiAdminUpdateForm(forms.ModelForm):
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','driver_name','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
+        fields = ('number_plate','traffic_number','driver_name','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
 
 class TaxiAdmin(admin.ModelAdmin):
-    exclude = ('qr_code','num_of_complaints','traffic_number')
+    exclude = ('qr_code','num_of_complaints')
     form = TaxiAdminCreationForm
     change_form = TaxiAdminUpdateForm
-    list_display = ('number_plate', 'traffic_number','driver_name','phone_number','owner_driver','profile_pic','qr_image')
+    list_display = ('number_plate_', 'traffic_number','name','phone_number','owner_driver','profile_pic','qr_image')
     search_fields = ('number_plate', 'traffic_number','driver_name','phone_number', )
     def qr_image(self, obj):  # receives the instance as an argument
         return '<img width=75 height=75 src="{thumb}" />'.format(
@@ -113,12 +116,41 @@ class TaxiAdmin(admin.ModelAdmin):
         )
     qr_image.allow_tags = True
     qr_image.short_description = 'QR Code'
+    
+
+ #   profile_pic = AdminThumbnail(image_field='driver_image')
+  #  profile_pic.short_description = 'Driver Picture'
+    
     def profile_pic(self, obj):  # receives the instance as an argument
+        url = reverse('admin:%s_%s_change' %(obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
+        url_string = '<a style="margin: 2px;" href="%s">Update</a>' %(url)
         return '<img width=75 height=75 src="{thumb}" />'.format(
-            thumb=obj.driver_image.url,
-        )
+            thumb=obj.driver_image_thumbnail.url,
+        ) + url_string
     profile_pic.allow_tags = True
     profile_pic.short_description = 'Driver Picture'
+    def name(self,obj):
+        return str(obj.driver_name)
+    name.allow_tags = True
+    name.short_description = "NAME"
+
+    def number_plate_(self, obj):  # receives the instance as an argument
+        np = obj.get_number_plate.replace('-','')
+        try:
+            k = np[0]
+            for i in range(1,len(np)):
+                if np[i]=='-':
+                    pass
+                elif ((np[i-1].isalpha()) and (np[i].isdigit())) or ((np[i-1].isdigit()) and (np[i].isalpha())):
+                    k = k + ' '+np[i]
+                else:
+                    k = k + np[i]
+            return k
+        except Exception as e:
+            return obj.get_number_plate
+    number_plate_.allow_tags = True
+    number_plate_.short_description = 'Number Plate'
+
     def owner_driver(self,obj):
         return str(obj.owner_driver)
     owner_driver.allow_tags = True

@@ -13,8 +13,9 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
 from whatsapp import Client
+import pandas as pd
 
-client = Client(login='919704807427', password='NNpCqG5QJvmHOaSy3XvyEylCmnY=')
+client = Client(login='919704807427', password='CM3u2jJb7sf6leMmQdkHJF/xvxI=')
 
 def index(request):
 	if request.user.is_authenticated():
@@ -108,7 +109,19 @@ def taxi_detail(request, pk):
         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
 #    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
     if len(taxi) > 0:
-        return render(request, 'taxiapp/taxi_detail.html', {'taxi': taxi[0]})
+        m = taxi[0]
+        k,p = m.number_plate,''
+        k.replace('-','')
+        start,p = k[0],k[0]
+        for i in range(1,len(k)):
+            if k[i] == '-':
+                pass
+            elif ((k[i-1].isalpha()) and (k[i].isdigit())) or ((k[i-1].isdigit()) and (k[i].isalpha())):
+                p = p+' '+k[i]
+            else:
+                p = p+k[i]
+        m.number_plate = p
+        return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
     else:
         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
@@ -147,13 +160,14 @@ def complaint_form(request):
 
 def send_sms(message,phone_number,kind):
     if kind == 'emergency':
-        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
+        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
     elif kind == 'complaint':
-        r = requests.get('http://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
+        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
     return r
 
 def send_whatsapp(message,phone_number):
     k = client.send_message('91'+str(phone_number), message=message)
+    print message,k
     return k 
 
 def complaint_success(request,pk):
@@ -225,12 +239,37 @@ def complaint_view(request,pk):
 
 def taxi_list(request):
     if request.user.is_authenticated():
-        rows = Taxi_Detail.objects.all()
-        rows_c = Complaint_Statement.objects.all()
-        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+        if request.user.is_admin:
+            rows = Taxi_Detail.objects.all()
+            rows_c = Complaint_Statement.objects.all()
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+        else:
+            city = request.user.city
+            rows = Taxi_Detail.objects.filter(city=city)
+            rows_c = Complaint_Statement.objects.filter(city=city)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
+
+
+'''
+def taxi_list(request):
+    if request.user.is_authenticated():
+        if request.user.is_admin:
+            rows = Taxi_Detail.objects.all()
+            rows_c = Complaint_Statement.objects.all()
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+        else:
+            city = request.user.city
+            print type(city)
+            rows = Taxi_Detail.objects.filter(city=city)
+            rows_c = Complaint_Statement.objects.filter(city=city)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+    else:
+        return HttpResponseRedirect("/admin_login?next=taxi_list")
+
+'''
 def get_distance(lat,lon,x,y):
     return (lat-x)**2+(lon-y)**2
 
@@ -270,7 +309,58 @@ def taxi_emergency(request):
     else:
             return render(request,'taxiapp/error.html')
 
+def date_form(date):                                   
+    t = str(date).strip().split('/')                                              
+    if len(t) == 3:                               
+        d,m,y = t                                                                                                                              
+        if (len(y)==4) and (int(m)<=12 and int(m)>=1):                                                                                         
+            return y+'-'+m+'-'+d                                                                                                               
+        elif (len(y)==4) and (int(d)<=12 and int(d)>=1):                                                                                                          return y+'-'+d+'-'+m                                                             
+    return None    
 
+def handle_taxi_csv(file_path,city):
+    import os
+    path = '/home/ec2-user/taxiapp/tproject'
+    dest = open(path+file_path.name,"wb")
+    for chunk in file_path.chunks():
+        dest.write(chunk)
+    dest.close() 
+    all_errors=[]
+    try:
+        data = pd.read_csv(path+file_path.name)
+    except:
+        return ["csv_file_error"]
+    for index,row in data.iterrows(): 
+        try:                                                                          
+            c = City_Code.objects.get(pk=city)
+            p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],city=c)
+            if len(row["TRAFFIC NUMBER"]) > 3:
+                p.save()
+        except Exception as e:
+            all_errors.append(e)
+    os.remove(path+file_path.name)
+    print("Akk Eerris",all_errors)
+    return all_errors
+
+def taxi_csv_upload(request):
+    message = 'Please Upload the CSV file here'
+    secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER'
+    if request.user.is_authenticated():
+        if request.user.is_admin:
+            if request.method == "POST":
+                form = TaxiDetailCsvUpload(request.POST, request.FILES)
+                if form.is_valid():
+                    errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
+                    if len(errors)==0:
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
+                    elif errors[0] == "csv_file_error":
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
+                    return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':'Some duplicates to the previous entries were found in the file.'})
+            else:
+                form = TaxiDetailCsvUpload()
+            return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
 
 def health_check(request):
     data = {

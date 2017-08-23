@@ -40,10 +40,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'qrcode',
+    'imagekit',
     'taxiapp',
     'location_field.apps.DefaultConfig',
     'bootstrap3',
     'mod_wsgi.server',
+    'storages',
 )
 SITE_ID = 1
 
@@ -84,9 +86,17 @@ WSGI_APPLICATION = 'tproject.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #}
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'taxidb',
+        'HOST': 'taxiapp.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
+        'PORT': '5432',
+        'USER': 'valv_admin',
+        'PASSWORD': 'Bharath360'
     }
 }
 
@@ -109,7 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
+#MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'taxiapp.MyUser'
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(BASE_DIR, 'taxiapp/static')
@@ -148,6 +158,41 @@ LOCATION_FIELD = {
     },
 }
 
+
+# S3 settings
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+
+AWS_STORAGE_BUCKET_NAME = 'taxipublic'
+AWS_ACCESS_KEY_ID = 'AKIAJXIBCZNZCKK4S6JQ'
+AWS_SECRET_ACCESS_KEY = 'GOTf2y7ThWOcUt4FRb8XmmJDjt6lM9Y1ZQoNH8QB'
+AWS_DEFAULT_ACL = "public-read" # to make sure all your files gives read only access to the files
+
+# Tell django-storages that when coming up with the URL for an item in S3 storage, keep
+# it simple - just use this domain plus the path. (If this isn't set, things get complicated).
+# This controls how the `static` template tag from `staticfiles` gets expanded, if you're using it.
+# We also use it in the next setting.
+AWS_S3_HOST = 's3.ap-south-1.amazonaws.com'
+AWS_S3_CUSTOM_DOMAIN = 's3.ap-south-1.amazonaws.com/%s' % AWS_STORAGE_BUCKET_NAME
+AWS_QUERYSTRING_AUTH = False
+S3DIRECT_REGION = 'ap-south-1'
+# This is used by the `static` template tag from `static`, if you're using that. Or if anything else
+# refers directly to STATIC_URL. So it's safest to always set it.
+S3_URL = "https://%s" % AWS_S3_CUSTOM_DOMAIN
+# Tell the staticfiles app to use S3Boto storage when writing the collected static files (when
+# you run `collectstatic`).
+STATIC_DIRECTORY = '/static/'
+MEDIA_DIRECTORY = '/media/'
+
+#'https://taxipublic.s3.ap-south-1.amazonaws.com/media/drivers/DSCN2533.JPG'
+AWS_S3_MEDIA_DOMAIN = 'https://%s.s3.ap-south-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+STATIC_URL = S3_URL + STATIC_DIRECTORY
+MEDIA_URL = AWS_S3_MEDIA_DOMAIN + MEDIA_DIRECTORY
+#AWS_HEADERS = {  # see http://developer.yahoo.com/performance/rules.html#expires
+ #       'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+  #      'Cache-Control': 'max-age=94608000',
+   # }
 
 TEMPLATE_DEBUG = DEBUG
 
