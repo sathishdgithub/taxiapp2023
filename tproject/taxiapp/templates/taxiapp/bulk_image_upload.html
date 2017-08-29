@@ -1,0 +1,18 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+{{message1}}<br>
+</p>
+<p>
+{{message2}}<br>
+</p>
+
+{% load bootstrap3 %}
+
+<form enctype="multipart/form-data" action="{% url 'taxiapp:bulk_image_upload' %}" method="post">
+	{% csrf_token %}
+        
+	       {% bootstrap_form form %}
+
+<button class="btn btn-primary" type="submit">Upload ZIP</button>
+</form>
+{% endblock %}

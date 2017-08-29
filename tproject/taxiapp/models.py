@@ -55,6 +55,7 @@ class MyUserManager(BaseUserManager):
 			password=password,
 		)
 		user.is_admin = True
+                user.is_staff = True
 		user.save(using=self._db)
 		return user
 
@@ -72,7 +73,8 @@ class MyUser(AbstractBaseUser):
 	city = models.ForeignKey(City_Code,null=True)
 	location = PlainLocationField(based_fields=['area'], zoom=7,null=True,blank=True)
 	is_active = models.BooleanField(default=True)
-	is_admin = models.BooleanField(default=False)
+	is_admin = models.BooleanField(default=False, verbose_name="Admin")
+        is_staff = models.BooleanField(default=False, verbose_name="Moderator")
 
 	objects = MyUserManager()
 
@@ -99,12 +101,11 @@ class MyUser(AbstractBaseUser):
 		# Simplest possible answer: Yes, always
 		return True
 
-	@property
-	def is_staff(self):
-		"Is the user a member of staff?"
-		# Simplest possible answer: All admins are staff
-		return self.is_admin
-
+        @property
+        def is_superuser(self):
+            "Is the user a member of admin?"
+            # Simplest possible answer: All admins are superuser
+            return self.is_admin
 
         class Meta:
                 verbose_name = 'Administrator'
@@ -137,6 +138,7 @@ class Taxi_Detail(models.Model):
                                       format='JPEG',
                                       options={'quality': 60})
         qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
+        driver_image_name = models.CharField(max_length = 100, null=True, blank = True)
 
             
 	def __str__(self):
@@ -225,4 +227,12 @@ class Complaint_Statement(models.Model):
             verbose_name = 'Customer Complaint'
             verbose_name_plural = 'Customer Complaints'
 
-      
+class Otp_Codes(models.Model):
+    user = models.ForeignKey(MyUser,null=True,blank=True)
+    otp = models.CharField(max_length=6)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return str(self.user)+" "+str(self.otp)
+    class Meta:
+        verbose_name = "OTP Code"
+        verbose_name_plural = "OTP Codes"

@@ -3,6 +3,8 @@ from django.http import *
 from django.template import loader
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.files import File
+from django.contrib.auth.views import password_change
 from forms import *
 from models import *
 import urllib2, simplejson
@@ -14,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 from urlparse import urlparse
 from whatsapp import Client
 import pandas as pd
+import random,datetime
 
 client = Client(login='919704807427', password='CM3u2jJb7sf6leMmQdkHJF/xvxI=')
 
@@ -163,6 +166,8 @@ def send_sms(message,phone_number,kind):
         r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
     elif kind == 'complaint':
         r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
+    elif kind == 'otp':
+        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXOTP','to':str(phone_number),'msg':str(message),'type':'1'})
     return r
 
 def send_whatsapp(message,phone_number):
@@ -202,10 +207,8 @@ def complaint_success(request,pk):
         message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number:'+str(complaint.phone_number)+'\nOrigin:'+str(complaint.origin_area)+'\nDestination:'+str(complaint.destination_area)
         if taxi.city.sms:
             m = send_sms(message,phone_number,'complaint')
-            print m
         if taxi.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
-            print m
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
 def complaint_resolve(request,pk):
@@ -253,23 +256,6 @@ def taxi_list(request):
 
 
 
-'''
-def taxi_list(request):
-    if request.user.is_authenticated():
-        if request.user.is_admin:
-            rows = Taxi_Detail.objects.all()
-            rows_c = Complaint_Statement.objects.all()
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
-        else:
-            city = request.user.city
-            print type(city)
-            rows = Taxi_Detail.objects.filter(city=city)
-            rows_c = Complaint_Statement.objects.filter(city=city)
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
-    else:
-        return HttpResponseRedirect("/admin_login?next=taxi_list")
-
-'''
 def get_distance(lat,lon,x,y):
     return (lat-x)**2+(lon-y)**2
 
@@ -319,7 +305,7 @@ def date_form(date):
     return None    
 
 def handle_taxi_csv(file_path,city):
-    import os
+    import os,numpy as np
     path = '/home/ec2-user/taxiapp/tproject'
     dest = open(path+file_path.name,"wb")
     for chunk in file_path.chunks():
@@ -328,39 +314,174 @@ def handle_taxi_csv(file_path,city):
     all_errors=[]
     try:
         data = pd.read_csv(path+file_path.name)
+        data = data.replace(np.nan, '', regex=True)
     except:
+        os.remove(path+file_path.name)
         return ["csv_file_error"]
     for index,row in data.iterrows(): 
         try:                                                                          
             c = City_Code.objects.get(pk=city)
-            p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],city=c)
-            if len(row["TRAFFIC NUMBER"]) > 3:
+            p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
+            if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
                 p.save()
         except Exception as e:
             all_errors.append(e)
     os.remove(path+file_path.name)
-    print("Akk Eerris",all_errors)
     return all_errors
+
+def handle_bulk_image_zip(file_path):
+    import os,zipfile,shutil
+    path = '/home/ec2-user/taxiapp/tproject/'
+    dest = open(path+"images.zip","wb")
+    for chunk in file_path.chunks():
+        dest.write(chunk)
+    dest.close()
+    zip_ref = zipfile.ZipFile(path+"images.zip", 'r')
+    try:
+        os.mkdir(path+'bulk_tmp')
+    except:
+        shutil.rmtree(path+'bulk_tmp')
+        os.mkdir(path+'bulk_tmp')
+    try:
+        zip_ref.extractall(path+'bulk_tmp')
+    except:
+        os.remove(path+"images.zip")
+        zip_ref.close()
+        shutil.rmtree(path+'bulk_tmp')
+        return ["csv_file_error"]
+    zip_ref.close()
+    os.remove(path+"images.zip")
+    all_errors=[]
+    for images in os.listdir(path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"):
+        try:
+           full_path = path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"+images
+           taxis = Taxi_Detail.objects.filter(driver_image_name__contains = images.strip())
+           for t in taxis:
+               t.driver_image.save("drivers",File(open(full_path)))
+               t.save()
+        except Exception as e:
+            all_errors.append(e)
+    print(all_errors)
+    shutil.rmtree(path+'bulk_tmp')
+    return all_errors
+
+
 
 def taxi_csv_upload(request):
     message = 'Please Upload the CSV file here'
-    secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER'
+    secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
     if request.user.is_authenticated():
-        if request.user.is_admin:
+        if request.user.is_admin or request.user.is_staff:
             if request.method == "POST":
                 form = TaxiDetailCsvUpload(request.POST, request.FILES)
                 if form.is_valid():
                     errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
+                    print(errors)
                     if len(errors)==0:
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
                     elif errors[0] == "csv_file_error":
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
-                    return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':'Some duplicates to the previous entries were found in the file.'})
+                    return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
             else:
                 form = TaxiDetailCsvUpload()
             return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
+
+def bulk_image_upload(request):
+    message = 'Please Upload the Bulk Image ZIP here'
+    secondary_message = 'The images in the zip should be named according to their traffic numbers'
+    if request.user.is_authenticated():
+        if request.user.is_admin or request.user.is_staff:
+            if request.method == "POST":
+                form = BulkImageUpload(request.POST, request.FILES)
+                if form.is_valid():
+                    errors = handle_bulk_image_zip(request.FILES['bulk_image_zip'])
+                    if len(errors)==0:
+                        return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
+                    elif errors[0] == "csv_file_error":
+                        return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'ERROR: Files are not images.\n','message2':secondary_message})
+                    return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors))+' were NOT UPLOADED because of invalid filename.'})
+            else:
+                form = BulkImageUpload()
+            return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=bulk_image_upload")
+
+def admin_password_change(request):
+    if request.user.is_authenticated():
+        return password_change(request,post_change_redirect=reverse('taxiapp:admin_password_change_done'),template_name='taxiapp/password_change.html')
+    else:
+        return HttpResponseRedirect("/admin_login")
+
+
+def admin_password_change_done(request):
+    if request.user.is_authenticated():
+        return render(request, 'taxiapp/password_change_done.html')
+    else:
+        return HttpResponseRedirect("/admin_login")
+
+def admin_forgot_password(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect("/")
+    if request.method == "POST":
+        form = EnterPhoneNumber(request.POST)
+        if form.is_valid():
+            phone_number = request.POST["phone_no"]
+            retrieve_user = MyUser.objects.filter(sms_number__contains=phone_number)
+            if len(retrieve_user) == 0:
+                return render(request, 'taxiapp/admin_forgot_password.html', {'form': form, 'message': "Could not find any exising user with the phone number. Please check and re-enter your 10-digit SMS number","message2":"FAIL"})
+            else:
+                 Otp_Codes.objects.filter(user=retrieve_user[0]).delete()
+                 otp_code = random.randint(100000,999999)
+                 code = Otp_Codes(user=retrieve_user[0],otp=str(otp_code))
+                 code.save()
+                 m = send_sms(str(otp_code)+" is your OTP for resetting password",phone_number,'otp') 
+                 return HttpResponseRedirect("/enter_otp?number="+str(retrieve_user[0].id))
+    else:
+        form = EnterPhoneNumber()         
+    return render(request, 'taxiapp/admin_forgot_password.html', {'form':form, 'message':"Please enter your registered 10 digit SMS number",'message2':""})
+
+def enter_otp(request):
+    if request.method == "GET":
+        number = request.GET["number"]
+        form = EnterOTP(initial={'user_id':int(number)})
+        return render(request,'taxiapp/enter_otp.html', {'form':form, 'message':"Please enter your 6-digit OTP"})
+    elif request.method == "POST":
+        form = EnterOTP(request.POST)
+        if form.is_valid():
+            start = datetime.datetime.now() - datetime.timedelta(minutes=30)
+            a = Otp_Codes.objects.filter(user_id=int(request.POST["user_id"]),otp=request.POST["otp_code"],updated_at__gte=start)
+            if (len(a) == 0):
+                return render(request, 'taxiapp/admin_forgot_password.html', {'form': form, 'message': "Wrong OTP","message2":"FAIL"})
+            else:
+                return HttpResponseRedirect('/reset_admin_password?number='+request.POST["user_id"]+"&otp="+request.POST["otp_code"])
+    else:
+        return HttpResponseRedirect("/")
+
+def reset_admin_password(request):
+    if request.method == "GET":
+        number = request.GET["number"]
+        otp_code = request.GET["otp"]
+        start = datetime.datetime.now() - datetime.timedelta(minutes=30)
+        a = Otp_Codes.objects.filter(user_id=int(number),otp=otp_code,updated_at__gte=start)
+        if (len(a) == 0):
+                return HttpResponseRedirect("/")
+        else:
+            form = ResetPassword(initial={'user_id':int(number)})
+            return render(request, 'taxiapp/reset_admin_password.html',{'form':form,'message':"Reset Password"})
+    elif request.method == "POST":
+        form = ResetPassword(request.POST)
+        if (form.is_valid()) and (form.cleaned_data['password'] == form.cleaned_data['confirm_password']):
+            user = MyUser.objects.get(pk=int(request.POST["user_id"]))
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            return render(request,"taxiapp/reset_admin_password.html",{"form":form,"message":"Password has been successfully reset."})
+        elif (form.cleaned_data['password'] != form.cleaned_data['confirm_password']):
+            form.add_error('confirm_password', 'The passwords do not match')
+            return render(request, 'taxiapp/reset_admin_password.html',{'form':form,'message':"Reset Password"})
+    else:
+        return HttpResponseRedirect("/")
 
 def health_check(request):
     data = {

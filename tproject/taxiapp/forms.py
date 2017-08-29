@@ -40,4 +40,20 @@ class ComplaintUserForm(forms.ModelForm):
 
 class TaxiDetailCsvUpload(forms.Form):
     city = forms.ModelChoiceField(queryset=City_Code.objects.all(), label='City', help_text='All the taxi data should belong to the chosen city.', required=True)
-    taxi_csv = forms.FileField()     
+    taxi_csv = forms.FileField()    
+
+class BulkImageUpload(forms.Form):
+    bulk_image_zip = forms.FileField()
+
+class EnterPhoneNumber(forms.Form): 
+    phone_no = forms.CharField(min_length=10,max_length=10)
+   
+class EnterOTP(forms.Form):
+    user_id = forms.IntegerField(widget = forms.HiddenInput(), required = True)
+    otp_code = forms.CharField(min_length=6,max_length=6) 
+
+class ResetPassword(forms.Form):
+    user_id = forms.IntegerField(widget = forms.HiddenInput(), required = True)
+    password=forms.CharField(widget=forms.PasswordInput())
+    confirm_password=forms.CharField(widget=forms.PasswordInput())
+    

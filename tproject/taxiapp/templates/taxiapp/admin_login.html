@@ -13,6 +13,7 @@
                     <input type="checkbox" value="remember-me">
                     Remember me
                 </label>
+                <p><a class="pull-right" href="{% url 'taxiapp:admin_forgot_password' %}">Forgot Password?</a></p>
                 </form>
 {% if form.errors %}
     {% for field in form %}

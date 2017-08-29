@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth.models import User
+
 from .models import *
 from django import forms
 from django.contrib.auth.models import Group
@@ -18,7 +20,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = MyUser
-        fields = ('email','sms_number','whatsapp_number','area','city','location')
+        fields = ('email','sms_number','whatsapp_number','city','area','location', 'is_admin', 'is_staff')
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -50,7 +52,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = MyUser
-        fields = ('email', 'password', 'sms_number', 'whatsapp_number', 'area','city','location','is_active', 'is_admin')
+        fields = ('email', 'password', 'sms_number', 'whatsapp_number', 'area','city','location','is_active', 'is_admin','is_staff')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
@@ -60,6 +62,9 @@ class UserChangeForm(forms.ModelForm):
 
 
 class UserAdmin(BaseUserAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin
+
     # The forms to add and change user instances
     form = UserChangeForm
     add_form = UserCreationForm
@@ -67,19 +72,19 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'sms_number', 'whatsapp_number', 'area','city','location','is_admin')
+    list_display = ('email', 'sms_number', 'whatsapp_number','area','city','is_admin','is_staff')
     list_filter = ('is_admin',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('sms_number','whatsapp_number', 'area','city','location')}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        ('Permissions', {'fields': ('is_admin','is_staff')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'sms_number','area','city','location','password1', 'password2',)}
+            'fields': ('email', 'sms_number','city','area','location','password1', 'password2','is_admin','is_staff',)}
         ),
     )
     search_fields = ('email',)
@@ -90,7 +95,7 @@ class UserAdmin(BaseUserAdmin):
 class TaxiAdminCreationForm(forms.ModelForm):
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','traffic_number','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
+        fields = ('number_plate','traffic_number','driver_name','address','city','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image','driver_image_name')
     def save(self, *args, **kwargs):
         self.instance.traffic_number = self.instance.city.city_code+'-TR-'+str(self.instance.city.taxi_no+1).zfill(5)
         t = City_Code.objects.get(id=self.instance.city.id)
@@ -102,13 +107,16 @@ class TaxiAdminCreationForm(forms.ModelForm):
 class TaxiAdminUpdateForm(forms.ModelForm):
     class Meta:
         model = Taxi_Detail
-        fields = ('number_plate','traffic_number','driver_name','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image')
+        fields = ('number_plate','traffic_number','driver_name','address','date_of_birth','son_of','phone_number', 'aadhar_number','driving_license_number','date_of_validity','autostand','union','insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver','driver_image','driver_image_name')
 
 class TaxiAdmin(admin.ModelAdmin):
+    #def has_delete_permission(request):
+    #    return request.user.is_staff and request.user.is_admin
+
     exclude = ('qr_code','num_of_complaints')
     form = TaxiAdminCreationForm
     change_form = TaxiAdminUpdateForm
-    list_display = ('number_plate_', 'traffic_number','name','phone_number','owner_driver','profile_pic','qr_image')
+    list_display = ('number_plate_', 'traffic_number','name','phone_number','owner_driver','profile_pic','qr_image',)
     search_fields = ('number_plate', 'traffic_number','driver_name','phone_number', )
     def qr_image(self, obj):  # receives the instance as an argument
         return '<img width=75 height=75 src="{thumb}" />'.format(
@@ -123,10 +131,9 @@ class TaxiAdmin(admin.ModelAdmin):
     
     def profile_pic(self, obj):  # receives the instance as an argument
         url = reverse('admin:%s_%s_change' %(obj._meta.app_label,  obj._meta.model_name),  args=[obj.id] )
-        url_string = '<a style="margin: 2px;" href="%s">Update</a>' %(url)
         return '<img width=75 height=75 src="{thumb}" />'.format(
             thumb=obj.driver_image_thumbnail.url,
-        ) + url_string
+        )
     profile_pic.allow_tags = True
     profile_pic.short_description = 'Driver Picture'
     def name(self,obj):
@@ -162,6 +169,8 @@ class TaxiAdmin(admin.ModelAdmin):
 
 
 class ComplaintStatementAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin
     list_display = ('complaint_id', 'number_plate', 'driver_name', 'phone_number', 'reason','resolved','allocated_to')
     def complaint_id(self, obj):
         return str(obj.complaint_number)
@@ -186,13 +195,18 @@ class ComplaintStatementAdmin(admin.ModelAdmin):
 
 
 class CityCodeAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
     exclude = ('police_no','taxi_no','complaint_no')
     list_display = ('city','city_code','whatsapp','sms','distress')
 
 class ReasonsAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
     list_display = ('reason_id','reason')
     def reason_id(self,obj):
         return 'CR-'+str(obj.id).zfill(3)
+
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
@@ -202,6 +216,6 @@ admin.site.register(Reasons,ReasonsAdmin)
 admin.site.register(Taxi_Detail,TaxiAdmin)
 admin.site.register(Complaint_Statement,ComplaintStatementAdmin)
 admin.site.unregister(Site)
-
+admin.site.site_header = 'SafeAutoTaxi Administration'
 #admin.site.register(Admin_Detail)
 #admin.site.register(User_Complaint)

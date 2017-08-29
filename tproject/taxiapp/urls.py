@@ -1,6 +1,5 @@
 from django.conf.urls import url
 from . import views
-
 app_name = "taxiapp"
 
 urlpatterns = [
@@ -8,6 +7,7 @@ urlpatterns = [
 	url(r'^admin_login/', views.admin_login, name = "admin_login"),
         url(r'^admin_logout/', views.admin_logout, name = "admin_logout"),
 	url(r'^taxi_csv_upload/$', views.taxi_csv_upload, name='taxi_csv_upload'),
+        url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
 #	url(r'^taxi/(?P<pk>[\w\-]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^taxi/(?P<pk>[\w|\W]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^complaint/', views.complaint_form, name='complaint_form'),
@@ -19,6 +19,12 @@ urlpatterns = [
         url(r'^taxi_emergency/$', views.taxi_emergency, name='taxi_emergency'),
         url(r'^health_check/$', views.health_check, name='health_check'),
         url(r'^admin/logout/$', views.admin_logout),
+        url(r'^admin_password_change/$',views.admin_password_change,name="admin_password_change"),
+        url(r'^admin_password_change_done/$',views.admin_password_change_done,name="admin_password_change_done"),
+        url(r'^admin_forgot_password/$',views.admin_forgot_password,name="admin_forgot_password"),
+        url(r'^enter_otp/$',views.enter_otp,name="enter_otp"),
+        url(r'^reset_admin_password/$',views.reset_admin_password,name="reset_admin_password"),
+
 ]
 
 handler404 = views.handler404
