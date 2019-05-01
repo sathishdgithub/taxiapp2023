@@ -45,3 +45,7 @@ traitlets==4.3.2
 wcwidth==0.1.7
 Werkzeug==0.12.2
 yowsup2==2.5.0
+djangorestframework==3.9.2
+django-rest-swagger==2.2.0
+boto3==1.9.136
+boto==2.49.0
