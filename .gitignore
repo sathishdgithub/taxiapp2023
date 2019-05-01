@@ -14,3 +14,5 @@ build/
 tests/report/
 .idea/
 venv/
+/tproject/ENV
+/tproject/yowsup

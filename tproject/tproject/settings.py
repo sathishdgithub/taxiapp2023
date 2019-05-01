@@ -25,8 +25,8 @@ SECRET_KEY = '28=yz63c!&j%zmk#h!e$@-co#byb$7g#3_x6$fuh80-rb-ip=h'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 ALLOWED_HOSTS = ['*']
-SECURE_SSL_REDIRECT = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -46,7 +46,19 @@ INSTALLED_APPS = (
     'bootstrap3',
     'mod_wsgi.server',
     'storages',
+    'rest_framework',
+    'rest_framework_swagger',
 )
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    )
+}
+
 SITE_ID = 1
 
 MIDDLEWARE_CLASSES = (
@@ -79,7 +91,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tproject.wsgi.application'
+# WSGI_APPLICATION = 'tproject.wsgi.application'
 
 
 # Database
@@ -91,12 +103,19 @@ DATABASES = {
     #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     #}
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'taxidb',
-        'HOST': 'taxiapp.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'NAME': 'postgres',
+        # 'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
+        # 'PORT': '5432',
+        # 'USER': 'valv_admin',
+        # 'PASSWORD': 'Bharath360'
+		
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'HOST': 'localhost',
         'PORT': '5432',
-        'USER': 'valv_admin',
-        'PASSWORD': 'Bharath360'
+        'USER': 'postgres',
+        'PASSWORD': 'postgres'
     }
 }
 
@@ -119,7 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
-#MEDIA_URL = '/media/'
+MEDIA_URL = '/media/'
 AUTH_USER_MODEL = 'taxiapp.MyUser'
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(BASE_DIR, 'taxiapp/static')
@@ -185,14 +204,14 @@ S3_URL = "https://%s" % AWS_S3_CUSTOM_DOMAIN
 STATIC_DIRECTORY = '/static/'
 MEDIA_DIRECTORY = '/media/'
 
-#'https://taxipublic.s3.ap-south-1.amazonaws.com/media/drivers/DSCN2533.JPG'
+'https://taxipublic.s3.ap-south-1.amazonaws.com/media/drivers/DSCN2533.JPG'
 AWS_S3_MEDIA_DOMAIN = 'https://%s.s3.ap-south-1.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 STATIC_URL = S3_URL + STATIC_DIRECTORY
 MEDIA_URL = AWS_S3_MEDIA_DOMAIN + MEDIA_DIRECTORY
-#AWS_HEADERS = {  # see http://developer.yahoo.com/performance/rules.html#expires
- #       'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
-  #      'Cache-Control': 'max-age=94608000',
-   # }
+AWS_HEADERS = {  # see http://developer.yahoo.com/performance/rules.html#expires
+        'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
+        'Cache-Control': 'max-age=94608000',
+    }
 
 TEMPLATE_DEBUG = DEBUG
 

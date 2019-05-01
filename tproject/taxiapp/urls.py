@@ -1,6 +1,14 @@
 from django.conf.urls import url
 from . import views
+
+from rest_framework.documentation import include_docs_urls
+from rest_framework_swagger.views import get_swagger_view
+from . import swagger
+
 app_name = "taxiapp"
+
+#schema_view = get_swagger_view(title="Swagger Docs")
+ 
 
 urlpatterns = [
 	url(r'^$', views.home, name = "home"),
@@ -24,7 +32,9 @@ urlpatterns = [
         url(r'^admin_forgot_password/$',views.admin_forgot_password,name="admin_forgot_password"),
         url(r'^enter_otp/$',views.enter_otp,name="enter_otp"),
         url(r'^reset_admin_password/$',views.reset_admin_password,name="reset_admin_password"),
-
+        url(r'^api/v1/get_driver_owner_details/$',views.TaxiDriverOwner.as_view()),
+        url(r'^api/v1/get_complaints/$',views.TaxiComplaints.as_view()),
+        url(r'^docs/$', swagger.schema_view, name="schema_view"),
 ]
 
 handler404 = views.handler404

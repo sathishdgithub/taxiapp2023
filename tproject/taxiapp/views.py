@@ -17,6 +17,19 @@ from urlparse import urlparse
 from whatsapp import Client
 import pandas as pd
 import random,datetime
+from rest_framework import viewsets
+from rest_framework.views import APIView
+from serializers import TaxiDriverOwnerSerialize
+from serializers import TaxiComplaintsSerialize
+from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from collections import OrderedDict
+from rest_framework.filters import BaseFilterBackend
+import coreapi
+
+
+
 
 client = Client(login='919704807427', password='CM3u2jJb7sf6leMmQdkHJF/xvxI=')
 
@@ -501,4 +514,87 @@ def handler500(request):
                                   context_instance=RequestContext(request))
     response.status_code = 500
     return response
+
+class TaxiDriverOwner(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,format=None, **kwargs):
+        cityCode = request.GET.get('cityCode')
+        if(cityCode == None or cityCode == ''):
+            od = OrderedDict() 
+            od['cityCode'] = "City Code is mandatory."
+            return Response(data=od)
+
+        rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.GET.get('taxiIds') # Traffic Numbers
+        numberPlates = request.GET.get('numberPlates') # Number Plates
+
+        taxiDetails = ''
+        if (rangeFrom != None and rangeTo != None):
+            rangeFromList = rangeFrom.split('-')
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, traffic_number__in = rangeList)
+        elif (taxiIds != None):
+            taxiIdsArray = taxiIds.split(',')
+            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, traffic_number__in = taxiIdsArray)
+        elif (numberPlates != None):
+            numberPlatesArray = numberPlates.split(',')
+            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, number_plate__in = numberPlatesArray)
+        elif (cityCode != None):
+            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode)
+
+        serializer = TaxiDriverOwnerSerialize(taxiDetails,many=True)        
+        return Response(data=serializer.data)
+
+class TaxiComplaints(APIView):
+    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = (IsAuthenticated,)
+    def get(self,request,format=None, **kwargs):
+        cityCode = request.GET.get('cityCode')
+        if(cityCode == None or cityCode == ''):
+            od = OrderedDict()
+            od['cityCode'] = "City Code is mandatory."
+            return Response(data=od)
+
+        rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.GET.get('taxiIds') # Traffic Numbers
+        numberPlates = request.GET.get('numberPlates') # Number Plates
+
+        complaints = ''
+        if (rangeFrom != None and rangeTo != None):
+            rangeFromList = rangeFrom.split('-')
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__traffic_number__in = rangeList)
+        elif (taxiIds != None):
+            taxiIdsArray = taxiIds.split(',')
+            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__traffic_number__in = taxiIdsArray)
+        elif (numberPlates != None):
+            numberPlatesArray = numberPlates.split(',')
+            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__number_plate__in = numberPlatesArray)
+        elif (cityCode != None):
+            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode)
+
+        serializer = TaxiComplaintsSerialize(complaints,many=True)        
+        return Response(data=serializer.data)
+
 
