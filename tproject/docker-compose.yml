@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: dj
+      POSTGRES_USER: dj
+      POSTGRES_PASSWORD: dj
+      POSTGRES_PORT: 5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  web:
+    build: .
+    # docker cp <Source Db Local Path> <db Container Name>:<Destination path in db container>
+    command: docker cp db.backup tproject_db_1:/
+    # docker exec <db Container Name> pg_restore -U <Db User Name> -d <Database Name> <Destination path in db container>
+    command: docker exec tproject_db_1 pg_restore -U dj -d dj /db.backup
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    # command: python manage.py runserver 0.0.0.0:8000
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    environment:
+      POSTGRES_DB: dj
+      POSTGRES_USER: dj
+      POSTGRES_PASSWORD: dj
+      POSTGRES_HOST: db
+    volumes:
+      - .:/tproject
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  db-data:

@@ -103,19 +103,30 @@ DATABASES = {
     #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     #}
     'default': {
+       # Server Configuration
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': 'postgres',
+        # 'NAME': 'taxidb',
         # 'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
-        # 'PORT': '5432',
+        # 'PORT': 5432,
         # 'USER': 'valv_admin',
         # 'PASSWORD': 'Bharath360'
-		
-		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+	# End of Server Configuration
+    # Local Configuration
+		'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
         'USER': 'postgres',
-        'PASSWORD': 'postgres'
+        'HOST': 'db',
+        'PASSWORD': 'postgres',
+        'PORT': 5432,
+    # End of Local Configuration
+    # Docker Configuration
+        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'NAME': os.environ.get('POSTGRES_DB', ''),
+        # 'USER': os.environ.get('POSTGRES_USER', ''),
+        # 'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+        # 'HOST': os.environ.get('POSTGRES_HOST', ''),
+        # 'PORT': os.environ.get('POSTGRES_PORT', ''),		
+    # End of Docker Configuration
     }
 }
 
