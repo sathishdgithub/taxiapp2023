@@ -16,6 +16,7 @@ import requests
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -87,11 +88,13 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            
         },
     },
 ]
 
-# WSGI_APPLICATION = 'tproject.wsgi.application'
+
+WSGI_APPLICATION = 'tproject.wsgi.application'
 
 
 # Database
@@ -104,20 +107,20 @@ DATABASES = {
     #}
     'default': {
        # Server Configuration
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': 'taxidb',
-        # 'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
-        # 'PORT': 5432,
-        # 'USER': 'valv_admin',
-        # 'PASSWORD': 'Bharath360'
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'taxidb',
+        'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
+        'PORT': 5432,
+        'USER': 'valv_admin',
+        'PASSWORD': 'Bharath360',
 	# End of Server Configuration
     # Local Configuration
-		'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        'PASSWORD': 'postgres',
-        'PORT': 5432,
+		# 'ENGINE': 'django.db.backends.postgresql',
+        # 'NAME': 'postgres',
+        # 'USER': 'postgres',
+        # 'HOST': 'localhost',
+        # 'PASSWORD': 'postgres',
+        # 'PORT': 5432,
     # End of Local Configuration
     # Docker Configuration
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
