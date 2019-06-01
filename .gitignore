@@ -16,3 +16,4 @@ tests/report/
 venv/
 /tproject/ENV
 /tproject/yowsup
+/tproject/*.pyc

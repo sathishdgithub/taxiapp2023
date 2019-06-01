@@ -27,6 +27,7 @@ from rest_framework.permissions import IsAuthenticated
 from collections import OrderedDict
 from rest_framework.filters import BaseFilterBackend
 import coreapi
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 
@@ -529,7 +530,9 @@ class TaxiDriverOwner(APIView):
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
         numberPlates = request.GET.get('numberPlates') # Number Plates
-
+        page = request.GET.get('page', 1) # Page Number
+        limit = request.GET.get('limit', 1) # No Of Records per page
+        
         taxiDetails = ''
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
@@ -553,6 +556,14 @@ class TaxiDriverOwner(APIView):
         elif (cityCode != None):
             taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode)
 
+        paginator = Paginator(taxiDetails, limit)
+        try:
+            taxiDetails = paginator.page(page)
+        except PageNotAnInteger:
+            taxiDetails = paginator.page(1)
+        except EmptyPage:
+            taxiDetails = paginator.page(paginator.num_pages)
+
         serializer = TaxiDriverOwnerSerialize(taxiDetails,many=True)        
         return Response(data=serializer.data)
 
@@ -570,6 +581,8 @@ class TaxiComplaints(APIView):
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
         numberPlates = request.GET.get('numberPlates') # Number Plates
+        page = request.GET.get('page', 1) # Page Number
+        limit = request.GET.get('limit', 1) # No Of Records per page
 
         complaints = ''
         if (rangeFrom != None and rangeTo != None):
@@ -594,6 +607,14 @@ class TaxiComplaints(APIView):
         elif (cityCode != None):
             complaints = Complaint_Statement.objects.filter(city__city_code = cityCode)
 
+        paginator = Paginator(complaints, limit)
+        try:
+            complaints = paginator.page(page)
+        except PageNotAnInteger:
+            complaints = paginator.page(1)
+        except EmptyPage:
+            complaints = paginator.page(paginator.num_pages)
+        
         serializer = TaxiComplaintsSerialize(complaints,many=True)        
         return Response(data=serializer.data)
 

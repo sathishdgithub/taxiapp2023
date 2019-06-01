@@ -46,6 +46,18 @@ def schema_view(request):
                     required=False,
                     location='query',
                     description='Number Plates.'
+                ),
+                coreapi.Field(
+                    name='page',
+                    required=False,
+                    location='query',
+                    description='Page Number.'
+                ),
+                coreapi.Field(
+                    name='limit',
+                    required=False,
+                    location='query',
+                    description='No Of Records per page.'
                 )
             ],
             #description='Return Taxi Details as per CityCode and Traffic Number Range.'
@@ -84,6 +96,18 @@ def schema_view(request):
                     required=False,
                     location='query',
                     description='Number Plates.'
+                ),
+                coreapi.Field(
+                    name='page',
+                    required=False,
+                    location='query',
+                    description='Page Number.'
+                ),
+                coreapi.Field(
+                    name='limit',
+                    required=False,
+                    location='query',
+                    description='No Of Records per page.'
                 )
             ],
             #description='Return Taxi Details as per CityCode and Traffic Number Range.'
