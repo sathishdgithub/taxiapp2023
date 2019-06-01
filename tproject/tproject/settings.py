@@ -107,12 +107,12 @@ DATABASES = {
     #}
     'default': {
        # Server Configuration
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'taxidb',
-        'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
-        'PORT': 5432,
-        'USER': 'valv_admin',
-        'PASSWORD': 'Bharath360',
+       #  'ENGINE': 'django.db.backends.postgresql_psycopg2',
+       #  'NAME': 'taxidb',
+       #  'HOST': 'taxiapp-2.cdbkqvigkoct.ap-south-1.rds.amazonaws.com',
+       #  'PORT': 5432,
+       #  'USER': 'valv_admin',
+       #  'PASSWORD': 'Bharath360',
 	# End of Server Configuration
     # Local Configuration
 		# 'ENGINE': 'django.db.backends.postgresql',
@@ -123,12 +123,12 @@ DATABASES = {
         # 'PORT': 5432,
     # End of Local Configuration
     # Docker Configuration
-        # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'NAME': os.environ.get('POSTGRES_DB', ''),
-        # 'USER': os.environ.get('POSTGRES_USER', ''),
-        # 'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
-        # 'HOST': os.environ.get('POSTGRES_HOST', ''),
-        # 'PORT': os.environ.get('POSTGRES_PORT', ''),		
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'host.docker.internal'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     # End of Docker Configuration
     }
 }
