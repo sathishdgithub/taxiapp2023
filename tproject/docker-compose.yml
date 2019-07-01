@@ -2,6 +2,7 @@ version: "3"
 services:
 
   taxi-db:
+    container_name: taxi-db
     image: postgres
     restart: always
     ports:
@@ -17,18 +18,17 @@ services:
       - backend
 
   taxi-web:
+    container_name: taxi-web
     build: .
-    # docker cp <Source Db Local Path> <db Container Name>:<Destination path in db container>
-#    command: docker cp db.backup tproject_db_1:/
-    # docker exec <db Container Name> pg_restore -U <Db User Name> -d <Database Name> <Destination path in db container>
-#    command: docker exec tproject_db_1 pg_restore -U dj -d dj /db.backup
-#    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      bash -c "nginx -g 'daemon on;'
+      && python manage.py runserver 0.0.0.0:8000"
     restart: always
     depends_on:
       - taxi-db
     ports:
-      - 8000:8000
+      - 80:80
+      - 443:443
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -41,6 +41,5 @@ services:
 
 networks:
   backend:
-
 volumes:
   db-data:
