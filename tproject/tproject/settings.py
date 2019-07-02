@@ -118,7 +118,7 @@ DATABASES = {
 		'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'localhost',
+        'HOST': 'host.docker.internal',
         'PASSWORD': 'postgres',
         'PORT': 5432,
     # End of Local Configuration

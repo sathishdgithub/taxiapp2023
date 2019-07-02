@@ -15,4 +15,4 @@ RUN pip install -r requirements.txt
 COPY . /tproject/
 EXPOSE 80
 EXPOSE 443
-CMD ['nginx', '-g', '"daemon on;"', "&&", "python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD nginx -g 'daemon on;' && python manage.py runserver 0.0.0.0:8000
