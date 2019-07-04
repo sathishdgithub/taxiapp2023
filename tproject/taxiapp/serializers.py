@@ -6,7 +6,6 @@ from models import Complaint_Statement
 class TaxiDriverOwnerSerialize(serializers.ModelSerializer):
     city = serializers.SlugRelatedField(
         read_only=True,
-        #slug_field='city_code'
         slug_field='city'
      )
     class Meta:
@@ -19,22 +18,18 @@ class TaxiDriverOwnerSerialize(serializers.ModelSerializer):
 class TaxiComplaintsSerialize(serializers.ModelSerializer):
     city = serializers.SlugRelatedField(
         read_only=True,
-        #slug_field='city_code'
         slug_field='city'
     )    
     assigned_to = serializers.SlugRelatedField(
         read_only=True,
-        #slug_field='city_code'
         slug_field='email'
     )
     taxi = serializers.SlugRelatedField(
         read_only=True,
-        #slug_field='city_code'
         slug_field='driver_name'
     )
     reason = serializers.SlugRelatedField(
         read_only=True,
-        #slug_field='city_code'
         slug_field='reason'
     )
     

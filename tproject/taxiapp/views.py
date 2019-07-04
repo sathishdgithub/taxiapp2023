@@ -521,11 +521,6 @@ class TaxiDriverOwner(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,format=None, **kwargs):
         cityCode = request.GET.get('cityCode')
-        # if(cityCode == None or cityCode == ''):
-        #     od = OrderedDict() 
-        #     od['cityCode'] = "City Code is mandatory."
-        #     return Response(data=od)
-
         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
@@ -573,11 +568,6 @@ class TaxiComplaints(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,format=None, **kwargs):
         cityCode = request.GET.get('cityCode')
-        # if(cityCode == None or cityCode == ''):
-        #     od = OrderedDict()
-        #     od['cityCode'] = "City Code is mandatory."
-        #     return Response(data=od)
-
         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
