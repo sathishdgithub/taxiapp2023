@@ -20,6 +20,7 @@ services:
   taxi-web:
     container_name: taxi-web
     build: .
+    image: taxiapp:latest
     command: >
       bash -c "nginx -g 'daemon on;'
       && python manage.py runserver 0.0.0.0:8000"
