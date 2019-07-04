@@ -521,19 +521,19 @@ class TaxiDriverOwner(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,format=None, **kwargs):
         cityCode = request.GET.get('cityCode')
-        if(cityCode == None or cityCode == ''):
-            od = OrderedDict() 
-            od['cityCode'] = "City Code is mandatory."
-            return Response(data=od)
+        # if(cityCode == None or cityCode == ''):
+        #     od = OrderedDict() 
+        #     od['cityCode'] = "City Code is mandatory."
+        #     return Response(data=od)
 
         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
         numberPlates = request.GET.get('numberPlates') # Number Plates
         page = request.GET.get('page', 1) # Page Number
-        limit = request.GET.get('limit', 1) # No Of Records per page
+        limit = request.GET.get('limit', 10) # No Of Records per page
         
-        taxiDetails = ''
+        taxiDetails = Taxi_Detail.objects.all()
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
@@ -546,15 +546,16 @@ class TaxiDriverOwner(APIView):
                 leadingZero = rangeLen - rangFromValuelen
                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
                 rangeFromValue =  rangeFromValue + 1
-            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, traffic_number__in = rangeList)
-        elif (taxiIds != None):
+            taxiDetails = taxiDetails.filter(traffic_number__in = rangeList)
+        if (taxiIds != None):
             taxiIdsArray = taxiIds.split(',')
-            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, traffic_number__in = taxiIdsArray)
-        elif (numberPlates != None):
+            taxiDetails = taxiDetails.filter(traffic_number__in = taxiIdsArray)
+        if (numberPlates != None):
             numberPlatesArray = numberPlates.split(',')
-            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode, number_plate__in = numberPlatesArray)
-        elif (cityCode != None):
-            taxiDetails = Taxi_Detail.objects.filter(city__city_code = cityCode)
+            taxiDetails = taxiDetails.filter(number_plate__in = numberPlatesArray)
+        if (cityCode != None):
+            taxiDetails = taxiDetails.filter(city__city_code = cityCode)
+
 
         paginator = Paginator(taxiDetails, limit)
         try:
@@ -572,19 +573,19 @@ class TaxiComplaints(APIView):
     permission_classes = (IsAuthenticated,)
     def get(self,request,format=None, **kwargs):
         cityCode = request.GET.get('cityCode')
-        if(cityCode == None or cityCode == ''):
-            od = OrderedDict()
-            od['cityCode'] = "City Code is mandatory."
-            return Response(data=od)
+        # if(cityCode == None or cityCode == ''):
+        #     od = OrderedDict()
+        #     od['cityCode'] = "City Code is mandatory."
+        #     return Response(data=od)
 
         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
         numberPlates = request.GET.get('numberPlates') # Number Plates
         page = request.GET.get('page', 1) # Page Number
-        limit = request.GET.get('limit', 1) # No Of Records per page
+        limit = request.GET.get('limit', 10) # No Of Records per page
 
-        complaints = ''
+        complaints = Complaint_Statement.objects.all()
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
@@ -597,15 +598,15 @@ class TaxiComplaints(APIView):
                 leadingZero = rangeLen - rangFromValuelen
                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
                 rangeFromValue =  rangeFromValue + 1
-            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__traffic_number__in = rangeList)
-        elif (taxiIds != None):
+            complaints = complaints.filter(taxi__traffic_number__in = rangeList)
+        if (taxiIds != None):
             taxiIdsArray = taxiIds.split(',')
-            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__traffic_number__in = taxiIdsArray)
-        elif (numberPlates != None):
+            complaints = complaints.filter(taxi__traffic_number__in = taxiIdsArray)
+        if (numberPlates != None):
             numberPlatesArray = numberPlates.split(',')
-            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode, taxi__number_plate__in = numberPlatesArray)
-        elif (cityCode != None):
-            complaints = Complaint_Statement.objects.filter(city__city_code = cityCode)
+            complaints = complaints.filter(taxi__number_plate__in = numberPlatesArray)
+        if (cityCode != None):
+            complaints = complaints.filter(city__city_code = cityCode)
 
         paginator = Paginator(complaints, limit)
         try:

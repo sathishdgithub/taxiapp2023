@@ -19,7 +19,7 @@ def schema_view(request):
             fields=[
                 coreapi.Field(
                     name='cityCode',
-                    required=True,
+                    required=False,
                     location='query',
                     description='Enter City Code.'
                 ),
@@ -69,7 +69,7 @@ def schema_view(request):
             fields=[
                 coreapi.Field(
                     name='cityCode',
-                    required=True,
+                    required=False,
                     location='query',
                     description='Enter City Code.'
                 ),
