@@ -115,21 +115,21 @@ DATABASES = {
        #  'PASSWORD': 'Bharath360',
 	# End of Server Configuration
     # Local Configuration
-		# 'ENGINE': 'django.db.backends.postgresql',
-        # 'NAME': 'postgres',
-        # 'USER': 'postgres',
-        # 'HOST': 'localhost',
-        # 'PASSWORD': 'postgres',
-        # 'PORT': 5432,
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'host.docker.internal',
+        'PASSWORD': 'postgres',
+        'PORT': 5432,
     # End of Local Configuration
     # Docker Configuration
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
-        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'host.docker.internal'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
-    # End of Docker Configuration
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+    #     'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+    #     'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+    #     'HOST': os.environ.get('POSTGRES_HOST', 'host.docker.internal'),
+    #     'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        #     # End of Docker Configuration
     }
 }
 

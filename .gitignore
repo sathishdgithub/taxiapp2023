@@ -17,3 +17,4 @@ venv/
 /tproject/ENV
 /tproject/yowsup
 /tproject/*.pyc
+*.pyc
