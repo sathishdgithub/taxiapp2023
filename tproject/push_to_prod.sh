@@ -2,7 +2,7 @@
 
 echo "Copying env specific values ..."
 env="prod"
-env_file="~/dev/valv/git/env/taxi/" + $env + "/settings.py"
+env_file="../../env/taxi/"$env"/settings.py"
 cp $env_file tproject/settings.py
 
 # Setup AWS Profile 'valv-ecr' which should have credentials to push to ECR
