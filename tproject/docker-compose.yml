@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+  taxi-db:
+    container_name: taxi-db
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+  taxi-web:
+    container_name: taxi-web
+    build: .
+    image: taxiapp:latest
+    command: >
+      bash -c "nginx -g 'daemon on;'
+      && python manage.py runserver 0.0.0.0:8000"
+    restart: always
+    depends_on:
+      - taxi-db
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: taxi-db
+    volumes:
+      - .:/tproject
+    networks:
+      - backend
+
+networks:
+  backend:
+volumes:
+  db-data:
