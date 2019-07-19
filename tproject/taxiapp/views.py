@@ -339,23 +339,27 @@ def handle_taxi_csv(file_path,city):
         s3_data = StringIO(s3_object.get()['Body'].read().decode('utf-8'))
         data = pd.read_csv(s3_data)
         data = data.replace(np.nan, '', regex=True)
-        for i in data.columns:
-            if i not in headers:
-                s3_object.delete()
-                return ["csv_header_error"]
+        if len(headers) == len(data.columns):
+            for column in data.columns:
+                if column not in headers:
+                    s3_object.delete()
+                    return ["csv_header_error"]
+        else :
+            s3_object.delete()
+            return ["csv_header_error"]
     except Exception as e:
         s3_object.delete()
         return ["csv_file_error"]
-    i = 1
+    rowNumber = 1
     for index,row in data.iterrows(): 
-        i+=1
+        rowNumber+=1
         try:                                                                          
             c = City_Code.objects.get(pk=city)
             p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
                 p.save()
         except Exception as e:
-            all_errors.append(i)
+            all_errors.append(rowNumber)
     s3_object.delete()
     return all_errors
 
@@ -411,11 +415,11 @@ def taxi_csv_upload(request):
                     if len(errors)==0:
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
                     elif errors[0] == "csv_header_error":  
-                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid File Headers to upload. Please Re-Validate and Try again. \n','message2':''})     
+                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
                     elif errors[0] == "csv_file_error":
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
                     elif errors[0] == "network_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during upload.\n','message2':secondary_message})                          
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
                     # return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number '+ str((errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
