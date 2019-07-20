@@ -31,6 +31,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import boto3
 from botocore.exceptions import NoCredentialsError
 from io import StringIO
+from pyshorteners import Shortener
 
 
 
@@ -50,11 +51,16 @@ def strip_scheme(url):
     return parsed.geturl().replace(scheme, '', 1)
 
 def googl(url):
+    # params = simplejson.dumps({'longUrl': url})
+    # headers = { 'Content-Type' : 'application/json' }
+    # req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
+    # f = urllib2.urlopen(req)
+    # return strip_scheme(simplejson.loads(f.read())['id'])
+    #ACCESS_TOKEN = '135297e60fed60786d87b5e98b41e8e6e9e3675f' 
     params = simplejson.dumps({'longUrl': url})
     headers = { 'Content-Type' : 'application/json' }
-    req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
-    f = urllib2.urlopen(req)
-    return strip_scheme(simplejson.loads(f.read())['id'])
+    url_shortener = Shortener('Bitly', bitly_token = settings.BITLY_ACCESS_TOKEN) 
+    return strip_scheme(url_shortener.short(url))
 
 def home(request):
     if request.method == "POST":
