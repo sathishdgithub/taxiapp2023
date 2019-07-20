@@ -32,6 +32,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from io import StringIO
 from pyshorteners import Shortener
+from . import constants
 
 
 
@@ -59,7 +60,7 @@ def googl(url):
     #ACCESS_TOKEN = '135297e60fed60786d87b5e98b41e8e6e9e3675f' 
     params = simplejson.dumps({'longUrl': url})
     headers = { 'Content-Type' : 'application/json' }
-    url_shortener = Shortener('Bitly', bitly_token = settings.BITLY_ACCESS_TOKEN) 
+    url_shortener = Shortener('Bitly', bitly_token = constants.BITLY_ACCESS_TOKEN) 
     return strip_scheme(url_shortener.short(url))
 
 def home(request):
@@ -186,11 +187,11 @@ def complaint_form(request):
 
 def send_sms(message,phone_number,kind):
     if kind == 'emergency':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_EMERGENCY,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE}) 
     elif kind == 'complaint':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_COMPLAINT,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     elif kind == 'otp':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXOTP','to':str(phone_number),'msg':str(message),'type':'1'})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_OTP,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     return r
 
 def send_whatsapp(message,phone_number):
