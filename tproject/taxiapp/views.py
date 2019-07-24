@@ -58,10 +58,14 @@ def googl(url):
     # f = urllib2.urlopen(req)
     # return strip_scheme(simplejson.loads(f.read())['id'])
     #ACCESS_TOKEN = '135297e60fed60786d87b5e98b41e8e6e9e3675f' 
-    params = simplejson.dumps({'longUrl': url})
-    headers = { 'Content-Type' : 'application/json' }
-    url_shortener = Shortener('Bitly', bitly_token = constants.BITLY_ACCESS_TOKEN) 
-    return strip_scheme(url_shortener.short(url))
+
+    """ Code : Using Cutly Acccess Token """
+    req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url)
+    f = urllib2.urlopen(req)
+    resJson = (simplejson.loads(f.read())['url'])
+    return resJson['shortLink']
+    """ Code : Using Cutly Acccess Token """
+
 
 def home(request):
     if request.method == "POST":
@@ -228,7 +232,7 @@ def complaint_success(request,pk):
         complaint.save()
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number:'+str(complaint.phone_number)+'\nOrigin:'+str(complaint.origin_area)+'\nDestination:'+str(complaint.destination_area)
+        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number: '+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
         if taxi.city.sms:
             m = send_sms(message,phone_number,'complaint')
         if taxi.city.whatsapp:

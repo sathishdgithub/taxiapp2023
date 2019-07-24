@@ -102,41 +102,6 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-AUTH_USER_MODEL = 'taxiapp.MyUser'
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_ROOT = os.path.join(BASE_DIR, 'taxiapp/static')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'taxiapp/media')
-GOOGLE_URL_SHORTENER_KEY = "AIzaSyDNWWg5dCIxZYiO8uo6wkPEdDUb2NwdFs4"
-LOCATION_FIELD_PATH = STATIC_URL + 'location_field'
-LOCATION_FIELD = {
-    'map.provider': 'google',
-    'map.zoom': 14,
-    'search.provider': 'google',
-    'search.suffix': '',
-    # Google
-    'provider.google.api': '//maps.google.com/maps/api/js',
-    'provider.google.api_key': 'AIzaSyBX_xC2Jeti6f0v83GVrnzX0mvfDyZE9yc',
-    'provider.google.map_type': 'ROADMAP',
-    # Mapbox
-#    'provider.mapbox.access_token': '',
-#    'provider.mapbox.max_zoom': 18,
-#    'provider.mapbox.id': 'mapbox.streets',
-    # OpenStreetMap
-    'provider.openstreetmap.max_zoom': 18,
-    # misc
-    'resources.root_path': LOCATION_FIELD_PATH,
-    'resources.media': {
-        'js': [
-            LOCATION_FIELD_PATH + '/js/jquery.livequery.js',
-            LOCATION_FIELD_PATH + '/js/form.js',
-        ],
-    },
-}
-
 # S3 settings
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -173,3 +138,41 @@ try:
     ALLOWED_HOSTS.append(EC2_IP)
 except requests.exceptions.RequestException:
     pass
+
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.8/howto/static-files/
+#STATIC_URL = '/static/'
+#MEDIA_URL = '/media/'
+AUTH_USER_MODEL = 'taxiapp.MyUser'
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_ROOT = os.path.join(BASE_DIR, 'taxiapp/static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'taxiapp/media')
+GOOGLE_URL_SHORTENER_KEY = "AIzaSyDNWWg5dCIxZYiO8uo6wkPEdDUb2NwdFs4"
+LOCATION_FIELD_PATH = S3_URL + '/location_field'
+#LOCATION_FIELD_PATH = 'https://s3.ap-south-1.amazonaws.com/taxipublic/' + 'location_field'
+LOCATION_FIELD = {
+    'map.provider': 'google',
+    'map.zoom': 14,
+    'search.provider': 'google',
+    'search.suffix': '',
+    # Google
+    'provider.google.api': '//maps.google.com/maps/api/js',
+    'provider.google.api_key': 'AIzaSyBX_xC2Jeti6f0v83GVrnzX0mvfDyZE9yc',
+    'provider.google.map_type': 'ROADMAP',
+    # Mapbox
+#    'provider.mapbox.access_token': '',
+#    'provider.mapbox.max_zoom': 18,
+#    'provider.mapbox.id': 'mapbox.streets',
+    # OpenStreetMap
+    'provider.openstreetmap.max_zoom': 18,
+    # misc
+    'resources.root_path': LOCATION_FIELD_PATH,
+    'resources.media': {
+        'js': [
+            LOCATION_FIELD_PATH + '/js/jquery.livequery.js',
+            LOCATION_FIELD_PATH + '/js/form.js',
+        ],
+    },
+}
