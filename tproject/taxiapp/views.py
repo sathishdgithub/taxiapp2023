@@ -28,6 +28,11 @@ from collections import OrderedDict
 from rest_framework.filters import BaseFilterBackend
 import coreapi
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import boto3
+from botocore.exceptions import NoCredentialsError
+from io import StringIO
+from pyshorteners import Shortener
+from . import constants
 
 
 
@@ -47,11 +52,20 @@ def strip_scheme(url):
     return parsed.geturl().replace(scheme, '', 1)
 
 def googl(url):
-    params = simplejson.dumps({'longUrl': url})
-    headers = { 'Content-Type' : 'application/json' }
-    req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
+    # params = simplejson.dumps({'longUrl': url})
+    # headers = { 'Content-Type' : 'application/json' }
+    # req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
+    # f = urllib2.urlopen(req)
+    # return strip_scheme(simplejson.loads(f.read())['id'])
+    #ACCESS_TOKEN = '135297e60fed60786d87b5e98b41e8e6e9e3675f' 
+
+    """ Code : Using Cutly Acccess Token """
+    req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url)
     f = urllib2.urlopen(req)
-    return strip_scheme(simplejson.loads(f.read())['id'])
+    resJson = (simplejson.loads(f.read())['url'])
+    return resJson['shortLink']
+    """ Code : Using Cutly Acccess Token """
+
 
 def home(request):
     if request.method == "POST":
@@ -177,11 +191,11 @@ def complaint_form(request):
 
 def send_sms(message,phone_number,kind):
     if kind == 'emergency':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXSOS','to':str(phone_number),'msg':str(message),'type':'1'}) 
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_EMERGENCY,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE}) 
     elif kind == 'complaint':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXCOM','to':str(phone_number),'msg':str(message),'type':'1'})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_COMPLAINT,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     elif kind == 'otp':
-        r = requests.get('https://www.smsstriker.com/API/sms.php', params={'username':'ValvDataPvtLtd','password':'T@*1App123','from':'TAXOTP','to':str(phone_number),'msg':str(message),'type':'1'})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_OTP,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     return r
 
 def send_whatsapp(message,phone_number):
@@ -218,7 +232,7 @@ def complaint_success(request,pk):
         complaint.save()
         taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number:'+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number:'+str(complaint.phone_number)+'\nOrigin:'+str(complaint.origin_area)+'\nDestination:'+str(complaint.destination_area)
+        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number: '+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
         if taxi.city.sms:
             m = send_sms(message,phone_number,'complaint')
         if taxi.city.whatsapp:
@@ -320,28 +334,46 @@ def date_form(date):
 
 def handle_taxi_csv(file_path,city):
     import os,numpy as np
-    path = '/home/ec2-user/taxiapp/tproject'
-    dest = open(path+file_path.name,"wb")
-    for chunk in file_path.chunks():
-        dest.write(chunk)
-    dest.close() 
+    bucketName = settings.BULK_UPLOAD_S3_BUCKETNAME
+    headers = ['AUTO NUMBER','TRAFFIC NUMBER','NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER','DRIVING LICENSE NUMBER','DATE OF VALIDITY','AUTO STAND','UNION','INSURANCE','CAPACITY OF PASSENGERS','POLLUTION','ENGINE NUMBER','CHASIS NUMBER','OWNERDRIVER','DRIVER IMAGE FILENAME']
+    #Code to upload to s3 Bucket
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    try:
+        s3.Bucket(bucketName).put_object(Key=file_path.name,Body=file_path)
+    except Exception as e:
+        return ["network_error"]
+          
     all_errors=[]
     try:
-        data = pd.read_csv(path+file_path.name)
+        s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
+        s3_data = StringIO(s3_object.get()['Body'].read().decode('utf-8'))
+        data = pd.read_csv(s3_data)
         data = data.replace(np.nan, '', regex=True)
-    except:
-        os.remove(path+file_path.name)
+        if len(headers) == len(data.columns):
+            for column in data.columns:
+                if column not in headers:
+                    s3_object.delete()
+                    return ["csv_header_error"]
+        else :
+            s3_object.delete()
+            return ["csv_header_error"]
+    except Exception as e:
+        s3_object.delete()
         return ["csv_file_error"]
+    rowNumber = 1
     for index,row in data.iterrows(): 
+        rowNumber+=1
         try:                                                                          
             c = City_Code.objects.get(pk=city)
             p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
                 p.save()
         except Exception as e:
-            all_errors.append(e)
-    os.remove(path+file_path.name)
+            all_errors.append(rowNumber)
+    s3_object.delete()
     return all_errors
+
 
 def handle_bulk_image_zip(file_path):
     import os,zipfile,shutil
@@ -392,10 +424,15 @@ def taxi_csv_upload(request):
                     errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
                     print(errors)
                     if len(errors)==0:
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
+                    elif errors[0] == "csv_header_error":  
+                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
                     elif errors[0] == "csv_file_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
-                    return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
+                    elif errors[0] == "network_error":
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
+                    # return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number '+ str((errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
+                    return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
                 form = TaxiDetailCsvUpload()
             return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
