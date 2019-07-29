@@ -12,6 +12,172 @@ from imagekit.processors import ResizeToFill
 import StringIO
 from werkzeug import secure_filename
 
+class Active(models.Model):
+      active_name = models.CharField(max_length=10)
+
+      def __str__(self):
+        return self.active_name
+
+      class Meta:
+            verbose_name = 'Active Name'
+            verbose_name_plural = 'Active Names'      
+
+class Vehicle_type(models.Model):
+      
+      vehicle_type = models.CharField(max_length=10,unique=True)
+      active_id_fk = models.ForeignKey(Active,null=True)
+      created_by = models.CharField(max_length=50)
+      created_time = models.DateTimeField(auto_now=True)
+      modified_by = models.CharField(max_length=50)
+      modified_time = models.DateTimeField(auto_now=True)
+      
+      def __str__(self):
+        return self.vehicle_type
+
+      class Meta:
+            verbose_name = 'Vehicle type'
+            verbose_name_plural = 'Vehicle types'
+
+      
+
+class Owner(models.Model):
+      owner_name = models.CharField(max_length = 40, verbose_name="Name")
+      address = models.CharField(max_length = 200, blank = True)
+      date_of_birth = models.DateField(null=True,blank=True)
+      son_of = models.CharField(max_length = 40)
+      phone_number = models.CharField(max_length=16)
+      aadhar_number = models.CharField(max_length=22,null=True,blank=True)
+      owner_image = models.ImageField(upload_to='owners',default = 'owners/profile.png')
+      owner_image_thumbnail = ImageSpecField(source='owner_image',
+                                      processors=[ResizeToFill(75, 100)],
+                                      format='JPEG',
+                                      options={'quality': 60})
+      owner_image_name = models.CharField(max_length = 100, null=True, blank = True)
+      active_id_fk = models.ForeignKey(Active,null=True)
+      created_by = models.CharField(max_length=50)
+      created_time = models.DateTimeField(auto_now=True)
+      modified_by = models.CharField(max_length=50)
+      modified_time = models.DateTimeField(auto_now=True)
+
+      def __str__(self):
+        return self.owner_name+' '+self.phone_number
+      
+      class Meta:
+            verbose_name = 'Owner'
+            verbose_name_plural = 'Owners'
+
+class Vehicle(models.Model):
+
+      traffic_number = models.CharField(max_length = 28,default='',unique=True)
+      number_plate = models.CharField(max_length = 24)
+      vehicle_type_id_fk = models.ForeignKey(Vehicle_type,null=True)
+      owner_id_fk = models.ForeignKey(Owner,null=True)                                                                                                                                                       
+      autostand = models.CharField(max_length=80,null=True,blank=True, verbose_name="Stand")
+      union = models.CharField(max_length=100,null=True,blank=True)
+      #city = models.ForeignKey(City_Code,null=True)
+      insurance = models.DateField(null=True,blank=True)
+      capacity_of_passengers = models.CharField(max_length=14,null=True,blank=True)
+      pollution = models.DateField(null=True,blank=True)
+      engine_number = models.CharField(max_length=40,null=True,blank=True)
+      chasis_number = models.CharField(max_length=30,null=True,blank=True)
+      is_owner_driver = models.CharField(max_length=6,choices=(('OWNER','Owner'),('DRIVER','Driver')),default='OWNER',null=True,blank=True)
+      rc_number = models.CharField(max_length = 28,default='')
+      rc_expiry = models.DateField(null=True,blank=True)
+      active_id_fk = models.ForeignKey(Active,null=True)
+      created_by = models.CharField(max_length=50)
+      created_time = models.DateTimeField(auto_now=True)
+      modified_by = models.CharField(max_length=50)
+      modified_time = models.DateTimeField(auto_now=True)
+      
+      def __str__(self):
+        return self.traffic_number+' '+self.number_plate
+
+      def generate_qrcode(self):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=6,
+            border=0,
+        )
+        weburl = "https://taxiapp.safeautotaxi.com/taxi"
+        qr.add_data("%s/%s" % (weburl, str(self.traffic_number)))
+        qr.make(fit=True)
+
+        img = qr.make_image()
+
+        buffer = StringIO.StringIO()
+        img.save(buffer)
+        file_name = secure_filename('%s.png' % self.traffic_number)
+        file_buffer = InMemoryUploadedFile(
+            buffer, None, file_name, 'image/png', buffer.len, None)
+        self.qr_code.save(file_name, file_buffer)
+
+      def save(self, *args, **kwargs):
+        add = not self.pk
+        super(Vehicle, self).save(*args, **kwargs)
+
+        if add:
+			self.generate_qrcode()
+			kwargs['force_insert'] = False # create() uses this, which causes error.
+                        if self.traffic_number.strip()=='' or self.traffic_number.strip()=='-':
+                            self.traffic_number = self.city.city_code+'-TR-'+str(self.city.taxi_no+1).zfill(5)	
+                        t = City_Code.objects.get(id=self.city.id)
+                        t.taxi_no = t.taxi_no+1
+                        t.save()
+                        if ' ' in self.number_plate:
+                             m = self.number_plate
+                             self.number_plate = m.replace(' ','')
+ 		        super(Vehicle, self).save(*args, **kwargs)
+       
+        @property
+        def get_number_plate(self):
+            np = self.number_plate.replace('-','')[:]
+            try:
+                k = np[0]
+                for i in range(1,len(np)):
+                    if np[i]=='-':
+                        pass
+                    elif ((np[i-1].isalpha()) and (np[i].isdigit())) or ((np[i-1].isdigit()) and (np[i].isalpha())):
+                        k = k + ' '+np[i]
+                    else:
+                        k = k + np[i]
+                return k
+            except Exception as e:
+                return self.number_plate
+
+      class Meta:
+            verbose_name = 'Vehicle'
+            verbose_name_plural = 'Vehicles'
+
+class Driver(models.Model):
+      vehicle_id_fk = models.ForeignKey(Vehicle,null=True)
+      driver_name = models.CharField(max_length = 40, verbose_name="Name")
+      address = models.CharField(max_length = 200, blank = True)
+      date_of_birth = models.DateField(null=True,blank=True)
+      son_of = models.CharField(max_length = 40)
+      phone_number = models.CharField(max_length=16)
+      aadhar_number = models.CharField(max_length=22,null=True,blank=True)
+      dl_number = models.CharField(max_length=22,null=True,blank=True)
+      dl_expiry = models.DateField(null=True,blank=True)
+      driver_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
+      driver_image_thumbnail = ImageSpecField(source='driver_image',
+                                      processors=[ResizeToFill(75, 100)],
+                                      format='JPEG',
+                                      options={'quality': 60})
+      driver_image_name = models.CharField(max_length = 100, null=True, blank = True)
+      active_id_fk = models.ForeignKey(Active,null=True)
+      created_by = models.CharField(max_length=50)
+      created_time = models.DateTimeField(auto_now=True)
+      modified_by = models.CharField(max_length=50)
+      modified_time = models.DateTimeField(auto_now=True)
+      
+      def __str__(self):
+        return self.driver_name+' '+self.phone_number
+
+      class Meta:
+            verbose_name = 'Driver'
+            verbose_name_plural = 'Drivers'
+
 class City_Code(models.Model):
       city = models.CharField(max_length=40)
       city_code = models.CharField(max_length=10)
@@ -26,8 +192,8 @@ class City_Code(models.Model):
           return self.city_code+' '+self.city
 
       class Meta:
-          verbose_name = 'City Code'
-          verbose_name_plural = 'City Codes'
+        	verbose_name = 'City Code'
+        	verbose_name_plural = 'City Codes'
 
 class MyUserManager(BaseUserManager):
 	def create_user(self, email, password=None):

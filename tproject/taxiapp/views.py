@@ -31,7 +31,6 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import boto3
 from botocore.exceptions import NoCredentialsError
 from io import StringIO
-from pyshorteners import Shortener
 from . import constants
 
 
@@ -129,19 +128,24 @@ def administrator(request):
         form = UserForm()
         return render(request, 'taxiapp/home.html', {'form': form})
 
-
 def taxi_detail(request, pk):
     if ' ' in pk:
         pk = pk.replace(' ','')
-    taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
-    if len(taxi)<1:
-        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
-    if len(taxi)<1:
-        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
-#    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
-    if len(taxi) > 0:
-        m = taxi[0]
+    
+    owner = Owner.objects.filter(vehicle__traffic_number=pk)
+    vcl = Vehicle.objects.filter(traffic_number = pk)
+   
+    if ( len(owner) < 1 or len(vcl) < 1 ):
+        owner = Owner.objects.filter(vehicle__number_plate=pk)
+        vcl = Vehicle.objects.filter(number_plate = pk)
+    
+    dvr = Driver.objects.all().filter(vehicle_id_fk = vcl[0].id )
+    
+    if len(vcl) > 0:
+        m = vcl[0]
+        print("value m",m)
         k,p = m.number_plate,''
+        print("value k and p",k,p)
         k.replace('-','')
         start,p = k[0],k[0]
         for i in range(1,len(k)):
@@ -152,9 +156,35 @@ def taxi_detail(request, pk):
             else:
                 p = p+k[i]
         m.number_plate = p
-        return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
+        return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vcl[0],'owner':owner[0],'driver':dvr[0]}) 
     else:
         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
+
+# def taxi_detail(request, pk):
+#     if ' ' in pk:
+#         pk = pk.replace(' ','')
+#     taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
+#     if len(taxi)<1:
+#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
+#     if len(taxi)<1:
+#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
+# #    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
+#     if len(taxi) > 0:
+#         m = taxi[0]
+#         k,p = m.number_plate,''
+#         k.replace('-','')
+#         start,p = k[0],k[0]
+#         for i in range(1,len(k)):
+#             if k[i] == '-':
+#                 pass
+#             elif ((k[i-1].isalpha()) and (k[i].isdigit())) or ((k[i-1].isdigit()) and (k[i].isalpha())):
+#                 p = p+' '+k[i]
+#             else:
+#                 p = p+k[i]
+#         m.number_plate = p
+#         return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
+#     else:
+#         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
 def taxi_new(request):
     if request.method == "POST":
@@ -268,20 +298,33 @@ def complaint_view(request,pk):
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_view/"+str(pk))
 
+# def taxi_list(request):
+#     if request.user.is_authenticated():
+#         if request.user.is_admin:
+#             rows = Taxi_Detail.objects.all()
+#             rows_c = Complaint_Statement.objects.all()
+#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+#         else:
+#             city = request.user.city
+#             rows = Taxi_Detail.objects.filter(city=city)
+#             rows_c = Complaint_Statement.objects.filter(city=city)
+#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+#     else:
+#         return HttpResponseRedirect("/admin_login?next=taxi_list")
+
+
 def taxi_list(request):
     if request.user.is_authenticated():
         if request.user.is_admin:
-            rows = Taxi_Detail.objects.all()
             rows_c = Complaint_Statement.objects.all()
+            rows = Vehicle.objects.select_related()
             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
         else:
-            city = request.user.city
-            rows = Taxi_Detail.objects.filter(city=city)
-            rows_c = Complaint_Statement.objects.filter(city=city)
+            rows = Vehicle.objects.all()
+            rows_c = Complaint_Statement.objects.all()
             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
-
 
 
 def get_distance(lat,lon,x,y):

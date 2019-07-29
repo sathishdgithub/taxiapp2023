@@ -29,11 +29,11 @@
         <tbody>
             {% for row in rows %}
             <tr>
-                <td>{{row.get_number_plate}}</td>
+                <td>{{row.number_plate}}</td>
                 <td>{{row.traffic_number}}</td>
-                <td>{{row.driver_name}}</td>
-                <td>{{row.phone_number}}</td>
-                <td>{{row.owner_driver}}</td>
+                <td>{{row.owner_id_fk.owner_name}}</td>
+                <td>{{row.owner_id_fk.phone_number}}</td>
+                <td>{{row.is_owner_driver}}</td>
                 <td><a href="{% url 'taxiapp:taxi_detail' pk=row.traffic_number %}">{{'More Details'}}</a></td>
             </tr>
             {% endfor %}
