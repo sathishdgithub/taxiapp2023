@@ -1,0 +1,244 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO */
+[type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+[type=radio] + img {
+  cursor: pointer;
+}
+
+/* CHECKED STYLES */
+[type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+}
+
+/* Rating Star Widgets Style */
+.rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+}
+
+/* Idle State of the stars */
+.rating-stars ul > li.star > i.fa {
+  font-size:2.5em; /* Change the size of the stars */
+  color:#ccc; /* Color on idle state */
+}
+
+/* Hover state of the stars */
+.rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+}
+
+/* Selected state of the stars */
+.rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+}
+
+</style>
+<form id="customer_rating" action="/customer_rating/" method="post">
+  {% csrf_token %}
+  <div
+    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad">
+    {% if msg|length > 0 %}
+    <div>
+      <h4 style="text-align: center; color: green;">{{msg}}</h4>
+    </div>
+    <div class="profile-userbuttons center-block">
+      <button type="button" class="btn btn-primary btn-sm" onclick="goToHome()" style="margin:0.5em;">Home</button>
+    </div>
+    {% endif %}
+    {% ifequal msg|length 0 %}
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Rate Your Ride</h3>
+      </div>
+      <div>
+        <div class="panel-heading">
+          <h3 class="panel-title" style="text-align: center;">Vehicle Number: {{ number_plate }}</h3>
+        </div>
+      </div>
+      <div>
+        <section class='rating-widget'>
+            <!-- Rating Stars Box -->
+            <div class='rating-stars text-center'>
+              <ul id='stars'>
+                <li class='star' title='Poor' data-value='1'>
+                  <i class='fa fa-star fa-fw'></i>
+                </li>
+                <li class='star' title='Bad' data-value='2'>
+                  <i class='fa fa-star fa-fw'></i>
+                </li>
+                <li class='star' title='Avarage' data-value='3'>
+                  <i class='fa fa-star fa-fw'></i>
+                </li>
+                <li class='star' title='Good' data-value='4'>
+                  <i class='fa fa-star fa-fw'></i>
+                </li>
+                <li class='star' title='Excellent' data-value='5'>
+                  <i class='fa fa-star fa-fw'></i>
+                </li>
+              </ul>
+            </div>
+          </section>
+          {% if rating_type > 0 %}
+          <table align="center">
+              <tr>
+                <td>Reason:<span style="padding-left: 31px;">
+                  <select style="width:150px; text-align: center;" name="reason" id="reason" onchange="showOthers()">
+                    {% for reason in reasons %}
+                    <option value="{{reason.reason}}">{{ reason.reason }}</option>
+                    {% endfor %}
+                    <option value="Other">Other</option>
+                  </select>
+                  </span>
+                </td>
+              </tr>            
+              <tr style="display: none" id="other">
+                  <td>
+                      <textarea rows="2" cols="30" name="otherReason" id = "otherReason"></textarea>
+                  </td>
+              </tr>              
+              <tr>
+                <td>Select Driver:
+                  <select style="width:150px; text-align: center;" name="driver">
+                    {% for driver in drivers %}
+                    <option value="{{driver.id}}">{{ driver.driver_name }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+              </tr>
+
+            </table>
+          {% endif %}
+      </div>
+      <div class="row">
+        <input type="hidden" name="passenger_phone" value="{{passenger_phone}}" />
+        <input type="hidden" name="passenger_origin" value="{{passenger_origin}}" />
+        <input type="hidden" name="passenger_destination" value="{{passenger_destination}}" />
+        <input type="hidden" name="vehicle_id" value="{{vehicle_id}}" />
+        <input type="hidden" name="rating_type" id="rating_type" value="{{rating_type}}" />
+        <div class="profile-userbuttons center-block">
+          <button type="button" class="btn btn-danger btn-sm" onclick="restValues(0)"
+            style="margin:0.5em;">Reset</button>
+          <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
+            style="margin:0.5em;">submit</button>
+        </div>
+      </div>
+    </div>
+    {% endifequal %}
+  </div>
+
+</form>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+  $('#stars li').on('mouseover', function(){
+    var onStar = parseInt($(this).data('value'), 10); // The star currently mouse on
+    $(this).parent().children('li.star').each(function(e){
+      if (e < onStar) {
+        $(this).addClass('hover');
+      }
+      else {
+        $(this).removeClass('hover');
+      }
+    });
+  }).on('mouseout', function(){
+    $(this).parent().children('li.star').each(function(e){
+      $(this).removeClass('hover');
+    });
+  });
+  
+  $('#stars li').on('click', function(){
+    var onStar = parseInt($(this).data('value'), 10); // The star currently selected
+    var stars = $(this).parent().children('li.star');
+    for (i = 0; i < stars.length; i++) {
+      $(stars[i]).removeClass('selected');
+    }
+    for (i = 0; i < onStar; i++) {
+      $(stars[i]).addClass('selected');
+    }
+    var ratingValue = parseInt($('#stars li.selected').last().data('value'), 10);
+    restValues(ratingValue);
+  });
+  var stars = $('#stars li').parent().children('li.star');
+  var ratingType = $('#rating_type').val();
+  for (i = 0; i < ratingType; i++) {
+    $(stars[i]).addClass('selected');
+  }
+});
+
+
+  function restValues(ratingType) {
+    var url = new URL(location.href);
+    var query_string = url.search;
+    var search_params = new URLSearchParams(query_string);
+    search_params.set('rating_type', ratingType);
+    url.search = search_params.toString();
+    var new_url = url.toString();
+    location.href = new_url;
+  }
+  function goToHome() {
+    location.href = '/';
+  }
+  function getReasons() {
+    var rating_type = document.querySelector('input[name="rating_type"]:checked').value;
+    var url = new URL(location.href);
+    var query_string = url.search;
+    var search_params = new URLSearchParams(query_string);
+    search_params.set('rating_type', rating_type);
+    url.search = search_params.toString();
+    var new_url = url.toString();
+    location.href = new_url;
+  }
+  function showOthers() {
+    var reason = document.getElementById("reason").value;
+    if(reason == "Other") {
+      document.getElementById("other").style.display = "inline";
+    } else {
+      document.getElementById("otherReason").value = "";
+      document.getElementById("other").style.display = "none";
+    }
+  }
+  function saveCustomerDetails() {
+    var ratingType = $('#rating_type').val();
+    if(ratingType <= 0) {
+      alert("Please select rating.");
+      return false;
+    }
+    document.forms.customer_rating.submit();
+  }
+</script>
+
+{% endblock %}

@@ -14,7 +14,7 @@ urlpatterns = [
 	url(r'^$', views.home, name = "home"),
 	url(r'^admin_login/', views.admin_login, name = "admin_login"),
         url(r'^admin_logout/', views.admin_logout, name = "admin_logout"),
-	url(r'^taxi_csv_upload/$', views.taxi_csv_upload, name='taxi_csv_upload'),
+	url(r'^taxi_xls_upload/$', views.taxi_csv_upload, name='taxi_csv_upload'),
         url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
 #	url(r'^taxi/(?P<pk>[\w\-]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^taxi/(?P<pk>[\w|\W]+)/$', views.taxi_detail, name='taxi_detail'),
@@ -35,7 +35,10 @@ urlpatterns = [
         url(r'^api/v1/get_driver_owner_details/$',views.TaxiDriverOwner.as_view()),
         url(r'^api/v1/get_complaints/$',views.TaxiComplaints.as_view()),
         url(r'^docs/$', swagger.schema_view, name="schema_view"),
-]
+        url(r'^ratings/$',views.Ratings,name='Ratings'),
+        url(r'^customer_rating/$',views.customer_rating,name='Ratings'),
+
+]       
 
 handler404 = views.handler404
 

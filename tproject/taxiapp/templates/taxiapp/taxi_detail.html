@@ -141,145 +141,267 @@ word-wrap:break-word;
         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad" >
           <div class="panel panel-info">
             <div class="panel-heading">
-              <h3 class="panel-title" style="text-align: center;">{{ taxi.driver_name }} ({{taxi.number_plate}})</h3>
+              <h3 class="panel-title" style="text-align: center;">{{ owner.owner_name }} ({{vehicle.number_plate}})</h3>
             </div>
             <div class="panel-body">
-            <div class="row">
-              <div class="col-md-6">
-                 <div class="profile-userpic">
-                    <img src="{{ taxi.driver_image_thumbnail.url }}" class="img-responsive" alt="">
-
-                </div>
-                </div>
-                               {% if taxi.qr_code %}
-              <div class="col-md-6">
-
-                <div class="qr-userpic">
-                    <img src="{{ taxi.qr_code.url }}" class="img-responsive" alt="">
-                </div>
-                </div>
-                 {% endif %}
-                </div>
                 {% if not user.is_authenticated %}
                 <div class="row">
                 <div class="profile-userbuttons center-block">
-                    <button type="button" class="btn btn-success btn-sm" onclick="sendComplaint()" style="margin:0.5em;">Complaint</button>
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm" style="margin:0.5em;">Emergency text</button>
-                    {% if taxi.city.distress %}
-                    <a class="btn btn-warning btn-xlg" href="tel:+91-{{ taxi.city.distress_contact }}" style="margin:0.5em;">
+                    {% if vehicle.city.distress %}
+                    <a class="btn btn-warning btn-xlg" href="tel:+91-{{ vehicle.city.distress_contact }}" style="margin:0.5em;">
                         <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>Emergency Call
                     </a>
                     {% endif %}
+                   
+                    
                 </div>
+                <div class="row">
+                 <div class="profile-userbuttons center-block">  
+                  <button type="button" class="btn btn-success btn-sm" onclick="sendComplaint()" style="margin:0.5em;">Complaint</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="rating()" style="margin:0.5em;">Rating</button>
+                </div>
+              </div>
                 </div>
                 {% endif %}
- 
-                <div class="center-block" style="margin: 1em;"> 
-                  <table class="table table-user-information">
-                    <tbody>
-                    <tr>
-                        <td>Number Plate</td>
-                        <td>{{ taxi.number_plate }}</td>
-                      </tr>
-                      <tr>
-                        <td>Traffic Number</td>
-                        <td>{{ taxi.traffic_number }}</td>
-                      </tr>
-                      <tr>
-                        <td>Name</td>
-                        <td>{{ taxi.driver_name }}</td>
-                      </tr>
-                    {% if user.is_authenticated %}
-                    <tr>
-                        <td>S/O</td>
-                        <td>{{ taxi.son_of }}</td>
-                      </tr>
-                      <tr>
-                        <td>Date of Birth</td>
-                        <td>{{ taxi.date_of_birth }} </td>
-                      </tr>    
-                        <tr>
-                        <td>Home Address</td>
-                        <td class="address">{{ taxi.address }} </td>
-                      </tr>
-                                    {% endif %}
-
-                        <td>Phone Number</td>
-                        <td> <a class="btn btn-primary btn-xlg" href="tel:+91-{{ taxi.phone_number }}" >
-   			<span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>{{ taxi.phone_number }}
-			    </a></td>       
-                        </tr>
-
-                    {% if user.is_authenticated %}
-                      <tr>
-                        <td>Aadhar number</td>
-                        <td>{{ taxi.aadhar_number }}</td>
-                      </tr>
-                      <tr>
-                        <td>Driving License</td>
-                        <td>{{ taxi.driving_license_number }}</td>
-                      </tr>
-                      <tr>
-                        <td>Valid Upto</td>
-                        <td>{{ taxi.date_of_validity }}</td>
-                      </tr>
-                      <tr>
-                        <td>Stand</td>
-                        <td>{{ taxi.autostand }}</td>
-                      </tr>
-                      <tr>
-                        <td>Union</td>
-                        <td>{{ taxi.union }}</td>
-                      </tr>
-                      <tr>
-                        <td>Insurance Valid Upto</td>
-                        <td>{{ taxi.insurance }}</td>
-                      </tr>
-                      <tr>
-                        <td>Capacity of Passengers</td>
-                        <td>{{ taxi.capacity_of_passengers }}</td>
-                      </tr>
-                      <tr>
-                        <td>Polution Valid Upto</td>
-                        <td>{{ taxi.pollution }}</td>
-                      </tr>
-                      <tr>
-                        <td>Engine number</td>
-                        <td>{{ taxi.engine_number }}</td>
-                      </tr>
-                      <tr>
-                        <td>Chasis number</td>
-                        <td>{{ taxi.chasis_number }}</td>
-                      </tr>
-                      <tr>
-                        <td>Owner/Driver</td>
-                        <td>{{ taxi.owner_driver }}</td>
-                      </tr>
-                      {% endif %}
-                     
-                    </tbody>
-                  </table>
+                <div class ="row">
+                    {% if vehicle.qr_code %}
+                    <div class="col-md-6" style="margin-top: 25px;">
+      
+                      <div class="qr-userpic">
+                          <img src="{{ vehicle.qr_code.url }}" class="img-responsive" alt="">
+                      </div>
+                      </div>
+                       {% endif %}
+                       <div class="col-md-6" style="margin-top: 25px;">
+                          <h2 class="panel-title" style="text-align: center;"> Vehicle </h2>
+                          <div class="center-block" style="margin: 1em;"> 
+                              <table class="table table-user-information">
+                                <tbody>
+                                <tr>
+                                    <td>Number Plate</td>
+                                    <td>{{ vehicle.number_plate }}</td>                                    
+                                  </tr>
+                                  <tr>
+                                    <td>Traffic Number</td>
+                                    <td>{{ vehicle.traffic_number }}</td>
+                                  </tr>
+                                  
+                                {% if user.is_authenticated %}
+                                <tr>
+                                    <td>S/O</td>
+                                    <td>{{ owner.son_of }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Date of Birth</td>
+                                    <td>{{ owner.date_of_birth }} </td>
+                                  </tr>    
+                                    <tr>
+                                    <td>Home Address</td>
+                                    <td class="address">{{ owner.address }} </td>
+                                  </tr>
+                                                {% endif %}
+            
+                                {% if user.is_authenticated %}
+                                  <tr>
+                                    <td>Aadhar number</td>
+                                    <td>{{ owner.aadhar_number }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Driving License</td>
+                                    <td>{{ vehicle.rc_number }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Valid Upto</td>
+                                    <td>{{ vehicle.rc_expiry }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Stand</td>
+                                    <td>{{ vehicle.autostand }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Union</td>
+                                    <td>{{ vehicle.union }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Insurance Valid Upto</td>
+                                    <td>{{ vehicle.insurance }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Capacity of Passengers</td>
+                                    <td>{{ vehicle.capacity_of_passengers }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Polution Valid Upto</td>
+                                    <td>{{ vehicle.pollution }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Engine number</td>
+                                    <td>{{ vehicle.engine_number }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Chasis number</td>
+                                    <td>{{ vehicle.chasis_number }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Owner/Driver</td>
+                                    <td>{{ vehicle.is_owner_driver }}</td>
+                                  </tr>
+                                  {% endif %}
+                                 
+                                </tbody>
+                              </table>
+                            </div>
+                       </div>
+                       
                 </div>
-               
+
 {% if not user.is_authenticated %}
 <center>
 <div>
 <form class="form-inline" id="passenger" action="/complaint/" method="get">
-    <input id="id" type="text" name="id" value="{{taxi.id }}" style="display:none;">
+    <input id="id" type="text" name="id" value="{{vehicle.id }}" style="display:none;">
     <input id="passenger_phone" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_phone" placeholder="Your Phone Number" required><br><br>
     <input id="passenger_origin" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_origin" placeholder="Origin of the trip">&nbsp;&nbsp;&nbsp;&nbsp;
     <input id="passenger_destination" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_destination" placeholder="Destination of the trip">
+    <!-- For Rating -->
+    <input id="number_plate" type="text" name="number_plate" value="{{ vehicle.number_plate }}" style="display:none;">
+    <input id="rating_type" type="text" name="rating_type" value="0" style="display:none;">
 </form>
 </div>
 </center>
 {% endif %}
+                {%if owner%}
+                <!--code for OWNER Starts-->
+                <div>&nbsp;</div>
+                <div class ="row">
+                  
+                    <div class="col-md-6">
+                        <div class="profile-userpic">
+                           <img src="{{ owner.owner_image_thumbnail.url }}" class="img-responsive" alt="">
+       
+                       </div>
+                </div>
+                       <div class="col-md-6" style="margin-top: 25px;">
+                          <h2 class="panel-title" style="text-align: center;"> Owner </h2>
+                          <div class="center-block" style="margin: 1em;"> 
+                              <table class="table table-user-information">
+                                <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>{{ owner.owner_name}}</td>
+                                  </tr>
+                                {% if user.is_authenticated %}
+                                <tr>
+                                    <td>S/O</td>
+                                    <td>{{ owner.son_of }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Date of Birth</td>
+                                    <td>{{ owner.date_of_birth }} </td>
+                                  </tr>    
+                                    <tr>
+                                    <td>Home Address</td>
+                                    <td class="address">{{ owner.address }} </td>
+                                  </tr>
+                                                {% endif %}
+            
+                                    <td>Phone Number</td>
+                                    <td> <a class="btn btn-primary btn-xlg" href="tel:+91-{{ owner.phone_number }}" >
+                     <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>{{ owner.phone_number }}
+                      </a></td>       
+                                    </tr>
+            
+                                {% if user.is_authenticated %}
+                                  <tr>
+                                    <td>Aadhar number</td>
+                                    <td>{{ owner.aadhar_number }}</td>
+                                  </tr>
+                                  <!-- <tr>
+                                    <td>Driving License</td>
+                                    <td>{{ owner.driving_license_number }}</td>
+                                  </tr> -->
+                                  
+                                  {% endif %}
+                                 
+                                </tbody>
+                              </table>
+                            </div>
+                       </div>
+                       
+                </div>
+                {%endif%}
+                <!--code for Driver Starts -->
+                {%if drivers|length > 0 %}
+                <div>&nbsp;</div>
+                {% for driver in drivers %}
+                <div class ="row">
+                    
+                    <div class="col-md-6">
+                        <div class="profile-userpic">
+                           <img src="{{ driver.driver_image_thumbnail.url }}" class="img-responsive" alt="">
+       
+                       </div>
+                </div>
+                      
+                       <div class="col-md-6" style="margin-top: 25px;">
+                          <h2 class="panel-title" style="text-align: center;"> Driver </h2>
+                          <div class="center-block" style="margin: 1em;"> 
+                              <table class="table table-user-information">
+                                <tbody>
+                                <tr>
+                                    <td>Name</td>
+                                    <td>{{ driver.driver_name}}</td>
+                                  </tr>                                
+                                {% if user.is_authenticated %}
+                                <tr>
+                                    <td>S/O</td>
+                                    <td>{{ driver.son_of }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Date of Birth</td>
+                                    <td>{{ driver.date_of_birth }} </td>
+                                  </tr>    
+                                    <tr>
+                                    <td>Home Address</td>
+                                    <td class="address">{{ driver.address }} </td>
+                                  </tr>
+                                                {% endif %}
+            
+                                    <td>Phone Number</td>
+                                    <td> <a class="btn btn-primary btn-xlg" href="tel:+91-{{ driver.phone_number }}" >
+                     <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>{{ driver.phone_number }}
+                      </a></td>       
+                                    </tr>
+            
+                                {% if user.is_authenticated %}
+                                  <tr>
+                                    <td>Aadhar number</td>
+                                    <td>{{ driver.aadhar_number }}</td>
+                                  </tr>
+                                  <tr>
+                                    <td>Driving License</td>
+                                    <td>{{ driver.dl_number }}</td>
+                                  </tr>
+                                  
+                                  {% endif %}
+                                 
+                                </tbody>
+                              </table>
+                            </div>
+                       </div>
+                </div>
+                {% endfor %}
+
+                {%endif%}
+
               </div>
         </div>
-
+      
 <div style=" display: none;">
 <form id="emer" action="/taxi_emergency/" method="post">
     {% csrf_token %}
-    <input id="id" type="text" name="id" value="{{taxi.id }}">
+    <input id="id" type="text" name="id" value="{{vehicle.id }}">
     <input id="point" type="text" name="point" value="">
     <input id="passenger_phone_sos" type="text" name="passenger_phone_sos" placeholder="Your Phone Number" required>
     <input id="passenger_origin_sos" type="text" name="passenger_origin_sos" placeholder="Origin of the trip">
@@ -300,7 +422,7 @@ word-wrap:break-word;
   if (!navigator.geolocation){
     //output.innerHTML = "<p>Geolocation is not supported by your browser</p>";
     var url = "http://"+"{{request.get_host}}";
-    var id = "{{taxi.traffic_number}}";
+    var id = "{{vehicle.traffic_number}}";
     window.open(url+'/complaint/'+id,"_self")
     return;
   }
@@ -320,7 +442,7 @@ word-wrap:break-word;
 	}
   function error() {
     var url = "http://"+"{{request.get_host}}";
-    var id = "{{taxi.traffic_number}}";
+    var id = "{{vehicle.traffic_number}}";
     window.open(url+'/complaint/'+id,"_self")
     //output.innerHTML = "Unable to retrieve your location";
   }
@@ -339,6 +461,21 @@ function sendComplaint() {
     }
     else{document.forms.passenger.submit();}
 }
+
+
+function rating() {
+  var x = document.getElementById("passenger_phone").value;
+  document.getElementById("passenger").action = "/ratings/";
+  if (x.length < 10) {
+        alert("Please fill in your correct Phone Number");
+        return false;
+    }
+    else{
+      document.forms.passenger.submit(); 
+    }
+}
+
+
 </script>
 {% endblock %}
 

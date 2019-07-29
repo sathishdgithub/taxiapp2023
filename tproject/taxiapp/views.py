@@ -1,31 +1,40 @@
-import datetime
-import random
-import simplejson
-import sys
-import urllib2
-from urlparse import urlparse
-
-import boto3
-import pandas as pd
-import requests
-from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.views import password_change
-from django.core.files import File
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import *
-from django.shortcuts import render, get_object_or_404
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
+from django.template import loader
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.files import File
+from django.contrib.auth.views import password_change
 from forms import *
 from models import *
-from serializers import TaxiComplaintsSerialize
-from serializers import TaxiDriverOwnerSerialize
+import urllib2, simplejson
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.conf import settings
+import sys
+import requests
+from django.views.decorators.csrf import csrf_exempt
+from urlparse import urlparse
 from whatsapp import Client
+import pandas as pd
+import random,datetime
+from rest_framework import viewsets
+from rest_framework.views import APIView
+from serializers import TaxiDriverOwnerSerialize
+from serializers import TaxiComplaintsSerialize
+from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from collections import OrderedDict
+from rest_framework.filters import BaseFilterBackend
+import coreapi
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import boto3
+from botocore.exceptions import NoCredentialsError
+from io import StringIO
 from . import constants
+
+
+
 
 client = Client(login='919704807427', password='CM3u2jJb7sf6leMmQdkHJF/xvxI=')
 
@@ -119,18 +128,24 @@ def administrator(request):
         form = UserForm()
         return render(request, 'taxiapp/home.html', {'form': form})
 
-
 def taxi_detail(request, pk):
     if ' ' in pk:
         pk = pk.replace(' ','')
-    taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
-    if len(taxi)<1:
-        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
-    if len(taxi)<1:
-        taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
-#    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
-    if len(taxi) > 0:
-        m = taxi[0]
+    
+    owner = Owner.objects.filter(vehicle__traffic_number__iexact=pk)
+    vcl = Vehicle.objects.filter(traffic_number__iexact = pk)
+   
+    drivers = []
+   
+    if ( len(owner) < 1):
+        owner = Owner.objects.filter(vehicle__number_plate__iexact=pk)
+    if (len(vcl) < 1 ):
+        vcl = Vehicle.objects.filter(number_plate__iexact = pk)
+    if len(vcl) > 0:
+       drivers = Driver.objects.all().filter(vehicle = vcl[0].id )
+    
+    if len(vcl) > 0:
+        m = vcl[0]
         k,p = m.number_plate,''
         k.replace('-','')
         start,p = k[0],k[0]
@@ -142,9 +157,42 @@ def taxi_detail(request, pk):
             else:
                 p = p+k[i]
         m.number_plate = p
-        return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
+    
+    
+
+    vehicleObj = vcl[0] if vcl is not None and len(vcl) > 0 else None
+    ownerObj = owner[0] if owner is not None and len(owner) > 0 else None
+    #driverObj = dvr[0] if dvr is not None and len(dvr) > 0 else None
+    if(vehicleObj is not None or ownerObj is not None) :
+        return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vehicleObj,'owner':ownerObj,'drivers':drivers}) 
     else:
         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
+
+# def taxi_detail(request, pk):
+#     if ' ' in pk:
+#         pk = pk.replace(' ','')
+#     taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
+#     if len(taxi)<1:
+#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
+#     if len(taxi)<1:
+#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
+# #    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
+#     if len(taxi) > 0:
+#         m = taxi[0]
+#         k,p = m.number_plate,''
+#         k.replace('-','')
+#         start,p = k[0],k[0]
+#         for i in range(1,len(k)):
+#             if k[i] == '-':
+#                 pass
+#             elif ((k[i-1].isalpha()) and (k[i].isdigit())) or ((k[i-1].isdigit()) and (k[i].isalpha())):
+#                 p = p+' '+k[i]
+#             else:
+#                 p = p+k[i]
+#         m.number_plate = p
+#         return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
+#     else:
+#         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
 def taxi_new(request):
     if request.method == "POST":
@@ -160,24 +208,44 @@ def taxi_new(request):
         form = TaxidetailsForm()
     return render(request, 'taxiapp/taxi_edit.html', {'form': form})
 
+# def complaint_form(request):
+#     if request.method == "POST":
+#         form = ComplaintUserForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             t = Taxi_Detail.objects.get(id=form.instance.taxi.id)
+#             t.num_of_complaints = t.num_of_complaints+1
+#             t.save()
+#             return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
+#     else:
+#         taxi_id = request.GET.get('id', '')
+#         passenger_phone = request.GET.get('passenger_phone','')
+#         passenger_origin = request.GET.get('passenger_origin','')
+#         passenger_destination = request.GET.get('passenger_destination','')
+#         form = ComplaintUserForm(initial={'taxi':taxi_id,'phone_number':passenger_phone,\
+#                'origin_area':passenger_origin,'destination_area':passenger_destination})
+#         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
+    	#   return render(request, 'taxiapp/complaint.html', {'form': form})
+
 def complaint_form(request):
     if request.method == "POST":
         form = ComplaintUserForm(request.POST)
         if form.is_valid():
             form.save()
-            t = Taxi_Detail.objects.get(id=form.instance.taxi.id)
+            t = Vehicle.objects.get(id=form.instance.vehicle.id)
             t.num_of_complaints = t.num_of_complaints+1
             t.save()
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
     else:
-        taxi_id = request.GET.get('id', '')
+        vehicle_id = request.GET.get('id', '')
         passenger_phone = request.GET.get('passenger_phone','')
         passenger_origin = request.GET.get('passenger_origin','')
         passenger_destination = request.GET.get('passenger_destination','')
-        form = ComplaintUserForm(initial={'taxi':taxi_id,'phone_number':passenger_phone,\
+        form = ComplaintUserForm(initial={'vehicle':vehicle_id,'phone_number':passenger_phone,\
                'origin_area':passenger_origin,'destination_area':passenger_destination})
-        form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
+        form.fields['vehicle'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
     	return render(request, 'taxiapp/complaint.html', {'form': form})
+
 
 def send_sms(message,phone_number,kind):
     if kind == 'emergency':
@@ -220,20 +288,28 @@ def complaint_success(request,pk):
         whatsapp_number = police.whatsapp_number
         complaint.assigned_to = police
         complaint.save()
-        taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
+        #taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
+        vehicleObj = Vehicle.objects.get(id=complaint.vehicle.id)
+        driver = Driver()
+        try:        
+            driver = Driver.objects.get(vehicle = vehicleObj)
+        except Exception as e:
+            print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Phone Number: '+str(taxi.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
-        if taxi.city.sms:
+        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
+        if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
-        if taxi.city.whatsapp:
+        if vehicleObj.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
 def complaint_resolve(request,pk):
     if request.user.is_authenticated():
         row = Complaint_Statement.objects.get(id=pk)
-        taxi = row.taxi
-        t = Taxi_Detail.objects.get(id=taxi.id)
+        #taxi = row.taxi
+        vehicle = row.vehicle
+        #t = Taxi_Detail.objects.get(id=taxi.id)
+        t = Vehicle.objects.get(id=vehicle.id)
         t.num_of_complaints = max(0,t.num_of_complaints-1)
         t.save()
         row.resolved = True
@@ -253,25 +329,52 @@ def complaint_view(request,pk):
     if request.user.is_authenticated():
         pk = pk.upper()
         row = get_object_or_404(Complaint_Statement, complaint_number=pk)
-        reason_statement = ''
-        return render(request,'taxiapp/complaint_view.html',{'row':row})
+        if row.vehicle is not None :
+            vehicleObj = Vehicle.objects.get(id=row.vehicle.id)
+            driver = Driver.objects.get(vehicle = vehicleObj)
+            reason_statement = ''
+            return render(request,'taxiapp/complaint_view.html',{'row':row,'driver':driver})
+        else :
+            return render(request,'taxiapp/complaint_view.html',{'row':row})
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_view/"+str(pk))
 
+# def taxi_list(request):
+#     if request.user.is_authenticated():
+#         if request.user.is_admin:
+#             rows = Taxi_Detail.objects.all()
+#             rows_c = Complaint_Statement.objects.all()
+#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+#         else:
+#             city = request.user.city
+#             rows = Taxi_Detail.objects.filter(city=city)
+#             rows_c = Complaint_Statement.objects.filter(city=city)
+#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+#     else:
+#         return HttpResponseRedirect("/admin_login?next=taxi_list")
+
 def taxi_list(request):
+    page = request.GET.get('page', 1)
+    
     if request.user.is_authenticated():
         if request.user.is_admin:
-            rows = Taxi_Detail.objects.all()
-            rows_c = Complaint_Statement.objects.all()
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+            rows = Vehicle.objects.select_related()
+            rows_c = Complaint_Statement.objects.select_related('vehicle')
+            paginator = Paginator(rows, 10)
+            try:
+                rowPages = paginator.page(page)
+            except PageNotAnInteger:
+                rowPages = paginator.page(1)
+            except EmptyPage:
+                rowPages = paginator.page(paginator.num_pages)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages})
         else:
             city = request.user.city
-            rows = Taxi_Detail.objects.filter(city=city)
+            rows = Vehicle.objects.select_related().filter(city = city)
             rows_c = Complaint_Statement.objects.filter(city=city)
             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
-
 
 
 def get_distance(lat,lon,x,y):
@@ -281,7 +384,7 @@ def taxi_emergency(request):
     if request.method == "POST":
         rows = MyUser.objects.all()
         point = request.POST.get('point','0,0')
-        taxi_id = request.POST.get('id')
+        vehicle_id = request.POST.get('id')
         p_phone = request.POST.get('passenger_phone_sos','')
         p_origin = request.POST.get('passenger_origin_sos','')       
         p_destination = request.POST.get('passenger_destination_sos','')       
@@ -301,11 +404,17 @@ def taxi_emergency(request):
                         police = row
             phone_number = police.sms_number
             whatsapp_number = police.whatsapp_number
-            taxi = Taxi_Detail.objects.get(id=taxi_id)
-            message = 'SOS\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Driver Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
-            if taxi.city.sms:
+            vehicle = Vehicle.objects.get(id=vehicle_id)
+            driver = Driver()
+            try:
+                driver = Driver.objects.get(vehicle=vehicle)
+            except Exception as e:
+                print(e.message)
+
+            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
+            if vehicle.city.sms:
                 m = send_sms(message,phone_number,'emergency')
-            if taxi.city.whatsapp:
+            if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
         else:
@@ -322,10 +431,62 @@ def date_form(date):
         elif (len(y)==4) and (int(d)<=12 and int(d)>=1):                                                                                                          return y+'-'+d+'-'+m                                                             
     return None    
 
+# def handle_taxi_csv(file_path,city):
+#     import os,numpy as np
+#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+#     headers = ['AUTO NUMBER','TRAFFIC NUMBER','NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER','DRIVING LICENSE NUMBER','DATE OF VALIDITY','AUTO STAND','UNION','INSURANCE','CAPACITY OF PASSENGERS','POLLUTION','ENGINE NUMBER','CHASIS NUMBER','OWNERDRIVER','DRIVER IMAGE FILENAME']
+#     #Code to upload to s3 Bucket
+#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+#     try:
+#         s3.Bucket(bucketName).put_object(Key=file_path.name,Body=file_path)
+#     except Exception as e:
+#         return ["network_error"]
+          
+#     all_errors=[]
+#     try:
+#         s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
+#         s3_data = StringIO(s3_object.get()['Body'].read().decode('utf-8'))
+#         data = pd.read_csv(s3_data)
+#         data = data.replace(np.nan, '', regex=True)
+#         if len(headers) == len(data.columns):
+#             for column in data.columns:
+#                 if column not in headers:
+#                     s3_object.delete()
+#                     return ["csv_header_error"]
+#         else :
+#             s3_object.delete()
+#             return ["csv_header_error"]
+#     except Exception as e:
+#         s3_object.delete()
+#         return ["csv_file_error"]
+#     rowNumber = 1
+#     for index,row in data.iterrows(): 
+#         rowNumber+=1
+#         try:                                                                          
+#             c = City_Code.objects.get(pk=city)
+#             #p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
+#             v = Vehicle(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],rc_expiry=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],is_owner_driver=row["OWNERDRIVER"],city=c)
+#             print(v)
+#             d = Driver(driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],dl_number=row["DRIVING LICENSE NUMBER"],driver_image_name=row["DRIVER IMAGE FILENAME"])
+#             print(d)
+#             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
+#                 v.save()
+#                 d.save()
+#         except Exception as e:
+#             all_errors.append(rowNumber)
+#     s3_object.delete()
+#     return all_errors
+
 def handle_taxi_csv(file_path,city):
-    import numpy as np
-    bucketName = settings.BULK_UPLOAD_S3_BUCKETNAME
-    headers = ['AUTO NUMBER','TRAFFIC NUMBER','NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER','DRIVING LICENSE NUMBER','DATE OF VALIDITY','AUTO STAND','UNION','INSURANCE','CAPACITY OF PASSENGERS','POLLUTION','ENGINE NUMBER','CHASIS NUMBER','OWNERDRIVER','DRIVER IMAGE FILENAME']
+    import os,numpy as np
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+   
+    owner_vehicle_headers = ['AUTO NUMBER','OWNER NAME','ADDRESS','DATE OF BIRTH','FATHER NAME','PHONE NUMBER','AADHAR NUMBER','OWNER IMAGE','OWNER IMAGE NAME','DRIVING LICENSE NUMBER','DATE OF VALIDITY','TRAFFIC NUMBER','INSURANCE DATE','AUTO STAND','UNION','CAPACITY OF PASSENGERS','POLLUTION DATE','ENGINE NUMBER',
+                             'CHASIS NUMBER','IS OWNER DRIVER','RC NUMBER','RC EXPIRY']
+    driver_headers = ['AUTO NUMBER','DRIVER NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER',
+                      'DRIVING LICENSE NUMBER','DATE OF VALIDITY','DRIVER IMAGE FILENAME']
+
     #Code to upload to s3 Bucket
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -337,12 +498,14 @@ def handle_taxi_csv(file_path,city):
     all_errors=[]
     try:
         s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
-        s3_data = StringIO(s3_object.get()['Body'].read().decode('utf-8'))
-        data = pd.read_csv(s3_data)
-        data = data.replace(np.nan, '', regex=True)
-        if len(headers) == len(data.columns):
-            for column in data.columns:
-                if column not in headers:
+        owner_vehicle_df = pd.read_excel(s3_object.get()['Body'],sheetname="Vehicle_Owner")
+        driver_df = pd.read_excel(s3_object.get()['Body'],sheetname="Driver")
+        owner_vehicle_data = owner_vehicle_df.replace(np.nan, '', regex=True)
+        driver_data = driver_df.replace(np.nan, '', regex=True)
+
+        if ( len(owner_vehicle_headers) == len(owner_vehicle_data.columns) and len(driver_headers) == len(driver_data.columns)) :
+            for ov_column,dvr_column in zip(owner_vehicle_data.columns,driver_data.columns):
+                if ( ov_column not in owner_vehicle_headers or dvr_column not in driver_headers ):
                     s3_object.delete()
                     return ["csv_header_error"]
         else :
@@ -351,19 +514,41 @@ def handle_taxi_csv(file_path,city):
     except Exception as e:
         s3_object.delete()
         return ["csv_file_error"]
+
+    """code to insert First Sheet named - Vehicle_Owner  into Vehicle and Owner Tables"""
     rowNumber = 1
-    for index,row in data.iterrows(): 
+    for index,row in owner_vehicle_data.iterrows(): 
         rowNumber+=1
         try:                                                                          
             c = City_Code.objects.get(pk=city)
-            p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
-                p.save()
+                active = Active.objects.get(active_name = "Active")
+                owner = Owner(owner_name=row["OWNER NAME"],address=row["ADDRESS"],date_of_birth=row["DATE OF BIRTH"],son_of=row['FATHER NAME'],phone_number=row['PHONE NUMBER'],aadhar_number=row['AADHAR NUMBER'],owner_image=row['OWNER IMAGE'],owner_image_name=row["OWNER IMAGE NAME"],active = active)
+                owner.save()   
+                vehicle = Vehicle(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],insurance = row["INSURANCE DATE"], rc_number=row['RC NUMBER'],autostand=row['AUTO STAND'],union=row['UNION'],capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=row["POLLUTION DATE"],engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],is_owner_driver=row["IS OWNER DRIVER"],city=c,owner = owner)
+                vehicle.save()
         except Exception as e:
             all_errors.append(rowNumber)
+            s3_object.delete()
+            return all_errors
+
+    """code to insert Second Sheet named - Driver  into Driver Table"""
+    rowNumber = 1
+    for index,row in driver_data.iterrows(): 
+        rowNumber+=1
+        try:                                                                          
+            if (len(row["AUTO NUMBER"]) > 3) or (row["AUTO NUMBER"] in ['','-']):
+                vehicle = Vehicle.objects.get(number_plate = row["AUTO NUMBER"])
+                active = Active.objects.get(active_name = "Active")
+                d = Driver(driver_name = row['DRIVER NAME'],traffic_number=row['AUTO NUMBER'],address=row['ADDRESS'],date_of_birth = row['DATE OF BIRTH'],son_of = row['FATHER NAME'],phone_number=row['PHONE NUMBER'], aadhar_number = row['AADHAR NUMBER'],dl_number=row['DRIVING LICENSE NUMBER'],dl_expiry =date_form(row['DATE OF VALIDITY']),driver_image=row['DRIVER IMAGE FILENAME'],vehicle=vehicle,active=active)
+                d.save()
+        except Exception as e:
+            all_errors.append(rowNumber)
+            s3_object.delete()
+            return all_errors
+
     s3_object.delete()
     return all_errors
-
 
 def handle_bulk_image_zip(file_path):
     import os,zipfile,shutil
@@ -401,11 +586,36 @@ def handle_bulk_image_zip(file_path):
     shutil.rmtree(path+'bulk_tmp')
     return all_errors
 
+# def taxi_csv_upload(request):
+#     message = 'Please Upload the Excel file here'
+#     secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
+#     if request.user.is_authenticated():
+#         if request.user.is_admin or request.user.is_staff:
+#             if request.method == "POST":
+#                 form = TaxiDetailCsvUpload(request.POST, request.FILES)
+#                 if form.is_valid():
+#                     errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
+#                     print(errors)
+#                     if len(errors)==0:
+#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
+#                     elif errors[0] == "csv_header_error":  
+#                          return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
+#                     elif errors[0] == "csv_file_error":
+#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
+#                     elif errors[0] == "network_error":
+#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
+#                     # return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number '+ str((errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
+#                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
+#             else:
+#                 form = TaxiDetailCsvUpload()
+#             return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+#     else:
+#         return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
 
 
 def taxi_csv_upload(request):
-    message = 'Please Upload the CSV file here'
-    secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
+    message = 'Please Upload the Excel file here'
+    #secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
     if request.user.is_authenticated():
         if request.user.is_admin or request.user.is_staff:
             if request.method == "POST":
@@ -425,9 +635,10 @@ def taxi_csv_upload(request):
                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
                 form = TaxiDetailCsvUpload()
-            return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+            return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
+
 
 def bulk_image_upload(request):
     message = 'Please Upload the Bulk Image ZIP here'
@@ -543,6 +754,100 @@ def handler500(request):
     response.status_code = 500
     return response
 
+# class TaxiDriverOwner(APIView):
+#     authentication_classes = (SessionAuthentication, BasicAuthentication)
+#     permission_classes = (IsAuthenticated,)
+#     def get(self,request,format=None, **kwargs):
+#         cityCode = request.GET.get('cityCode')
+#         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
+#         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
+#         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
+#         numberPlates = request.GET.get('numberPlates') # Number Plates
+#         page = request.GET.get('page', 1) # Page Number
+#         limit = request.GET.get('limit', 10) # No Of Records per page
+        
+#         taxiDetails = Taxi_Detail.objects.all()
+#         if (rangeFrom != None and rangeTo != None):
+#             rangeFromList = rangeFrom.split('-')
+#             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+#             rangeLen = len(rangeFromList[2])
+#             rangeFromValue = int(rangeFromList[2])
+#             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+#             rangeList = []            
+#             for i in range(rangeDiff):
+#                 rangFromValuelen = len(str(rangeFromValue))
+#                 leadingZero = rangeLen - rangFromValuelen
+#                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+#                 rangeFromValue =  rangeFromValue + 1
+#             taxiDetails = taxiDetails.filter(traffic_number__in = rangeList)
+#         if (taxiIds != None):
+#             taxiIdsArray = taxiIds.split(',')
+#             taxiDetails = taxiDetails.filter(traffic_number__in = taxiIdsArray)
+#         if (numberPlates != None):
+#             numberPlatesArray = numberPlates.split(',')
+#             taxiDetails = taxiDetails.filter(number_plate__in = numberPlatesArray)
+#         if (cityCode != None):
+#             taxiDetails = taxiDetails.filter(city__city_code = cityCode)
+
+
+#         paginator = Paginator(taxiDetails, limit)
+#         try:
+#             taxiDetails = paginator.page(page)
+#         except PageNotAnInteger:
+#             taxiDetails = paginator.page(1)
+#         except EmptyPage:
+#             taxiDetails = paginator.page(paginator.num_pages)
+
+#         serializer = TaxiDriverOwnerSerialize(taxiDetails,many=True)        
+#         return Response(data=serializer.data)
+
+# class TaxiComplaints(APIView):
+#     authentication_classes = (SessionAuthentication, BasicAuthentication)
+#     permission_classes = (IsAuthenticated,)
+#     def get(self,request,format=None, **kwargs):
+#         cityCode = request.GET.get('cityCode')
+#         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
+#         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
+#         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
+#         numberPlates = request.GET.get('numberPlates') # Number Plates
+#         page = request.GET.get('page', 1) # Page Number
+#         limit = request.GET.get('limit', 10) # No Of Records per page
+
+#         complaints = Complaint_Statement.objects.all()
+#         if (rangeFrom != None and rangeTo != None):
+#             rangeFromList = rangeFrom.split('-')
+#             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+#             rangeLen = len(rangeFromList[2])
+#             rangeFromValue = int(rangeFromList[2])
+#             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+#             rangeList = []
+#             for i in range(rangeDiff):
+#                 rangFromValuelen = len(str(rangeFromValue))
+#                 leadingZero = rangeLen - rangFromValuelen
+#                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+#                 rangeFromValue =  rangeFromValue + 1
+#             complaints = complaints.filter(taxi__traffic_number__in = rangeList)
+#         if (taxiIds != None):
+#             taxiIdsArray = taxiIds.split(',')
+#             complaints = complaints.filter(taxi__traffic_number__in = taxiIdsArray)
+#         if (numberPlates != None):
+#             numberPlatesArray = numberPlates.split(',')
+#             complaints = complaints.filter(taxi__number_plate__in = numberPlatesArray)
+#         if (cityCode != None):
+#             complaints = complaints.filter(city__city_code = cityCode)
+
+#         paginator = Paginator(complaints, limit)
+#         try:
+#             complaints = paginator.page(page)
+#         except PageNotAnInteger:
+#             complaints = paginator.page(1)
+#         except EmptyPage:
+#             complaints = paginator.page(paginator.num_pages)
+        
+#         serializer = TaxiComplaintsSerialize(complaints,many=True)        
+#         return Response(data=serializer.data)
+
+
 class TaxiDriverOwner(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
@@ -555,39 +860,41 @@ class TaxiDriverOwner(APIView):
         page = request.GET.get('page', 1) # Page Number
         limit = request.GET.get('limit', 10) # No Of Records per page
         
-        taxiDetails = Taxi_Detail.objects.all()
+        vehicleDetails = Vehicle.objects.all()
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
             rangeLen = len(rangeFromList[2])
             rangeFromValue = int(rangeFromList[2])
+            print(rangeFromValue)
             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            print(rangeDiff)
             rangeList = []            
             for i in range(rangeDiff):
                 rangFromValuelen = len(str(rangeFromValue))
                 leadingZero = rangeLen - rangFromValuelen
                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
                 rangeFromValue =  rangeFromValue + 1
-            taxiDetails = taxiDetails.filter(traffic_number__in = rangeList)
+            print(rangeList)
+            vehicleDetails = vehicleDetails.filter(traffic_number__in = rangeList)
         if (taxiIds != None):
             taxiIdsArray = taxiIds.split(',')
-            taxiDetails = taxiDetails.filter(traffic_number__in = taxiIdsArray)
+            vehicleDetails = vehicleDetails.filter(traffic_number__in = taxiIdsArray)
         if (numberPlates != None):
             numberPlatesArray = numberPlates.split(',')
-            taxiDetails = taxiDetails.filter(number_plate__in = numberPlatesArray)
+            vehicleDetails = vehicleDetails.filter(number_plate__in = numberPlatesArray)
         if (cityCode != None):
-            taxiDetails = taxiDetails.filter(city__city_code = cityCode)
-
-
-        paginator = Paginator(taxiDetails, limit)
+            vehicleDetails = vehicleDetails.filter(city__city_code = cityCode)
+                       
+        paginator = Paginator(vehicleDetails, limit)
         try:
-            taxiDetails = paginator.page(page)
+            vehicleDetails = paginator.page(page)
         except PageNotAnInteger:
-            taxiDetails = paginator.page(1)
+            vehicleDetails = paginator.page(1)
         except EmptyPage:
-            taxiDetails = paginator.page(paginator.num_pages)
+            vehicleDetails = paginator.page(paginator.num_pages)
 
-        serializer = TaxiDriverOwnerSerialize(taxiDetails,many=True)        
+        serializer = TaxiDriverOwnerSerialize(vehicleDetails,many=True)        
         return Response(data=serializer.data)
 
 class TaxiComplaints(APIView):
@@ -601,7 +908,7 @@ class TaxiComplaints(APIView):
         numberPlates = request.GET.get('numberPlates') # Number Plates
         page = request.GET.get('page', 1) # Page Number
         limit = request.GET.get('limit', 10) # No Of Records per page
-
+        
         complaints = Complaint_Statement.objects.all()
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
@@ -615,15 +922,16 @@ class TaxiComplaints(APIView):
                 leadingZero = rangeLen - rangFromValuelen
                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
                 rangeFromValue =  rangeFromValue + 1
-            complaints = complaints.filter(taxi__traffic_number__in = rangeList)
+            complaints = complaints.filter(vehicle__traffic_number__in = rangeList)
         if (taxiIds != None):
             taxiIdsArray = taxiIds.split(',')
-            complaints = complaints.filter(taxi__traffic_number__in = taxiIdsArray)
+            complaints = complaints.filter(vehicle__traffic_number__in = taxiIdsArray)
         if (numberPlates != None):
             numberPlatesArray = numberPlates.split(',')
-            complaints = complaints.filter(taxi__number_plate__in = numberPlatesArray)
+            complaints = complaints.filter(vehicle__number_plate__in = numberPlatesArray)
         if (cityCode != None):
-            complaints = complaints.filter(city__city_code = cityCode)
+             complaints = complaints.filter(city__city_code = cityCode)
+            
 
         paginator = Paginator(complaints, limit)
         try:
@@ -636,4 +944,72 @@ class TaxiComplaints(APIView):
         serializer = TaxiComplaintsSerialize(complaints,many=True)        
         return Response(data=serializer.data)
 
+
+def Ratings(request):
+    passenger_phone = request.GET.get('passenger_phone')
+    passenger_origin = request.GET.get('passenger_origin')
+    passenger_destination = request.GET.get('passenger_destination')
+    number_plate = request.GET.get('number_plate')
+    rating_type = request.GET.get('rating_type')
+    vehicleId = request.GET.get('id')
+    reasons = []
+    rating_type = int(rating_type)
+    if(rating_type > 0):
+        ratingValue = 'Unsatisfied'
+        if(rating_type == 3):
+            ratingValue = 'neutral'
+        if(rating_type > 3):
+            ratingValue = 'Satisfied'
+        ratingType = Rating_Type.objects.get(rating_type__iexact = ratingValue)
+        active = Active.objects.get(active_name__iexact = 'Active')
+        reasons = Rating_Reason.objects.filter(rating_type = ratingType, active = active)  
+
+    vehicle = Vehicle.objects.get(id = vehicleId)
+    drivers = Driver.objects.filter(vehicle = vehicle)
+
+    return render(request,'taxiapp/rating.html',{'passenger_phone':passenger_phone, 'passenger_origin':passenger_origin, 
+                'passenger_destination':passenger_destination, 'number_plate':number_plate, 'rating_type':rating_type, 
+                'reasons':reasons,'drivers':drivers, 'vehicle_id':vehicleId})        
+
+def customer_rating (request) :
+    driver_id = request.POST.get('driver')
+    reason = request.POST.get('reason')
+    passenger_phone = request.POST.get('passenger_phone')
+    passenger_origin = request.POST.get('passenger_origin')
+    passenger_destination = request.POST.get('passenger_destination')
+    rating_type = request.POST.get('rating_type')
+    vehicle_id = request.POST.get('vehicle_id')
+    otherReason = request.POST.get('otherReason')
+    
+    if(reason == 'Other'):
+        reason = otherReason
+    rating_type = int(rating_type)
+    ratingValue = 'Unsatisfied'
+    if(rating_type == 3):
+        ratingValue = 'neutral'
+    if(rating_type > 3):
+        ratingValue = 'Satisfied'
+
+    vehicle = Vehicle.objects.get(id = vehicle_id)
+    ratingType = Rating_Type.objects.get(rating_type__iexact = ratingValue)
+    customerRating = Customer_Rating ()
+    driver=Driver()
+    if( driver_id is not None) :
+        driver = Driver.objects.get(id = driver_id)
+        customerRating.driver = driver
+    
+    
+    customerRating.vehicle = vehicle
+    customerRating.rating_type = ratingType
+    
+    customerRating.reason = reason
+    customerRating.phone_number = passenger_phone
+    customerRating.destination_area = passenger_destination
+    customerRating.origin_area = passenger_origin
+    # Who's name we have to keep as created by and modified by
+    #customerRating.created_by = passenger_phone
+    #customerRating.modified_by = passenger_phone
+
+    customerRating.save()
+    return render(request,'taxiapp/rating.html',{'msg':'Thank you for your rating.'})
 
