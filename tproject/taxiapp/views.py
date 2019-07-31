@@ -1,41 +1,31 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import *
-from django.template import loader
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.files import File
-from django.contrib.auth.views import password_change
-from forms import *
-from models import *
-import urllib2, simplejson
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.conf import settings
+import datetime
+import random
+import simplejson
 import sys
-import requests
-from django.views.decorators.csrf import csrf_exempt
+import urllib2
 from urlparse import urlparse
-from whatsapp import Client
+
+import boto3
 import pandas as pd
-import random,datetime
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from serializers import TaxiDriverOwnerSerialize
-from serializers import TaxiComplaintsSerialize
-from rest_framework.response import Response
+import requests
+from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import password_change
+from django.core.files import File
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import *
+from django.shortcuts import render, get_object_or_404
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
-from collections import OrderedDict
-from rest_framework.filters import BaseFilterBackend
-import coreapi
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import boto3
-from botocore.exceptions import NoCredentialsError
-from io import StringIO
-from pyshorteners import Shortener
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from forms import *
+from models import *
+from serializers import TaxiComplaintsSerialize
+from serializers import TaxiDriverOwnerSerialize
+from whatsapp import Client
 from . import constants
-
-
-
 
 client = Client(login='919704807427', password='CM3u2jJb7sf6leMmQdkHJF/xvxI=')
 
@@ -333,7 +323,7 @@ def date_form(date):
     return None    
 
 def handle_taxi_csv(file_path,city):
-    import os,numpy as np
+    import numpy as np
     bucketName = settings.BULK_UPLOAD_S3_BUCKETNAME
     headers = ['AUTO NUMBER','TRAFFIC NUMBER','NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER','DRIVING LICENSE NUMBER','DATE OF VALIDITY','AUTO STAND','UNION','INSURANCE','CAPACITY OF PASSENGERS','POLLUTION','ENGINE NUMBER','CHASIS NUMBER','OWNERDRIVER','DRIVER IMAGE FILENAME']
     #Code to upload to s3 Bucket
