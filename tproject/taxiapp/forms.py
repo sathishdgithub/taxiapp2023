@@ -30,7 +30,7 @@ class TaxisearchForm(forms.Form):
 class ComplaintUserForm(forms.ModelForm):
     class Meta:
         model = Complaint_Statement
-        fields = ('taxi','reason','city','phone_number','complaint','area','origin_area','destination_area')
+        fields = ('vehicle','reason','city','phone_number','complaint','area','origin_area','destination_area')
     def save(self, *args, **kwargs):
         self.instance.complaint_number = self.instance.city.city_code+'-CN-'+str(self.instance.city.complaint_no+1).zfill(7)
         t = City_Code.objects.get(id=self.instance.city.id)
@@ -52,7 +52,7 @@ class EnterOTP(forms.Form):
     user_id = forms.IntegerField(widget = forms.HiddenInput(), required = True)
     otp_code = forms.CharField(min_length=6,max_length=6) 
 
-class ResetPassword(forms.Form):
+class ResetPassword(forms.Form):                  
     user_id = forms.IntegerField(widget = forms.HiddenInput(), required = True)
     password=forms.CharField(widget=forms.PasswordInput())
     confirm_password=forms.CharField(widget=forms.PasswordInput())

@@ -159,7 +159,7 @@ word-wrap:break-word;
                 <div class="row">
                  <div class="profile-userbuttons center-block">  
                   <button type="button" class="btn btn-success btn-sm" onclick="sendComplaint()" style="margin:0.5em;">Complaint</button>
-                    <button type="button" class="btn btn-success btn-sm" onclick="" style="margin:0.5em;">Rating</button>
+                    <button type="button" class="btn btn-success btn-sm" onclick="rating()" style="margin:0.5em;">Rating</button>
                 </div>
               </div>
                 </div>
@@ -209,19 +209,19 @@ word-wrap:break-word;
                                   </tr>
                                   <tr>
                                     <td>Driving License</td>
-                                    <td>{{ owner.driving_license_number }}</td>
+                                    <td>{{ vehicle.rc_number }}</td>
                                   </tr>
                                   <tr>
                                     <td>Valid Upto</td>
-                                    <td>{{ owner.date_of_validity }}</td>
+                                    <td>{{ vehicle.rc_expiry }}</td>
                                   </tr>
                                   <tr>
                                     <td>Stand</td>
-                                    <td>{{ owner.autostand }}</td>
+                                    <td>{{ vehicle.autostand }}</td>
                                   </tr>
                                   <tr>
                                     <td>Union</td>
-                                    <td>{{ owner.union }}</td>
+                                    <td>{{ vehicle.union }}</td>
                                   </tr>
                                   <tr>
                                     <td>Insurance Valid Upto</td>
@@ -255,6 +255,19 @@ word-wrap:break-word;
                        </div>
                        
                 </div>
+
+{% if not user.is_authenticated %}
+<center>
+<div>
+<form class="form-inline" id="passenger" action="/complaint/" method="get">
+    <input id="id" type="text" name="id" value="{{vehicle.id }}" style="display:none;">
+    <input id="passenger_phone" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_phone" placeholder="Your Phone Number" required><br><br>
+    <input id="passenger_origin" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_origin" placeholder="Origin of the trip">&nbsp;&nbsp;&nbsp;&nbsp;
+    <input id="passenger_destination" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_destination" placeholder="Destination of the trip">
+</form>
+</div>
+</center>
+{% endif %}
                 <!--code for OWNER Starts-->
 
                 <div class ="row">
@@ -373,18 +386,7 @@ word-wrap:break-word;
                        
                 </div>
                
-{% if not user.is_authenticated %}
-<center>
-<div>
-<form class="form-inline" id="passenger" action="/complaint/" method="get">
-    <input id="id" type="text" name="id" value="{{taxi.id }}" style="display:none;">
-    <input id="passenger_phone" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_phone" placeholder="Your Phone Number" required><br><br>
-    <input id="passenger_origin" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_origin" placeholder="Origin of the trip">&nbsp;&nbsp;&nbsp;&nbsp;
-    <input id="passenger_destination" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_destination" placeholder="Destination of the trip">
-</form>
-</div>
-</center>
-{% endif %}
+
               </div>
         </div>
 

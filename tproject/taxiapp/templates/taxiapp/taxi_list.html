@@ -10,8 +10,8 @@
             <tr>
                 <th>Number Plate</th>
                 <th>Traffic Number</th>
-                <th>Name</th>
-                <th>Phone Number</th>
+                <th>Owner Name</th>
+                <th>Owner Phone Number</th>
                 <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
@@ -20,8 +20,8 @@
             <tr>
 		<th>Number Plate</th>
                 <th>Traffic Number</th>
-                <th>Driver Name</th>
-                <th>Phone Number</th>
+                <th>Owner Name</th>
+                <th>Owner Phone Number</th>
                 <th>Owner/Driver</th>
                 <th>More Details</th>
             </tr>
@@ -31,8 +31,8 @@
             <tr>
                 <td>{{row.number_plate}}</td>
                 <td>{{row.traffic_number}}</td>
-                <td>{{row.owner_id_fk.owner_name}}</td>
-                <td>{{row.owner_id_fk.phone_number}}</td>
+                <td>{{row.owner.owner_name}}</td>
+                <td>{{row.owner.phone_number}}</td>
                 <td>{{row.is_owner_driver}}</td>
                 <td><a href="{% url 'taxiapp:taxi_detail' pk=row.traffic_number %}">{{'More Details'}}</a></td>
             </tr>
@@ -53,7 +53,7 @@ $(document).ready(function() {
                 <th>Complaint Id</th>
                 <th>Number Plate</th>
                 <th>Traffic Number</th>
-                <th>Driver Name</th>
+                <th>Owner Name</th>
                 <th>Reason</th>
                 <th>Assigned To</th>
                 <th>Status</th>
@@ -65,7 +65,7 @@ $(document).ready(function() {
                 <th>Complaint Id</th>
                 <th>Number Plate</th>
                 <th>Traffic Number</th>
-                <th>Driver Name</th>
+                <th>Owner Name</th>
                 <th>Reason</th>
                 <th>Assigned To</th>
                 <th>Status</th>
@@ -76,9 +76,9 @@ $(document).ready(function() {
             {% for row in rows_c %}
             <tr>
                 <td>{{row.complaint_number}}</td>
-                <td>{{row.taxi.get_number_plate}}</td>
-                <td>{{row.taxi.traffic_number}}</td>
-                <td>{{row.taxi.driver_name}}</td>
+                <td>{{row.vehicle.number_plate}}</td>
+                <td>{{row.vehicle.traffic_number}}</td>
+                <td>{{row.vehicle.owner.owner_name}}</td>
                 <td>{{row.reason.reason}}</td>
                 {% if row.assigned_to.user_number %}
                 <td>Id: {{row.assigned_to.user_number}} | SMS: {{row.assigned_to.sms_number}}</td>

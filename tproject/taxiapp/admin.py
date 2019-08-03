@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import Site
-from taxiapp.models import MyUser
+from taxiapp.models import MyUser,Vehicle,Driver,Owner,Active,Vehicle_type
 from django.core.urlresolvers import reverse
 from imagekit.admin import AdminThumbnail
 
@@ -172,16 +172,18 @@ class TaxiAdmin(admin.ModelAdmin):
 class ComplaintStatementAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return request.user.is_staff and request.user.is_admin
-    list_display = ('complaint_id', 'number_plate', 'driver_name', 'phone_number', 'reason','resolved','allocated_to')
+    list_display = ('complaint_id', 'number_plate', 'owner_name', 'phone_number', 'reason','resolved','allocated_to')
     def complaint_id(self, obj):
         return str(obj.complaint_number)
     complaint_id.short_description = 'Complaint ID'
     def number_plate(self, obj):
-        return obj.taxi.traffic_number
+        if (obj.vehicle is not None) :
+            return obj.vehicle.traffic_number
     number_plate.short_description = 'Number Plate'
-    def driver_name(self, obj):
-        return obj.taxi.driver_name
-    driver_name.short_description = 'Driver Name'
+    def owner_name(self, obj):
+        if (obj.vehicle is not None and obj.vehicle.owner is not None) :
+            return obj.vehicle.owner.owner_name
+    owner_name.short_description = 'Owner Name'
     def reason(self, obj):
         return obj.reason
     reason.short_description = 'Reason'
@@ -208,6 +210,24 @@ class ReasonsAdmin(admin.ModelAdmin):
     def reason_id(self,obj):
         return 'CR-'+str(obj.id).zfill(3)
 
+class VehicleAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('qr_code','created_time','modified_by','modified_time')
+    list_display = ('traffic_number','number_plate','vehicle_type','is_owner_driver','rc_number')
+
+class DriverAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('qr_code','created_time','modified_by','modified_time')
+    list_display = ('traffic_number','driver_name','phone_number','dl_number','driver_image_name')
+
+class OwnerAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('created_time','modified_by','modified_time')
+    list_display = ('owner_name','date_of_birth','phone_number','owner_image','dl_number')
+
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
@@ -215,6 +235,11 @@ admin.site.unregister(Group)
 admin.site.register(City_Code,CityCodeAdmin)
 admin.site.register(Reasons,ReasonsAdmin)
 admin.site.register(Taxi_Detail,TaxiAdmin)
+admin.site.register(Vehicle,VehicleAdmin)
+admin.site.register(Driver,DriverAdmin)
+admin.site.register(Owner,OwnerAdmin)
+admin.site.register(Active)
+admin.site.register(Vehicle_type)
 admin.site.register(Complaint_Statement,ComplaintStatementAdmin)
 admin.site.unregister(Site)
 admin.site.site_header = 'SafeAutoTaxi Administration'

@@ -12,4 +12,8 @@ SMS_TYPE = '1'
 CUTLY_API = 'https://cutt.ly/api/api.php'
 CUTLY_ACCESS_TOKEN = 'a13286dac7e3ef36b3459859ad3808eb44fda'
 
+""" Bulk Upload Taxi Data Constants """
+BULK_UPLOAD_S3_BUCKETNAME = 'taxipublic'
+#BULK_UPLOAD_S3_BUCKETNAME = 'taxidev'
+
 
