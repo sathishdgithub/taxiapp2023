@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import Site
-from taxiapp.models import MyUser,Vehicle,Driver,Owner,Active,Vehicle_type
+from taxiapp.models import MyUser,Vehicle,Driver,Owner,Active,Vehicle_type,Rating_Type,Rating_Reason,Customer_Rating
 from django.core.urlresolvers import reverse
 from imagekit.admin import AdminThumbnail
 
@@ -240,6 +240,38 @@ class OwnerAdmin(admin.ModelAdmin):
     exclude = ('created_time','modified_by','modified_time')
     list_display = ('owner_name','date_of_birth','phone_number','owner_image','dl_number')
 
+class RatingTypeAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('created_time','modified_by','modified_time')
+    list_display = ('rating_type','active')
+    def active(self, obj):
+        return str(obj.active)
+    active.short_description = 'Active'
+
+class RatingReasonAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('created_time','modified_by','modified_time')
+    list_display = ('rating_type','reason','active')
+    def rating_type(self, obj):
+        return str(obj.rating_type)
+    rating_type.short_description = 'Rating Type'
+    def active(self, obj):
+        return str(obj.active)
+    active.short_description = 'Active'
+
+class CustomerRatingAdmin(admin.ModelAdmin):
+    def has_module_permission(self, request):
+        return request.user.is_staff and request.user.is_admin    
+    exclude = ('created_time','modified_by','modified_time')
+    list_display = ('vehicle','driver','reason','phone_number','destination_area','origin_area')
+    def vehicle(self, obj):
+        return str(obj.vehicle)
+    vehicle.short_description = 'Vehicle Number'
+    def driver(self, obj):
+        return str(obj.driver)
+    driver.short_description = 'Driver'
 
 # Now register the new UserAdmin...
 admin.site.register(MyUser, UserAdmin)
@@ -252,6 +284,9 @@ admin.site.register(Driver,DriverAdmin)
 admin.site.register(Owner,OwnerAdmin)
 admin.site.register(Active)
 admin.site.register(Vehicle_type)
+admin.site.register(Rating_Type,RatingTypeAdmin)
+admin.site.register(Rating_Reason,RatingReasonAdmin)
+admin.site.register(Customer_Rating,CustomerRatingAdmin)
 admin.site.register(Complaint_Statement,ComplaintStatementAdmin)
 admin.site.unregister(Site)
 admin.site.site_header = 'SafeAutoTaxi Administration'

@@ -459,6 +459,13 @@ class Rating_Type(models.Model):
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
 
+    def __str__(self):
+        return self.rating_type
+
+    class Meta:
+        verbose_name = 'Rating Type'
+        verbose_name_plural = 'Rating Types'
+
 class Rating_Reason(models.Model):
     rating_type = models.ForeignKey(Rating_Type,null=True)
     reason = models.CharField(max_length=30,null=False) #Satisfied (Good, Excellent) & Not Satisfied(Bad, Wooorest)
@@ -467,6 +474,13 @@ class Rating_Reason(models.Model):
     created_time = models.DateTimeField(default=datetime.now, blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    
+    def __str__(self):
+        return self.reason
+
+    class Meta:
+        verbose_name = 'Rating Reason'
+        verbose_name_plural = 'Rating Reasons'
 
 class Customer_Rating(models.Model):
     vehicle = models.ForeignKey(Vehicle,null=True)
@@ -480,3 +494,10 @@ class Customer_Rating(models.Model):
     created_time = models.DateTimeField(default=datetime.now, blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
+
+    def __str__(self):
+        return self.vehicle.number_plate
+
+    class Meta:
+        verbose_name = 'Customer Rating'
+        verbose_name_plural = 'Customer Ratings'
