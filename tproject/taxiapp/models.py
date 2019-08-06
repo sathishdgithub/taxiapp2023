@@ -416,6 +416,14 @@ class Driver(models.Model):
             buffer, None, file_name, 'image/png', buffer.len, None)
         self.qr_code.save(file_name, file_buffer)
 
+      def save(self, *args, **kwargs):
+        add = not self.pk
+        super(Driver, self).save(*args, **kwargs)
+        if add:
+			self.generate_qrcode()
+			kwargs['force_insert'] = False # create() uses this, which causes error.
+ 		        super(Driver, self).save(*args, **kwargs)
+
       class Meta:
             verbose_name = 'Driver'
             verbose_name_plural = 'Drivers'
@@ -442,3 +450,33 @@ class Complaint_Statement(models.Model):
         class Meta:
             verbose_name = 'Customer Complaint'
             verbose_name_plural = 'Customer Complaints'
+
+class Rating_Type(models.Model):
+    rating_type = models.CharField(max_length=20,null=False)
+    active = models.ForeignKey(Active,null=True)
+    created_by = models.CharField(max_length=50,null = True,blank= True)
+    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_by = models.CharField(max_length=50,null = True,blank= True)
+    modified_time = models.DateTimeField(default=datetime.now, blank=True)
+
+class Rating_Reason(models.Model):
+    rating_type = models.ForeignKey(Rating_Type,null=True)
+    reason = models.CharField(max_length=30,null=False) #Satisfied (Good, Excellent) & Not Satisfied(Bad, Wooorest)
+    active = models.ForeignKey(Active,null=True)
+    created_by = models.CharField(max_length=50,null = True,blank= True)
+    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_by = models.CharField(max_length=50,null = True,blank= True)
+    modified_time = models.DateTimeField(default=datetime.now, blank=True)
+
+class Customer_Rating(models.Model):
+    vehicle = models.ForeignKey(Vehicle,null=True)
+    rating_type = models.ForeignKey(Rating_Type,null=True)
+    driver = models.ForeignKey(Driver,null=True)
+    reason=models.CharField(max_length=200,null=False,blank=False)
+    phone_number = models.CharField(max_length=200,null=False,blank=False)
+    destination_area = models.CharField(max_length=200,null=True,blank=True)
+    origin_area  = models.CharField(max_length=200,null=True,blank=True)
+    created_by = models.CharField(max_length=50,null = True,blank= True)
+    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_by = models.CharField(max_length=50,null = True,blank= True)
+    modified_time = models.DateTimeField(default=datetime.now, blank=True)

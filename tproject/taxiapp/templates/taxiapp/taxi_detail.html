@@ -180,7 +180,7 @@ word-wrap:break-word;
                                 <tbody>
                                 <tr>
                                     <td>Number Plate</td>
-                                    <td>{{ vehicle.number_plate }}</td>
+                                    <td>{{ vehicle.number_plate }}</td>                                    
                                   </tr>
                                   <tr>
                                     <td>Traffic Number</td>
@@ -264,6 +264,9 @@ word-wrap:break-word;
     <input id="passenger_phone" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_phone" placeholder="Your Phone Number" required><br><br>
     <input id="passenger_origin" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_origin" placeholder="Origin of the trip">&nbsp;&nbsp;&nbsp;&nbsp;
     <input id="passenger_destination" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_destination" placeholder="Destination of the trip">
+    <!-- For Rating -->
+    <input id="number_plate" type="text" name="number_plate" value="{{ vehicle.number_plate }}" style="display:none;">
+    <input id="rating_type" type="text" name="rating_type" value="Satisfied" style="display:none;">
 </form>
 </div>
 </center>
@@ -453,6 +456,21 @@ function sendComplaint() {
     }
     else{document.forms.passenger.submit();}
 }
+
+
+function rating() {
+  var x = document.getElementById("passenger_phone").value;
+  document.getElementById("passenger").action = "/ratings/";
+  if (x.length < 10) {
+        alert("Please fill in your correct Phone Number");
+        return false;
+    }
+    else{
+      document.forms.passenger.submit(); 
+    }
+}
+
+
 </script>
 {% endblock %}
 

@@ -924,3 +924,59 @@ class TaxiComplaints(APIView):
         serializer = TaxiComplaintsSerialize(complaints,many=True)        
         return Response(data=serializer.data)
 
+
+def Ratings(request):
+    passenger_phone = request.GET.get('passenger_phone')
+    passenger_origin = request.GET.get('passenger_origin')
+    passenger_destination = request.GET.get('passenger_destination')
+    number_plate = request.GET.get('number_plate')
+    rating_type = request.GET.get('rating_type')
+    vehicleId = request.GET.get('id')
+
+    ratingType = Rating_Type.objects.get(rating_type = rating_type)
+    active = Active.objects.get(active_name = 'Active')
+    reasons = Rating_Reason.objects.filter(rating_type = ratingType, active = active)  
+
+    vehicle = Vehicle.objects.get(id = vehicleId)
+    drivers = Driver.objects.filter(vehicle = vehicle)
+
+    like = settings.S3_URL + '/images/rating/like.png'
+    un_like = settings.S3_URL + '/images/rating/unlike.png'
+    print(like)
+    print(un_like)
+    return render(request,'taxiapp/rating.html',{'passenger_phone':passenger_phone, 'passenger_origin':passenger_origin, 
+                'passenger_destination':passenger_destination, 'number_plate':number_plate, 'rating_type':rating_type, 
+                'reasons':reasons,'drivers':drivers, 'vehicle_id':vehicleId, 'like':like, 'un_like':un_like})        
+
+def customer_rating (request) :
+    driver_id = request.POST.get('driver')
+    reason = request.POST.get('reason')
+    passenger_phone = request.POST.get('passenger_phone')
+    passenger_origin = request.POST.get('passenger_origin')
+    passenger_destination = request.POST.get('passenger_destination')
+    rating_type = request.POST.get('rating_type')
+    vehicle_id = request.POST.get('vehicle_id')
+    otherReason = request.POST.get('otherReason')
+    
+    if(reason == 'Other'):
+        reason = otherReason
+
+    vehicle = Vehicle.objects.get(id = vehicle_id)
+    ratingType = Rating_Type.objects.get(rating_type = rating_type)
+    driver = Driver.objects.get(id = driver_id)
+    
+    customerRating = Customer_Rating ()
+    customerRating.vehicle = vehicle
+    customerRating.rating_type = ratingType
+    customerRating.driver = driver
+    customerRating.reason = reason
+    customerRating.phone_number = passenger_phone
+    customerRating.destination_area = passenger_destination
+    customerRating.origin_area = passenger_origin
+    # Who's name we have to keep as created by and modified by
+    #customerRating.created_by = passenger_phone
+    #customerRating.modified_by = passenger_phone
+
+    customerRating.save()
+    return render(request,'taxiapp/rating.html',{'msg':'Successfully saved'})
+

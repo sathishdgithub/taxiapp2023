@@ -35,6 +35,8 @@ urlpatterns = [
         url(r'^api/v1/get_driver_owner_details/$',views.TaxiDriverOwner.as_view()),
         url(r'^api/v1/get_complaints/$',views.TaxiComplaints.as_view()),
         url(r'^docs/$', swagger.schema_view, name="schema_view"),
+        url(r'^ratings/$',views.Ratings,name='Ratings'),
+        url(r'^customer_rating/$',views.customer_rating,name='Ratings'),
 
 ]       
 

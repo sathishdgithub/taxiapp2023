@@ -1,0 +1,324 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+  .user-row {
+    margin-bottom: 14px;
+  }
+
+  table,
+  th,
+  td {
+
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .user-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .dropdown-user {
+    margin: 13px 0;
+    padding: 5px;
+    height: 100%;
+  }
+
+  .dropdown-user:hover {
+    cursor: pointer;
+  }
+
+  .table-user-information>tbody>tr {
+    border-top: 1px solid rgb(221, 221, 221);
+  }
+
+  .table-user-information>tbody>tr:first-child {
+    border-top: 0;
+  }
+
+
+  .table-user-information>tbody>tr>td {
+    border-top: 0;
+  }
+
+  .toppad {
+    margin-top: 20px;
+  }
+
+  /* Profile container */
+  .profile {
+    margin: 20px 0;
+  }
+
+  /* Profile sidebar */
+  .profile-sidebar {
+    padding: 20px 0 10px 0;
+    background: #fff;
+  }
+
+  .profile-userpic img {
+    float: none;
+    margin: 0 auto;
+    width: 50%;
+    height: 50%;
+    max-height: 100px;
+    max-width: 100px;
+    -webkit-border-radius: 50% !important;
+    -moz-border-radius: 50% !important;
+    border-radius: 50% !important;
+  }
+
+  .profile-usertitle {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .profile-usertitle-name {
+    color: #5a7391;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+
+  .profile-usertitle-job {
+    text-transform: uppercase;
+    color: #5b9bd1;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .profile-userbuttons .btn {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 15px;
+    margin-right: 5px;
+  }
+
+  .profile-userbuttons .btn:last-child {
+    margin-right: 0px;
+  }
+
+  .profile-usermenu {
+    margin-top: 30px;
+  }
+
+  .profile-usermenu ul li {
+    border-bottom: 1px solid #f0f4f7;
+  }
+
+  .profile-usermenu ul li:last-child {
+    border-bottom: none;
+  }
+
+  .profile-usermenu ul li p {
+    color: #93a3b5;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .profile-usermenu ul li p i {
+    margin-right: 8px;
+    font-size: 14px;
+  }
+
+  .profile-usermenu ul li p:hover {
+    background-color: #fafcfd;
+    color: #5b9bd1;
+  }
+
+  .profile-usermenu ul li.active {
+    border-bottom: none;
+  }
+
+  .profile-usermenu ul li.active p {
+    color: #5b9bd1;
+    background-color: #f6f9fb;
+    border-left: 2px solid #5b9bd1;
+    margin-left: -2px;
+  }
+
+  /* Profile Content */
+  .profile-content {
+    padding: 20px;
+    background: #fff;
+    min-height: 460px;
+  }
+
+  .qr-userpic img {
+    float: none;
+    margin: 0 auto;
+    width: 50%;
+    height: 50%;
+    max-height: 100px;
+    max-width: 100px;
+  }
+
+  td.address
+
+  /* Give whatever class name you want */
+    {
+    width: 60%;
+    /* Give whatever width you want */
+    word-wrap: break-word;
+  }
+
+  /* HIDE RADIO */
+[type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+[type=radio] + img {
+  cursor: pointer;
+}
+
+/* CHECKED STYLES */
+[type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+}
+</style>
+<form id="customer_rating" action="/customer_rating/" method="post">
+  {% csrf_token %}
+  <div
+    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad">
+    {% if msg|length > 0 %}
+    <div>
+      <h4 style="text-align: center; color: green;">{{msg}}</h4>
+    </div>
+    <div class="profile-userbuttons center-block">
+      <button type="button" class="btn btn-success btn-sm" onclick="goToHome()" style="margin:0.5em;">Done</button>
+    </div>
+    {% endif %}
+    {% ifequal msg|length 0 %}
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Rate Your Ride</h3>
+      </div>
+      <div>
+        <div class="panel-heading">
+          <h3 class="panel-title" style="text-align: center;">Vehicle Number: {{ number_plate }}</h3>
+        </div>
+      </div>
+      <div>
+        <table align="center">
+          <tr>
+            <td>
+                <label>
+                <input type="radio" name="rating_type" value="Satisfied" onclick="getReasons()"
+                {% ifequal rating_type "Satisfied" %} checked {% endifequal %}> 
+                <img class="green" src="{{like}}"><br>
+                Satisfied
+                </label>
+            </td>
+            <td></td>
+            <td>
+                <label>
+                <input type="radio" name="rating_type" value="Unsatisfied" onclick="getReasons()"
+                {% ifequal rating_type "Unsatisfied" %} checked {% endifequal %}> 
+                <img class="red" src="{{un_like}}"><br>
+                Un-Satisfied
+                </label>
+            </td>
+          </tr>
+        </table>
+        <table align="center">
+            <tr>
+              <td>Reason:<span style="padding-left: 31px;">
+                <select style="width:150px; text-align: center;" name="reason" id="reason" onchange="showOthers()">
+                  {% for reason in reasons %}
+                  <option value="{{reason.reason}}">{{ reason.reason }}</option>
+                  {% endfor %}
+                  <option value="Other">Other</option>
+                </select>
+                </span>
+              </td>
+            </tr>            
+            <tr style="display: none" id="other">
+                <td>
+                    <textarea rows="2" cols="30" name="otherReason" id = "otherReason"></textarea>
+                </td>
+            </tr>              
+            <tr>
+              <td>Select Driver:
+                <select style="width:150px; text-align: center;" name="driver">
+                  {% for driver in drivers %}
+                  <option value="{{driver.id}}">{{ driver.driver_name }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+
+          </table>
+      </div>
+      <div class="row">
+        <input type="hidden" name="passenger_phone" value="{{passenger_phone}}" />
+        <input type="hidden" name="passenger_origin" value="{{passenger_origin}}" />
+        <input type="hidden" name="passenger_destination" value="{{passenger_destination}}" />
+        <input type="hidden" name="vehicle_id" value="{{vehicle_id}}" />
+        <div class="profile-userbuttons center-block">
+          <button type="button" class="btn btn-success btn-sm" onclick="restValues()"
+            style="margin:0.5em;">Reset</button>
+          <button type="submit" class="btn btn-danger btn-sm" onclick="saveCustomerDetails()"
+            style="margin:0.5em;">submit</button>
+        </div>
+      </div>
+    </div>
+    {% endifequal %}
+  </div>
+
+</form>
+
+<script type="text/javascript">
+  function restValues() {
+    //location.reload(true);    
+    var url = new URL(location.href);
+    var query_string = url.search;
+    var search_params = new URLSearchParams(query_string);
+    search_params.set('rating_type', "Satisfied");
+    url.search = search_params.toString();
+    var new_url = url.toString();
+    location.href = new_url;
+  }
+  function goToHome() {
+    location.href = '/';
+  }
+  function getReasons() {
+    var rating_type = document.querySelector('input[name="rating_type"]:checked').value;
+    var url = new URL(location.href);
+    var query_string = url.search;
+    var search_params = new URLSearchParams(query_string);
+    search_params.set('rating_type', rating_type);
+    url.search = search_params.toString();
+    var new_url = url.toString();
+    location.href = new_url;
+  }
+  function showOthers() {
+    var reason = document.getElementById("reason").value;
+    if(reason == "Other") {
+      document.getElementById("other").style.display = "inline";
+    } else {
+      document.getElementById("otherReason").value = "";
+      document.getElementById("other").style.display = "none";
+    }
+  }
+  function saveCustomerDetails() {
+    document.forms.customer_rating.submit();
+  }
+</script>
+
+{% endblock %}
