@@ -201,7 +201,7 @@
       <h4 style="text-align: center; color: green;">{{msg}}</h4>
     </div>
     <div class="profile-userbuttons center-block">
-      <button type="button" class="btn btn-success btn-sm" onclick="goToHome()" style="margin:0.5em;">Done</button>
+      <button type="button" class="btn btn-primary btn-sm" onclick="goToHome()" style="margin:0.5em;">Home</button>
     </div>
     {% endif %}
     {% ifequal msg|length 0 %}
@@ -271,9 +271,9 @@
         <input type="hidden" name="passenger_destination" value="{{passenger_destination}}" />
         <input type="hidden" name="vehicle_id" value="{{vehicle_id}}" />
         <div class="profile-userbuttons center-block">
-          <button type="button" class="btn btn-success btn-sm" onclick="restValues()"
+          <button type="button" class="btn btn-danger btn-sm" onclick="restValues()"
             style="margin:0.5em;">Reset</button>
-          <button type="submit" class="btn btn-danger btn-sm" onclick="saveCustomerDetails()"
+          <button type="submit" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
             style="margin:0.5em;">submit</button>
         </div>
       </div>

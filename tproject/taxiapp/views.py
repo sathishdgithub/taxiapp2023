@@ -978,5 +978,5 @@ def customer_rating (request) :
     #customerRating.modified_by = passenger_phone
 
     customerRating.save()
-    return render(request,'taxiapp/rating.html',{'msg':'Successfully saved'})
+    return render(request,'taxiapp/rating.html',{'msg':'Thank you for your rating.'})
 
