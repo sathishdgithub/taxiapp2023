@@ -135,14 +135,14 @@ def taxi_detail(request, pk):
     owner = Owner.objects.filter(vehicle__traffic_number__iexact=pk)
     vcl = Vehicle.objects.filter(traffic_number__iexact = pk)
    
-    dvr = None
+    drivers = []
    
     if ( len(owner) < 1):
         owner = Owner.objects.filter(vehicle__number_plate__iexact=pk)
     if (len(vcl) < 1 ):
         vcl = Vehicle.objects.filter(number_plate__iexact = pk)
     if len(vcl) > 0:
-       dvr = Driver.objects.all().filter(vehicle = vcl[0].id )
+       drivers = Driver.objects.all().filter(vehicle = vcl[0].id )
     
     if len(vcl) > 0:
         m = vcl[0]
@@ -162,9 +162,9 @@ def taxi_detail(request, pk):
 
     vehicleObj = vcl[0] if vcl is not None and len(vcl) > 0 else None
     ownerObj = owner[0] if owner is not None and len(owner) > 0 else None
-    driverObj = dvr[0] if dvr is not None and len(dvr) > 0 else None
-    if(vehicleObj is not None or ownerObj is not None or driverObj is not None) :
-        return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vehicleObj,'owner':ownerObj,'driver':driverObj}) 
+    #driverObj = dvr[0] if dvr is not None and len(dvr) > 0 else None
+    if(vehicleObj is not None or ownerObj is not None) :
+        return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vehicleObj,'owner':ownerObj,'drivers':drivers}) 
     else:
         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
