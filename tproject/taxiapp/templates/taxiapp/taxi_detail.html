@@ -174,7 +174,7 @@ word-wrap:break-word;
                       </div>
                        {% endif %}
                        <div class="col-md-6" style="margin-top: 25px;">
-                          <h2 class="panel-title" style="text-align: center;"> Vehicle Details</h2>
+                          <h2 class="panel-title" style="text-align: center;"> Vehicle </h2>
                           <div class="center-block" style="margin: 1em;"> 
                               <table class="table table-user-information">
                                 <tbody>
@@ -266,24 +266,24 @@ word-wrap:break-word;
     <input id="passenger_destination" class="form-control mb-2 mr-sm-2 mb-sm-0" type="text" name="passenger_destination" placeholder="Destination of the trip">
     <!-- For Rating -->
     <input id="number_plate" type="text" name="number_plate" value="{{ vehicle.number_plate }}" style="display:none;">
-    <input id="rating_type" type="text" name="rating_type" value="Satisfied" style="display:none;">
+    <input id="rating_type" type="text" name="rating_type" value="0" style="display:none;">
 </form>
 </div>
 </center>
 {% endif %}
+                {%if owner%}
                 <!--code for OWNER Starts-->
-
+                <div>&nbsp;</div>
                 <div class ="row">
-                    
+                  
                     <div class="col-md-6">
                         <div class="profile-userpic">
-                           <img src="{{ driver.driver_image_thumbnail.url }}" class="img-responsive" alt="">
+                           <img src="{{ owner.owner_image_thumbnail.url }}" class="img-responsive" alt="">
        
                        </div>
                 </div>
-                      
                        <div class="col-md-6" style="margin-top: 25px;">
-                          <h2 class="panel-title" style="text-align: center;"> Owner Details</h2>
+                          <h2 class="panel-title" style="text-align: center;"> Owner </h2>
                           <div class="center-block" style="margin: 1em;"> 
                               <table class="table table-user-information">
                                 <tbody>
@@ -330,7 +330,10 @@ word-wrap:break-word;
                        </div>
                        
                 </div>
+                {%endif%}
                 <!--code for Driver Starts -->
+                {%if driver%}
+                <div>&nbsp;</div>
                 <div class ="row">
                     
                     <div class="col-md-6">
@@ -341,7 +344,7 @@ word-wrap:break-word;
                 </div>
                       
                        <div class="col-md-6" style="margin-top: 25px;">
-                          <h2 class="panel-title" style="text-align: center;"> Driver Details</h2>
+                          <h2 class="panel-title" style="text-align: center;"> Driver </h2>
                           <div class="center-block" style="margin: 1em;"> 
                               <table class="table table-user-information">
                                 <tbody>
@@ -388,11 +391,11 @@ word-wrap:break-word;
                        </div>
                        
                 </div>
-               
+                {%endif%}
 
               </div>
         </div>
-
+      
 <div style=" display: none;">
 <form id="emer" action="/taxi_emergency/" method="post">
     {% csrf_token %}

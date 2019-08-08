@@ -132,13 +132,15 @@ def taxi_detail(request, pk):
     if ' ' in pk:
         pk = pk.replace(' ','')
     
-    owner = Owner.objects.filter(vehicle__traffic_number=pk)
-    vcl = Vehicle.objects.filter(traffic_number = pk)
+    owner = Owner.objects.filter(vehicle__traffic_number__iexact=pk)
+    vcl = Vehicle.objects.filter(traffic_number__iexact = pk)
+   
     dvr = None
    
-    if ( len(owner) < 1 or len(vcl) < 1 ):
-        owner = Owner.objects.filter(vehicle__number_plate=pk)
-        vcl = Vehicle.objects.filter(number_plate = pk)
+    if ( len(owner) < 1):
+        owner = Owner.objects.filter(vehicle__number_plate__iexact=pk)
+    if (len(vcl) < 1 ):
+        vcl = Vehicle.objects.filter(number_plate__iexact = pk)
     if len(vcl) > 0:
        dvr = Driver.objects.all().filter(vehicle = vcl[0].id )
     
@@ -288,7 +290,11 @@ def complaint_success(request,pk):
         complaint.save()
         #taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         vehicleObj = Vehicle.objects.get(id=complaint.vehicle.id)
-        driver = Driver.objects.get(vehicle = vehicleObj)
+        driver = Driver()
+        try:        
+            driver = Driver.objects.get(vehicle = vehicleObj)
+        except Exception as e:
+            print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
         message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
         if vehicleObj.city.sms:
@@ -370,7 +376,7 @@ def taxi_emergency(request):
     if request.method == "POST":
         rows = MyUser.objects.all()
         point = request.POST.get('point','0,0')
-        taxi_id = request.POST.get('id')
+        vehicle_id = request.POST.get('id')
         p_phone = request.POST.get('passenger_phone_sos','')
         p_origin = request.POST.get('passenger_origin_sos','')       
         p_destination = request.POST.get('passenger_destination_sos','')       
@@ -390,11 +396,17 @@ def taxi_emergency(request):
                         police = row
             phone_number = police.sms_number
             whatsapp_number = police.whatsapp_number
-            taxi = Taxi_Detail.objects.get(id=taxi_id)
-            message = 'SOS\n'+'Name: '+str(taxi.driver_name)+'\n'+'Taxi Number: '+str(taxi.number_plate)+'\n'+'Driver Phone Number:'+str(taxi.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
-            if taxi.city.sms:
+            vehicle = Vehicle.objects.get(id=vehicle_id)
+            driver = Driver()
+            try:
+                driver = Driver.objects.get(vehicle=vehicle)
+            except Exception as e:
+                print(e.message)
+
+            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
+            if vehicle.city.sms:
                 m = send_sms(message,phone_number,'emergency')
-            if taxi.city.whatsapp:
+            if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
         else:
@@ -932,21 +944,24 @@ def Ratings(request):
     number_plate = request.GET.get('number_plate')
     rating_type = request.GET.get('rating_type')
     vehicleId = request.GET.get('id')
-
-    ratingType = Rating_Type.objects.get(rating_type = rating_type)
-    active = Active.objects.get(active_name = 'Active')
-    reasons = Rating_Reason.objects.filter(rating_type = ratingType, active = active)  
+    reasons = []
+    rating_type = int(rating_type)
+    if(rating_type > 0):
+        ratingValue = 'Unsatisfied'
+        if(rating_type == 3):
+            ratingValue = 'neutral'
+        if(rating_type > 3):
+            ratingValue = 'Satisfied'
+        ratingType = Rating_Type.objects.get(rating_type__iexact = ratingValue)
+        active = Active.objects.get(active_name__iexact = 'Active')
+        reasons = Rating_Reason.objects.filter(rating_type = ratingType, active = active)  
 
     vehicle = Vehicle.objects.get(id = vehicleId)
     drivers = Driver.objects.filter(vehicle = vehicle)
 
-    like = settings.S3_URL + '/images/rating/like.png'
-    un_like = settings.S3_URL + '/images/rating/unlike.png'
-    print(like)
-    print(un_like)
     return render(request,'taxiapp/rating.html',{'passenger_phone':passenger_phone, 'passenger_origin':passenger_origin, 
                 'passenger_destination':passenger_destination, 'number_plate':number_plate, 'rating_type':rating_type, 
-                'reasons':reasons,'drivers':drivers, 'vehicle_id':vehicleId, 'like':like, 'un_like':un_like})        
+                'reasons':reasons,'drivers':drivers, 'vehicle_id':vehicleId})        
 
 def customer_rating (request) :
     driver_id = request.POST.get('driver')
@@ -960,15 +975,25 @@ def customer_rating (request) :
     
     if(reason == 'Other'):
         reason = otherReason
+    rating_type = int(rating_type)
+    ratingValue = 'Unsatisfied'
+    if(rating_type == 3):
+        ratingValue = 'neutral'
+    if(rating_type > 3):
+        ratingValue = 'Satisfied'
 
     vehicle = Vehicle.objects.get(id = vehicle_id)
-    ratingType = Rating_Type.objects.get(rating_type = rating_type)
-    driver = Driver.objects.get(id = driver_id)
-    
+    ratingType = Rating_Type.objects.get(rating_type__iexact = ratingValue)
     customerRating = Customer_Rating ()
+    driver=Driver()
+    if( driver_id is not None) :
+        driver = Driver.objects.get(id = driver_id)
+        customerRating.driver = driver
+    
+    
     customerRating.vehicle = vehicle
     customerRating.rating_type = ratingType
-    customerRating.driver = driver
+    
     customerRating.reason = reason
     customerRating.phone_number = passenger_phone
     customerRating.destination_area = passenger_destination
