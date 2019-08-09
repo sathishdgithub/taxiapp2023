@@ -259,7 +259,7 @@ class Owner(models.Model):
       aadhar_number = models.CharField(max_length=22,null=True,blank=True)
       # Need to change path to store in the owner after migration
       owner_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
-      owner_image_thumbnail = ImageSpecField(source='driver_image',
+      owner_image_thumbnail = ImageSpecField(source='owner_image',
                                       processors=[ResizeToFill(75, 100)],
                                       format='JPEG',
                                       options={'quality': 60})
