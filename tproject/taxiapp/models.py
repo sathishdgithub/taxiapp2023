@@ -257,8 +257,9 @@ class Owner(models.Model):
       son_of = models.CharField(max_length = 40)
       phone_number = models.CharField(max_length=16,null=True,blank=True)
       aadhar_number = models.CharField(max_length=22,null=True,blank=True)
-      owner_image = models.ImageField(upload_to='owners',default = 'owners/profile.png')
-      owner_image_thumbnail = ImageSpecField(source='owner_image',
+      # Need to change path to store in the owner after migration
+      owner_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
+      owner_image_thumbnail = ImageSpecField(source='driver_image',
                                       processors=[ResizeToFill(75, 100)],
                                       format='JPEG',
                                       options={'quality': 60})

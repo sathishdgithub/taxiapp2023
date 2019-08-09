@@ -354,12 +354,20 @@ def complaint_view(request,pk):
 #         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
 def taxi_list(request):
+    page = request.GET.get('page', 1)
     
     if request.user.is_authenticated():
         if request.user.is_admin:
             rows = Vehicle.objects.select_related()
             rows_c = Complaint_Statement.objects.select_related('vehicle')
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+            paginator = Paginator(rows, 10)
+            try:
+                rowPages = paginator.page(page)
+            except PageNotAnInteger:
+                rowPages = paginator.page(1)
+            except EmptyPage:
+                rowPages = paginator.page(paginator.num_pages)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages})
         else:
             city = request.user.city
             rows = Vehicle.objects.select_related().filter(city = city)

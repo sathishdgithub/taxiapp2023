@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"/>
 
 </head>
-
+<div style="padding-bottom: 55px;">
 <center><h3>Vehicle List</h3></center>
 <table id="taxi-list" class="table table-striped table-bordered" width="100%" cellspacing="0">
         <thead>
@@ -39,13 +39,113 @@
             {% endfor %}
         </tbody>
 </table>
+<!-- {% if rows.has_other_pages %}
+  <ul class="pagination">
+    {% if rows.has_previous %}
+      <li><a href="?page={{ rows.previous_page_number }}">&laquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&laquo;</span></li>
+    {% endif %}
+    {% for i in rows.paginator.page_range %}
+      {% if rows.number == i %}
+        <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+      {% else %}
+        <li><a href="?page={{ i }}">{{ i }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if rows.has_next %}
+      <li><a href="?page={{ rows.next_page_number }}">&raquo;</a></li>
+    {% else %}
+      <li class="disabled"><span>&raquo;</span></li>
+    {% endif %}
+  </ul>
+{% endif %} -->
+
+<!-- {% if rows.has_other_pages %}
+<ul class="pagination">
+{% if rows.has_previous %}
+<li>«</li>
+{% else %}
+<li class="disabled">«</li>
+{% endif %}
+{% for i in rows.paginator.page_range %}
+{% if rows.number > 3 and forloop.first %}
+<li>1</li>
+<li class="disabled">⋯</li>
+{% endif %}
+{% if rows.number == i %}
+<li class="active">{{ i }} (current)</li>
+{% elif i > rows.number|add:'-3' and i < rows.number|add:'3' %}
+<li>{{ i }}</li>
+{% endif %}
+{% if rows.paginator.num_pages > rows.number|add:'3' and forloop.last %}
+<li>⋯</li>
+<li>{{ rows.paginator.num_pages }}</li>
+{% endif %}
+{% endfor %}
+{% if rows.has_next %}
+<li>»</li>
+{% else %}
+<li class="disabled">»</li>
+{% endif %}
+</ul>
+{% endif %} -->
+<!-- {% for i in rows.paginator.page_range %}
+{% if rows.number == i %}
+<li class="active">{{ i }} (current)</li>
+{% elif i > rows.number|add:'-4' and i < rows.number|add:'4' %}
+<li>{{ i }}</li>
+{% endif %}
+{% endfor %} -->
+<ul class="pagination" style="float: right;">
+
+    {% if rows.has_previous %}
+        <li><a href="?page={{ rows.previous_page_number }}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a></li>
+    {% else %}
+        <li class="disabled"><span><i class="fa fa-chevron-left" aria-hidden="true"></i></span></li>
+    {% endif %}
+    
+    {% if rows.number|add:'-4' > 1 %}
+        <li><a href="?page={{ rows.number|add:'-5' }}">&hellip;</a></li>
+    {% endif %}
+    
+    {% for i in rows.paginator.page_range %}
+        {% if rows.number == i %}
+            <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+        {% elif i > rows.number|add:'-5' and i < rows.number|add:'5' %}
+            <li><a href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+    {% endfor %}
+    
+    {% if rows.paginator.num_pages > rows.number|add:'4' %}
+        <li><a href="?page={{ rows.number|add:'5' }}">&hellip;</a></li>
+    {% endif %}
+    
+    {% if rows.has_next %}
+        <li><a href="?page={{ rows.next_page_number }}"><i class="fa fa-chevron-right" aria-hidden="true"></i></a></li>
+    {% else %}
+        <li class="disabled"><span><i class="fa fa-chevron-right" aria-hidden="true"></i></span></li>
+    {% endif %}
+    
+    </ul>
+</div>
+
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
 <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
 <script>
 $(document).ready(function() {
-    $('#taxi-list').DataTable();
+    $('#taxi-list').DataTable(
+        {
+        "paging":   false,
+        "ordering": false,
+        "info":     false,
+        }
+        
+    );
+    
 } );
 </script>
+<div>
 <center><h3>Complaints</h3></center>
 <table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
         <thead>
@@ -95,6 +195,7 @@ $(document).ready(function() {
             {% endfor %}
         </tbody>
 </table>
+</div>
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
 <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
 <script>
