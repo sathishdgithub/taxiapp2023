@@ -14,7 +14,7 @@ django-storages==1.6.5
 enum34==1.1.6
 ipython==5.3.0
 ipython-genutils==0.2.0
-mod-wsgi==4.5.15
+mod-wsgi==4.6.7
 numpy==1.12.1
 olefile==0.44
 packaging==16.8
