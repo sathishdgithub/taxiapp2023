@@ -186,7 +186,7 @@ $(document).ready(function() {
                 <td>Id: Admin | SMS: {{row.assigned_to.sms_number}}</td>
                 {% endif %}
                 {% if row.resolved == False %}
-                <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
+                <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}"><button>Resolve</button></a></td>
                 {% else %}
                 <td>{{'Resolved'}}</td>
                 {% endif %}

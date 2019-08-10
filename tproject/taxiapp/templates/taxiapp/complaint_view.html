@@ -145,6 +145,7 @@ word-wrap:break-word;
             <div class="panel-heading">
               <h3 class="panel-title" style="text-align: center;">{{ row.complaint_number }}</h3>
             </div>
+            <form name="resolve" action="/complaint_resolve">
             <div class="panel-body">
               <div class="row">
                 <div class="center-block" style="margin: 1em;"> 
@@ -179,16 +180,28 @@ word-wrap:break-word;
                         {% ifequal row.resolved True %}
                         <td>Resolved</td>
                         {% else %}
-                        <td>Not Resolved</td>
+                        <td>Not Resolved</td>                        
                         {% endifequal %}
                       </tr>
+                      {% ifequal row.resolved False %}
+                      <tr>
+                        <td>Message</td>
+                        <td><input type="text" name="message" id="message" value="" /></td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" align="center"><input type="hidden" name="id" id="id" value="{{ row.id }}" />
+                          <button type="submit" class="btn btn-success btn-sm" style="margin:0.5em;">Submit</button></td>
+                      </tr>
+                      {% endifequal %}
                      
                     </tbody>
                   </table>
                 </div>
               </div>
         </div>
-
+      </form>
+      </div>
+      </div>
 <script type="text/javascript">
     function sendSOS() {
  // var output = document.getElementById("out");

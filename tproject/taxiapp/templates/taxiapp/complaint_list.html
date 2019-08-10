@@ -38,7 +38,7 @@
                 <td>{{row.reason.reason}}</td>
                 <td>Id:{{row.assigned_to.id}} | SMS:{{row.assigned_to.sms_number}}</td>
                 {% if row.resolved == False %}
-                <td><a href="{% url 'taxiapp:complaint_resolve' pk=row.id %}"><button>Resolve</button></a></td>
+                <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}">More Details</a></td>
                 {% else %}
                 <td>{{'Resolved'}}</td>
                 {% endif %}

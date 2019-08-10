@@ -157,12 +157,15 @@ def taxi_detail(request, pk):
             else:
                 p = p+k[i]
         m.number_plate = p
-    
-    
 
-    vehicleObj = vcl[0] if vcl is not None and len(vcl) > 0 else None
-    ownerObj = owner[0] if owner is not None and len(owner) > 0 else None
-    #driverObj = dvr[0] if dvr is not None and len(dvr) > 0 else None
+    vehicleObj=Vehicle()
+    ownerObj=Owner()
+    try :
+        vehicleObj = vcl[0] if vcl is not None and len(vcl) > 0 else None
+        ownerObj = owner[0] if owner is not None and len(owner) > 0 else None
+    except Exception as e :
+        print(e.message)
+    
     if(vehicleObj is not None or ownerObj is not None) :
         return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vehicleObj,'owner':ownerObj,'drivers':drivers}) 
     else:
@@ -299,21 +302,35 @@ def complaint_success(request,pk):
         message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
+            n = send_sms(message,complaint.phone_number,'complaint')
         if vehicleObj.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
-def complaint_resolve(request,pk):
+# def complaint_resolve(request,pk):
+#     if request.user.is_authenticated():
+#         row = Complaint_Statement.objects.get(id=pk)
+#         #taxi = row.taxi
+#         vehicle = row.vehicle
+#         #t = Taxi_Detail.objects.get(id=taxi.id)
+#         t = Vehicle.objects.get(id=vehicle.id)
+#         t.num_of_complaints = max(0,t.num_of_complaints-1)
+#         t.save()
+#         row.resolved = True
+#         row.save()
+#         return HttpResponseRedirect("/taxi_list") 
+#     else:
+#         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
+
+def complaint_resolve(request):
     if request.user.is_authenticated():
-        row = Complaint_Statement.objects.get(id=pk)
-        #taxi = row.taxi
-        vehicle = row.vehicle
-        #t = Taxi_Detail.objects.get(id=taxi.id)
-        t = Vehicle.objects.get(id=vehicle.id)
-        t.num_of_complaints = max(0,t.num_of_complaints-1)
-        t.save()
-        row.resolved = True
-        row.save()
+        message = request.GET.get('message')
+        complaintId = request.GET.get('id')
+        complaintStatement = Complaint_Statement.objects.get(id=complaintId)
+        complaintStatement.message = message
+        complaintStatement.resolved = True
+        complaintStatement.save()
+
         return HttpResponseRedirect("/taxi_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
@@ -331,7 +348,11 @@ def complaint_view(request,pk):
         row = get_object_or_404(Complaint_Statement, complaint_number=pk)
         if row.vehicle is not None :
             vehicleObj = Vehicle.objects.get(id=row.vehicle.id)
-            driver = Driver.objects.get(vehicle = vehicleObj)
+            driver = Driver()
+            try :
+                driver = Driver.objects.get(vehicle = vehicleObj)
+            except Exception as e:
+                print(e.message)
             reason_statement = ''
             return render(request,'taxiapp/complaint_view.html',{'row':row,'driver':driver})
         else :
@@ -408,12 +429,37 @@ def taxi_emergency(request):
             driver = Driver()
             try:
                 driver = Driver.objects.get(vehicle=vehicle)
+                
+                # 'vehicle','reason','city','phone_number','complaint','area','origin_area'
+                # ,'destination_area','message')
+                #https://www.google.co.in/maps/place/17.4809535,78.39558749999999
             except Exception as e:
                 print(e.message)
 
+            """Code to save Emergency Text data into complaints table"""
+            area = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)
+            city = City_Code.objects.get(pk=police.city.id)
+            cs = Complaint_Statement()
+            cs.vehicle = vehicle 
+            cs.city = city
+            cs.area = area
+            cs.origin_area = p_origin
+            cs.destination_area = p_destination
+            cs.phone_number = p_phone
+            cs.assigned_to = police
+            cs.resolved = False
+            cs.is_emergency_text = True 
+            cs.complaint_number = city.city_code+'-CN-'+str(city.complaint_no+1).zfill(7)
+            cs.save()
+
+            city.complaint_no = city.complaint_no+1
+            city.save()
+
+            
             message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
             if vehicle.city.sms:
                 m = send_sms(message,phone_number,'emergency')
+                n = send_sms(message,p_phone,'emergency')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
@@ -958,7 +1004,7 @@ def Ratings(request):
         ratingValue = 'Unsatisfied'
         if(rating_type == 3):
             ratingValue = 'neutral'
-        if(rating_type > 3):
+        elif(rating_type > 3):
             ratingValue = 'Satisfied'
         ratingType = Rating_Type.objects.get(rating_type__iexact = ratingValue)
         active = Active.objects.get(active_name__iexact = 'Active')
@@ -1013,3 +1059,95 @@ def customer_rating (request) :
     customerRating.save()
     return render(request,'taxiapp/rating.html',{'msg':'Thank you for your rating.'})
 
+def OwnerImagesMigration(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    owners = Owner.objects.all()
+    ownerDestPath = "images/owners/"
+    for owner in owners :
+        if(owner.owner_image == 'drivers/profile.png'):
+            owner.owner_image = 'images/profile.png'
+            owner.save()
+        elif(owner.owner_image is not None and owner.owner_image != 'drivers/profile.png'):
+            ownerImage = str(owner.owner_image)
+            if('/' in ownerImage):
+                ownerImage = ownerImage.split('/')[1]                
+            try:
+                dest = s3.Bucket(bucketName)
+                source= { 'Bucket' : bucketName, 'Key': str(owner.owner_image)}
+                #source= { 'Bucket' : "taxipublic", 'Key': str(owner.owner_image)}
+                dest.copy(source, ownerDestPath + ownerImage)
+                owner.owner_image = ownerDestPath + ownerImage
+                owner.save()
+            except Exception as e:
+                print(e)
+    return render(request,'taxiapp/migration.html') 
+
+def DriverImagesMigration(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    drivers = Driver.objects.all()
+    driverDestPath = "images/drivers/"
+    for driver in drivers :
+        if(driver.driver_image == 'drivers/profile.png'):
+            driver.driver_image = 'images/profile.png'
+            driver.save()
+        elif(driver.driver_image is not None and driver.driver_image != 'drivers/profile.png'):
+            driverImage = str(driver.driver_image)
+            if('/' in driverImage):
+                driverImage = driverImage.split('/')[1]                
+            try:
+                dest = s3.Bucket(bucketName)
+                source= { 'Bucket' : bucketName, 'Key': str(driver.driver_image)}
+                #source= { 'Bucket' : "taxipublic", 'Key': str(driver.driver_image)}
+                dest.copy(source, driverDestPath + driverImage)
+                driver.driver_image = driverDestPath + driverImage
+                driver.save()
+            except Exception as e:
+                print(e)
+    return render(request,'taxiapp/migration.html')
+
+def VehicleQrCodeMigration(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    vehicles = Vehicle.objects.all()
+    destPath = "qr_codes/vehicles/"
+    for vehicle in vehicles :
+        qr_code = str(vehicle.qr_code)
+        if('/' in qr_code):
+            qr_code = qr_code.split('/')[1]                
+        try:
+            dest = s3.Bucket(bucketName)
+            source= { 'Bucket' : bucketName, 'Key': str(vehicle.qr_code)}
+            #source= { 'Bucket' : "taxipublic", 'Key': str(vehicle.qr_code)}
+            #print(source)
+            dest.copy(source, destPath + qr_code)
+            vehicle.qr_code = destPath + qr_code
+            vehicle.save()
+        except Exception as e:
+            print(e)
+    return render(request,'taxiapp/migration.html')
+
+def DriverQrCodeMigration(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    drivers = Driver.objects.all()
+    destPath = "qr_codes/drivers/"
+    for driver in drivers :
+        qr_code = str(driver.qr_code)
+        if('/' in qr_code):
+            qr_code = qr_code.split('/')[1]                
+        try:
+            dest = s3.Bucket(bucketName)
+            source= { 'Bucket' : bucketName, 'Key': str(driver.qr_code)}
+            #source= { 'Bucket' : "taxipublic", 'Key': str(driver.qr_code)}
+            dest.copy(source, destPath + qr_code)
+            driver.qr_code = destPath + qr_code
+            driver.save()
+        except Exception as e:
+            print(e)
+    return render(request,'taxiapp/migration.html')

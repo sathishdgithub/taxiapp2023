@@ -258,7 +258,7 @@ class Owner(models.Model):
       phone_number = models.CharField(max_length=16,null=True,blank=True)
       aadhar_number = models.CharField(max_length=22,null=True,blank=True)
       # Need to change path to store in the owner after migration
-      owner_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
+      owner_image = models.ImageField(upload_to='images/owners',default = 'images/profile.png')
       owner_image_thumbnail = ImageSpecField(source='owner_image',
                                       processors=[ResizeToFill(75, 100)],
                                       format='JPEG',
@@ -300,7 +300,7 @@ class Vehicle(models.Model):
       rc_number = models.CharField(max_length = 28,default='')
       rc_expiry = models.DateField(null=True,blank=True)
       num_of_complaints = models.BigIntegerField(default=0)
-      qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
+      qr_code = models.ImageField(upload_to='qr_codes/vehicles', blank=True, null=True)
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
@@ -380,13 +380,14 @@ class Driver(models.Model):
       aadhar_number = models.CharField(max_length=22,null=True,blank=True)
       dl_number = models.CharField(max_length=22,null=False,blank=False)
       dl_expiry = models.DateField(null=True,blank=True)
-      driver_image = models.ImageField(upload_to='drivers',default = 'drivers/profile.png')
+      driver_image = models.ImageField(upload_to='images/drivers',default = 'images/profile.png')
       driver_image_thumbnail = ImageSpecField(source='driver_image',
                                       processors=[ResizeToFill(75, 100)],
                                       format='JPEG',
                                       options={'quality': 60})
       driver_image_name = models.CharField(max_length = 100, null=True, blank = True)
-      qr_code = models.ImageField(upload_to='qr', blank=True, null=True)
+      #qr_code = models.ImageField(upload_to='qr_codes/drivers', blank=True, null=True)
+      qr_code = models.ImageField(blank=True, null=True)
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
@@ -397,33 +398,33 @@ class Driver(models.Model):
       def __str__(self):
         return self.driver_name
 
-      def generate_qrcode(self):
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=6,
-            border=0,
-        )
-        weburl = "https://taxiapp.safeautotaxi.com/taxi"
-        qr.add_data("%s/%s" % (weburl, str(self.id)))
-        qr.make(fit=True)
+    #   def generate_qrcode(self):
+    #     qr = qrcode.QRCode(
+    #         version=1,
+    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
+    #         box_size=6,
+    #         border=0,
+    #     )
+    #     weburl = "https://taxiapp.safeautotaxi.com/taxi"
+    #     qr.add_data("%s/%s" % (weburl, str(self.id)))
+    #     qr.make(fit=True)
 
-        img = qr.make_image()
+    #     img = qr.make_image()
         
-        buffer = StringIO.StringIO()
-        img.save(buffer)
-        file_name = secure_filename('%s.png' % self.id)
-        file_buffer = InMemoryUploadedFile(
-            buffer, None, file_name, 'image/png', buffer.len, None)
-        self.qr_code.save(file_name, file_buffer)
+    #     buffer = StringIO.StringIO()
+    #     img.save(buffer)
+    #     file_name = secure_filename('%s.png' % self.id)
+    #     file_buffer = InMemoryUploadedFile(
+    #         buffer, None, file_name, 'image/png', buffer.len, None)
+    #     self.qr_code.save(file_name, file_buffer)
 
-      def save(self, *args, **kwargs):
-        add = not self.pk
-        super(Driver, self).save(*args, **kwargs)
-        if add:
-			self.generate_qrcode()
-			kwargs['force_insert'] = False # create() uses this, which causes error.
- 		        super(Driver, self).save(*args, **kwargs)
+    #   def save(self, *args, **kwargs):
+    #     add = not self.pk
+    #     super(Driver, self).save(*args, **kwargs)
+    #     if add:
+	# 		self.generate_qrcode()
+	# 		kwargs['force_insert'] = False # create() uses this, which causes error.
+ 	# 	        super(Driver, self).save(*args, **kwargs)
 
       class Meta:
             verbose_name = 'Driver'
@@ -436,7 +437,7 @@ class Complaint_Statement(models.Model):
         #taxi                         = models.ForeignKey(Taxi_Detail,null=True,blank=True, verbose_name="Vehicle ID")
         #vehicle_id_fk               = models.ForeignKey(Vehicle,null=True,blank=True,verbose_name="Vehicle ID")
         vehicle               = models.ForeignKey(Vehicle,null=True,blank=True,verbose_name="Vehicle ID")
-        reason			     = models.ForeignKey(Reasons,default=1)
+        reason			     = models.ForeignKey(Reasons, null=True,blank=True)
         area                         = models.CharField(max_length=200,default='')
         city                         = models.ForeignKey(City_Code,default=1)
         origin_area                  = models.CharField(max_length=200,null=True,blank=True)
@@ -444,9 +445,11 @@ class Complaint_Statement(models.Model):
         phone_number                 = models.CharField(max_length=13)
         complaint 		     = models.CharField(max_length = 100,null=True,blank=True)
         assigned_to                  = models.ForeignKey(MyUser,null=True,blank=True)
+        message              = models.CharField(null=True,blank=True,max_length=500)
         resolved		     = models.BooleanField(default=False)
+        is_emergency_text    = models.BooleanField(default=False)
         def __str__(self):
-             return str(self.complaint_number)+' '+self.vehicle.owner_name+' '+self.reason.reason
+             return str(self.complaint_number)+' '+self.reason.reason
 
         class Meta:
             verbose_name = 'Customer Complaint'

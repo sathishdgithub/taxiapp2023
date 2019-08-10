@@ -1,0 +1,42 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+/* 
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  } */
+
+</style>
+<form id="customer_rating" action="/customer_rating/" method="post">
+  {% csrf_token %}
+  <div
+    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-xs-offset-0 col-sm-offset-0 col-md-offset-3 col-lg-offset-3 toppad">
+    <div>
+      <h4 style="text-align: center; color: green;">Successfully moved images</h4>
+    </div>
+    <div class="profile-userbuttons center-block">
+      <button type="button" class="btn btn-primary btn-sm" onclick="goToHome()" style="margin:0.5em;">Home</button>
+    </div>
+
+  </div>
+
+</form>
+
+<script type="text/javascript">
+
+  function goToHome() {
+    location.href = '/';
+  }
+ 
+</script>
+
+{% endblock %}

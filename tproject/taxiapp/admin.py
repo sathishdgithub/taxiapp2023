@@ -225,14 +225,14 @@ class VehicleAdmin(admin.ModelAdmin):
 class DriverAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return request.user.is_staff and request.user.is_admin    
-    exclude = ('qr_code','created_time','modified_by','modified_time')
-    list_display = ('traffic_number','driver_name','phone_number','dl_number','driver_image_name','qr_image')
-    def qr_image(self, obj):  # receives the instance as an argument
-        return '<img width=75 height=75 src="{thumb}" />'.format(
-            thumb=obj.qr_code.url,
-        )
-    qr_image.allow_tags = True
-    qr_image.short_description = 'QR Code'
+    exclude = ('qr_code','created_time','modified_by','modified_time','qr_image')
+    list_display = ('traffic_number','driver_name','phone_number','dl_number','driver_image_name')
+    # def qr_image(self, obj):  # receives the instance as an argument
+    #     return '<img width=75 height=75 src="{thumb}" />'.format(
+    #         thumb=obj.qr_code.url,
+    #     )
+    # qr_image.allow_tags = True
+    # qr_image.short_description = 'QR Code'
 
 class OwnerAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):

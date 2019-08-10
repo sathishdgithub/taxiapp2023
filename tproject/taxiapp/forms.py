@@ -30,7 +30,7 @@ class TaxisearchForm(forms.Form):
 class ComplaintUserForm(forms.ModelForm):
     class Meta:
         model = Complaint_Statement
-        fields = ('vehicle','reason','city','phone_number','complaint','area','origin_area','destination_area')
+        fields = ('vehicle','reason','city','phone_number','complaint','area','origin_area','destination_area','message')
     def save(self, *args, **kwargs):
         self.instance.complaint_number = self.instance.city.city_code+'-CN-'+str(self.instance.city.complaint_no+1).zfill(7)
         t = City_Code.objects.get(id=self.instance.city.id)

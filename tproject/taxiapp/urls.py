@@ -21,7 +21,7 @@ urlpatterns = [
         url(r'^complaint/', views.complaint_form, name='complaint_form'),
         url(r'^complaint_success/(?P<pk>[\w\-]+)/$', views.complaint_success, name='complaint_success'),
 #        url(r'^complaint_list/$', views.complaint_list, name='complaint_list'),
-        url(r'^complaint_resolve/(?P<pk>\d+)/$', views.complaint_resolve, name='complaint_resolve'),
+        url(r'^complaint_resolve/$', views.complaint_resolve, name='complaint_resolve'),
         url(r'^complaint_view/(?P<pk>[\w\-]+)/$', views.complaint_view, name='complaint_view'),
         url(r'^taxi_list/$', views.taxi_list, name='taxi_list'),
         url(r'^taxi_emergency/$', views.taxi_emergency, name='taxi_emergency'),
@@ -37,6 +37,10 @@ urlpatterns = [
         url(r'^docs/$', swagger.schema_view, name="schema_view"),
         url(r'^ratings/$',views.Ratings,name='Ratings'),
         url(r'^customer_rating/$',views.customer_rating,name='Ratings'),
+        url(r'^owner_images_migration/$',views.OwnerImagesMigration,name='owner_images_migration'),
+        url(r'^driver_images_migration/$',views.DriverImagesMigration,name='driver_images_migration'),
+        url(r'^vehicle_qrcode_migration/$',views.VehicleQrCodeMigration,name='vehicle_qrcode_migration'),
+        url(r'^driver_qrcode_migration/$',views.DriverQrCodeMigration,name='driver_qrcode_migration'),
 
 ]       
 
