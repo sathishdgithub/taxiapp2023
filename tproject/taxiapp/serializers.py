@@ -1,43 +1,61 @@
 from rest_framework import serializers
 from models import Taxi_Detail
 from models import Complaint_Statement
+from models import Driver
+from models import Active
+from models import Owner
 from models import Vehicle
+from models import City_Code
+from models import Vehicle_type
 
+
+
+class ActiveSerialize(serializers.ModelSerializer):
+    class Meta:
+        model = Active
+        fields = ('id', 'active_name')
+
+class CityCodeSerialize(serializers.ModelSerializer):
+    class Meta:
+        model = City_Code
+        fields = ('id', 'city','city_code','whatsapp','sms','distress','distress_contact','taxi_no','police_no','complaint_no')
+
+class VehicleTypeSerialize(serializers.ModelSerializer):
+    active = ActiveSerialize(many=False)
+    class Meta:
+        model = Vehicle_type
+        fields = ('id', 'vehicle_type','active')
+
+class OwnerSerialize(serializers.ModelSerializer):
+    active = ActiveSerialize(many=False)
+    class Meta:
+        model = Owner
+        fields = ('id', 'owner_name','address','date_of_birth','son_of','phone_number','aadhar_number','owner_image',
+        'owner_image_name','dl_expiry','dl_number',
+        'blood_group','active','created_by','created_time','modified_by','modified_time')
+
+class VehicleSerialize(serializers.ModelSerializer):
+    vehicle_type = VehicleTypeSerialize(many=False)
+    city = CityCodeSerialize(many=False)
+    owner = OwnerSerialize(many=False)
+    active = ActiveSerialize(many=False)
+    class Meta:
+        model = Vehicle
+        fields = ('id', 'traffic_number','number_plate','autostand','union','insurance',
+                   'pollution','engine_number','chasis_number','is_owner_driver','num_of_complaints','qr_code',
+                    'vehicle_make','vehicle_model','mfg_date','insurance_provider','insurance_number','capacity_of_passengers',
+                    'rc_expiry','vehicle_type','city','owner','active','created_by','created_time',
+                    'modified_by','modified_time')
 
 class TaxiDriverOwnerSerialize(serializers.ModelSerializer):
-    city = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='city'
-     )
-
-    vehicle_type = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='vehicle_type'
-     )
-
-    owner = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='owner_name'
-     )
-    
-    active = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='active_name'
-     )
-
-    # class Meta:
-        # model =Vehicle
-        # fields = ('number_plate','traffic_number','driver_name','son_of','date_of_birth','phone_number',
-        # 'address','city','aadhar_number','driving_license_number','date_of_validity','autostand','union',
-        # 'insurance','capacity_of_passengers','pollution','engine_number','chasis_number','owner_driver',
-        # 'num_of_complaints','driver_image','qr_code','driver_image_name')
-
+    active = ActiveSerialize(many=False)
+    vehicle = VehicleSerialize(many=False)
     class Meta:
-        model =Vehicle
-        fields = ('traffic_number','number_plate','vehicle_type','owner','autostand','union','city','insurance',
-        'capacity_of_passengers','pollution','engine_number','chasis_number','is_owner_driver','rc_number',
-        'rc_expiry','num_of_complaints','qr_code','active','created_by','created_time','modified_by','modified_time')
-
+        model =Driver
+        fields = ('driver_name','address','date_of_birth','son_of','phone_number','aadhar_number', 
+                   'dl_number','dl_expiry','driver_image','driver_image_name','created_by',
+                   'created_time','modified_by','modified_time','traffic_number','qr_code','blood_group',
+                   'active','vehicle','created_by','created_time','modified_by','modified_time')
 
 
 class TaxiComplaintsSerialize(serializers.ModelSerializer):

@@ -214,7 +214,7 @@ class VehicleAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return request.user.is_staff and request.user.is_admin    
     exclude = ('qr_code','created_time','modified_by','modified_time')
-    list_display = ('traffic_number','number_plate','vehicle_type','is_owner_driver','rc_number','qr_image')
+    list_display = ('traffic_number','number_plate','vehicle_type','is_owner_driver','qr_image')
     def qr_image(self, obj):  # receives the instance as an argument
         return '<img width=75 height=75 src="{thumb}" />'.format(
             thumb=obj.qr_code.url,
