@@ -11,7 +11,8 @@ def schema_view(request):
     # noinspection PyArgumentList
     schema = coreapi.Document(
     title='Taxi App',
-    url='http://127.0.0.1:8000/',
+    #url='https://www.safeautotaxi.com/',
+    url='',
     content={        
         'taxidetails': coreapi.Link(
             url='/api/v1/get_driver_owner_details',
