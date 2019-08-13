@@ -383,11 +383,12 @@ def complaint_view(request,pk):
 
 def taxi_list(request):
     page = request.GET.get('page', 1)
-    
+
     if request.user.is_authenticated():
         if request.user.is_admin:
             rows = Vehicle.objects.select_related()
             rows_c = Complaint_Statement.objects.select_related('vehicle')
+            ratings = Customer_Rating.objects.select_related('vehicle')
             paginator = Paginator(rows, 10)
             try:
                 rowPages = paginator.page(page)
@@ -395,12 +396,13 @@ def taxi_list(request):
                 rowPages = paginator.page(1)
             except EmptyPage:
                 rowPages = paginator.page(paginator.num_pages)
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages})
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings})
         else:
             city = request.user.city
             rows = Vehicle.objects.select_related().filter(city = city)
             rows_c = Complaint_Statement.objects.filter(city=city)
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
+            ratings = Customer_Rating.objects.filter(vehicle__city = city)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows,'ratings':ratings})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
@@ -1154,7 +1156,9 @@ def OwnerImagesMigration(request):
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    owners = Owner.objects.all()
+    #owners = Owner.objects.all()
+    path = 'drivers/'
+    owners = Owner.objects.filter(owner_image__startswith = path)
     ownerDestPath = "images/owners/"
     for owner in owners :
         if(owner.owner_image == 'drivers/profile.png'):
@@ -1179,7 +1183,9 @@ def DriverImagesMigration(request):
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    drivers = Driver.objects.all()
+    #drivers = Driver.objects.all()
+    path = 'drivers/'
+    drivers = Driver.objects.filter(driver_image__startswith=path)
     driverDestPath = "images/drivers/"
     for driver in drivers :
         if(driver.driver_image == 'drivers/profile.png'):

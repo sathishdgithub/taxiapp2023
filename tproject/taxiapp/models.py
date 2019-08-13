@@ -507,8 +507,8 @@ class Customer_Rating(models.Model):
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
 
-    def __str__(self):
-        return self.vehicle.number_plate
+    # def __str__(self):
+    #     return self.vehicle.number_plate
 
     class Meta:
         verbose_name = 'Customer Rating'
