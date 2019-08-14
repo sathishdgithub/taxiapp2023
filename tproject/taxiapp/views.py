@@ -381,14 +381,63 @@ def complaint_view(request,pk):
 #     else:
 #         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
+from datetime import datetime, timedelta
+
+
 def taxi_list(request):
     page = request.GET.get('page', 1)
+    cities = City_Code.objects.order_by('city').values_list('city',flat=True).distinct()
+    vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
+    # To get today registration count
+    timestamp_from = datetime.now().date() -timedelta(days=1)
+    timestamp_to = datetime.now().date()
+    todayVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
+    todayVRCount = len(todayVR)
+    print(todayVRCount)
 
+    # To get last 1 week registration count
+    timestamp_from = datetime.now().date() -timedelta(days=7)
+    timestamp_to = datetime.now().date()
+    thisWeekVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
+    thisWeekVRCount = len(thisWeekVR)
+    print(thisWeekVRCount)
+
+    # To get last 1 week registration count
+    timestamp_from = datetime.now().date() -timedelta(days=30)
+    timestamp_to = datetime.now().date()
+    thisMonthVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
+    thisMonthVRCount = len(thisMonthVR)
+    print(thisMonthVRCount)
+
+     # To get last 1 year registration count
+    timestamp_from = datetime.now().date() -timedelta(days=365)
+    timestamp_to = datetime.now().date()
+    thisYearVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
+    thisYearVRCount = len(thisYearVR)
+    print(thisYearVRCount)
+
+    # To get total count of records
+
+    total = len ( Vehicle.objects.all())
+    
     if request.user.is_authenticated():
         if request.user.is_admin:
             rows = Vehicle.objects.select_related()
             rows_c = Complaint_Statement.objects.select_related('vehicle')
             ratings = Customer_Rating.objects.select_related('vehicle')
+            paginator = Paginator(rows, 10)            
+            try:
+                rowPages = paginator.page(page)
+            except PageNotAnInteger:
+                rowPages = paginator.page(1)
+            except EmptyPage:
+                rowPages = paginator.page(paginator.num_pages)
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,'thisWeekVRCount':thisWeekVRCount,'thisMonthVRCount':thisMonthVRCount,'thisYearVRCount':thisYearVRCount,'total':total})
+        else:
+            city = request.user.city
+            rows = Vehicle.objects.select_related().filter(city = city)
+            rows_c = Complaint_Statement.objects.filter(city=city)
+            ratings = Customer_Rating.objects.filter(vehicle__city = city)
             paginator = Paginator(rows, 10)
             try:
                 rowPages = paginator.page(page)
@@ -396,13 +445,7 @@ def taxi_list(request):
                 rowPages = paginator.page(1)
             except EmptyPage:
                 rowPages = paginator.page(paginator.num_pages)
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings})
-        else:
-            city = request.user.city
-            rows = Vehicle.objects.select_related().filter(city = city)
-            rows_c = Complaint_Statement.objects.filter(city=city)
-            ratings = Customer_Rating.objects.filter(vehicle__city = city)
-            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows,'ratings':ratings})
+            return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,'thisWeekVRCount':thisWeekVRCount,'thisMonthVRCount':thisMonthVRCount,'thisYearVRCount':thisYearVRCount,'total':total})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
@@ -1173,6 +1216,10 @@ def OwnerImagesMigration(request):
                 source= { 'Bucket' : bucketName, 'Key': str(owner.owner_image)}
                 #source= { 'Bucket' : "taxipublic", 'Key': str(owner.owner_image)}
                 dest.copy(source, ownerDestPath + ownerImage)
+                #Grant public Permisions
+                object_acl = s3.ObjectAcl(bucketName, ownerDestPath + ownerImage)
+                response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+                
                 owner.owner_image = ownerDestPath + ownerImage
                 owner.save()
             except Exception as e:
@@ -1200,51 +1247,74 @@ def DriverImagesMigration(request):
                 source= { 'Bucket' : bucketName, 'Key': str(driver.driver_image)}
                 #source= { 'Bucket' : "taxipublic", 'Key': str(driver.driver_image)}
                 dest.copy(source, driverDestPath + driverImage)
+                #Grant public Permisions
+                object_acl = s3.ObjectAcl(bucketName, driverDestPath + driverImage)
+                response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
                 driver.driver_image = driverDestPath + driverImage
                 driver.save()
             except Exception as e:
                 print(e)
     return render(request,'taxiapp/migration.html')
 
-def VehicleQrCodeMigration(request):
-    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
-    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    vehicles = Vehicle.objects.all()
-    destPath = "qr_codes/vehicles/"
-    for vehicle in vehicles :
-        qr_code = str(vehicle.qr_code)
-        if('/' in qr_code):
-            qr_code = qr_code.split('/')[1]                
-        try:
-            dest = s3.Bucket(bucketName)
-            source= { 'Bucket' : bucketName, 'Key': str(vehicle.qr_code)}
-            #source= { 'Bucket' : "taxipublic", 'Key': str(vehicle.qr_code)}
-            #print(source)
-            dest.copy(source, destPath + qr_code)
-            vehicle.qr_code = destPath + qr_code
-            vehicle.save()
-        except Exception as e:
-            print(e)
-    return render(request,'taxiapp/migration.html')
+# def VehicleQrCodeMigration(request):
+#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+#     vehicles = Vehicle.objects.all()
+#     destPath = "qr_codes/vehicles/"
+#     for vehicle in vehicles :
+#         qr_code = str(vehicle.qr_code)
+#         if('/' in qr_code):
+#             qr_code = qr_code.split('/')[1]                
+#         try:
+#             dest = s3.Bucket(bucketName)
+#             source= { 'Bucket' : bucketName, 'Key': str(vehicle.qr_code)}
+#             #source= { 'Bucket' : "taxipublic", 'Key': str(vehicle.qr_code)}
+#             #print(source)
+#             dest.copy(source, destPath + qr_code)
+#             vehicle.qr_code = destPath + qr_code
+#             vehicle.save()
+#         except Exception as e:
+#             print(e)
+#     return render(request,'taxiapp/migration.html')
 
-def DriverQrCodeMigration(request):
-    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
-    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    drivers = Driver.objects.all()
-    destPath = "qr_codes/drivers/"
-    for driver in drivers :
-        qr_code = str(driver.qr_code)
-        if('/' in qr_code):
-            qr_code = qr_code.split('/')[1]                
-        try:
-            dest = s3.Bucket(bucketName)
-            source= { 'Bucket' : bucketName, 'Key': str(driver.qr_code)}
-            #source= { 'Bucket' : "taxipublic", 'Key': str(driver.qr_code)}
-            dest.copy(source, destPath + qr_code)
-            driver.qr_code = destPath + qr_code
-            driver.save()
-        except Exception as e:
-            print(e)
-    return render(request,'taxiapp/migration.html')
+# def DriverQrCodeMigration(request):
+#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+#     drivers = Driver.objects.all()
+#     destPath = "qr_codes/drivers/"
+#     for driver in drivers :
+#         qr_code = str(driver.qr_code)
+#         if('/' in qr_code):
+#             qr_code = qr_code.split('/')[1]                
+#         try:
+#             dest = s3.Bucket(bucketName)
+#             source= { 'Bucket' : bucketName, 'Key': str(driver.qr_code)}
+#             #source= { 'Bucket' : "taxipublic", 'Key': str(driver.qr_code)}
+#             dest.copy(source, destPath + qr_code)
+#             driver.qr_code = destPath + qr_code
+#             driver.save()
+#         except Exception as e:
+#             print(e)
+#     return render(request,'taxiapp/migration.html')
+
+
+# def ImageGrandPublic(request):
+#     mainFolder = request.GET.get('mainFolder')
+#     subFolder = request.GET.get('subFolder')
+#     folder = str(mainFolder) +'/'+ str(subFolder)
+#     print(folder)
+#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+#     bucket = s3.Bucket(bucketName)
+#     for key in bucket.objects.filter(Prefix=folder):
+#         fileName = key.key
+#         print(fileName)
+#         object_acl = s3.ObjectAcl(bucketName, fileName)
+#         response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+#     print('Done')
+#     return render(request,'taxiapp/migration.html')
+

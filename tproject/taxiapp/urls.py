@@ -39,8 +39,9 @@ urlpatterns = [
         url(r'^customer_rating/$',views.customer_rating,name='Ratings'),
         url(r'^owner_images_migration/$',views.OwnerImagesMigration,name='owner_images_migration'),
         url(r'^driver_images_migration/$',views.DriverImagesMigration,name='driver_images_migration'),
-        url(r'^vehicle_qrcode_migration/$',views.VehicleQrCodeMigration,name='vehicle_qrcode_migration'),
-        url(r'^driver_qrcode_migration/$',views.DriverQrCodeMigration,name='driver_qrcode_migration'),
+        # url(r'^vehicle_qrcode_migration/$',views.VehicleQrCodeMigration,name='vehicle_qrcode_migration'),
+        # url(r'^driver_qrcode_migration/$',views.DriverQrCodeMigration,name='driver_qrcode_migration'),
+        #url(r'^image_grands_public/$',views.ImageGrandPublic,name='image_grands_public'),
 
 ]       
 
