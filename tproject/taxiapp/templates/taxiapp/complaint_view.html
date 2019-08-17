@@ -163,9 +163,13 @@ word-wrap:break-word;
                         <td>Driver Name</td>
                         <td>{{ driver.driver_name }}</td>
                       </tr>
-                       <tr>
-                        <td>Phone Number</td>
+                      <tr>
+                        <td>Driver Phone Number</td>
                         <td>{{ driver.phone_number }} </td>       
+                        </tr>
+                       <tr>
+                        <td>Customer Phone Number</td>
+                        <td>{{ row.phone_number }} </td>       
                         </tr>
                       <tr>
                         <td>Reason</td>
@@ -186,7 +190,10 @@ word-wrap:break-word;
                       {% ifequal row.resolved False %}
                       <tr>
                         <td>Message</td>
-                        <td><input type="text" name="message" id="message" value="" /></td>
+                        <td>
+                          <!-- <input type="text" name="message" id="message" value="" /> -->
+                          <textarea name="message" id="message" cols="40" rows="3"></textarea>
+                        </td>
                       </tr>
                       <tr>
                         <td colspan="2" align="center"><input type="hidden" name="id" id="id" value="{{ row.id }}" />

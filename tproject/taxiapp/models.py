@@ -273,7 +273,7 @@ class Owner(models.Model):
       created_time = models.DateTimeField(default=datetime.now, blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
       modified_time = models.DateTimeField(default=datetime.now, blank=True)
-
+      is_image_verified = models.BooleanField(default=False)
       def __str__(self):
         return self.owner_name
       
@@ -402,6 +402,7 @@ class Driver(models.Model):
       created_time = models.DateTimeField(default=datetime.now, blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
       modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      is_image_verified = models.BooleanField(default=False)
       
       def __str__(self):
         return self.driver_name

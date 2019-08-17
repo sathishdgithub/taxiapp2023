@@ -32,6 +32,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from io import StringIO
 from . import constants
+import urllib,shutil,os,zipfile
 
 
 
@@ -173,6 +174,19 @@ def taxi_detail(request, pk):
     #     print(e.message)
     
     #if(vehicle.id is not None or owner is not None) :
+    if (owner is not None):
+        bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+        s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        bucket = s3.Bucket(bucketName)   
+        try:                                
+            fileName = str(owner.owner_image)
+            objs = list(bucket.objects.filter(Prefix=fileName))
+            if(len(objs) == 0):
+                owner.owner_image = 'images/profile.png'
+        except Exception as e:
+            owner.owner_image = 'images/profile.png'
+            #print(e)
     if(vehicle.id is not None) :
         return render(request, 'taxiapp/taxi_detail.html', {'vehicle': vehicle,'owner':owner,'drivers':drivers}) 
     else:
@@ -307,9 +321,10 @@ def complaint_success(request,pk):
             print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
         message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
+        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
-            n = send_sms(message,complaint.phone_number,'complaint')
+            n = send_sms(message1,complaint.phone_number,'complaint')
         if vehicleObj.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
@@ -337,7 +352,9 @@ def complaint_resolve(request):
         complaintStatement.message = message
         complaintStatement.resolved = True
         complaintStatement.save()
-
+        #smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(complaintStatement.created_time)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
+        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
+        m = send_sms(smsMessage,complaintStatement.phone_number,'complaint')
         return HttpResponseRedirect("/taxi_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
@@ -402,7 +419,7 @@ def taxi_list(request):
     thisWeekVRCount = len(thisWeekVR)
     print(thisWeekVRCount)
 
-    # To get last 1 week registration count
+    # To get last 1 month registration count
     timestamp_from = datetime.now().date() -timedelta(days=30)
     timestamp_to = datetime.now().date()
     thisMonthVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
@@ -509,9 +526,10 @@ def taxi_emergency(request):
 
             
             message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
+            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
             if vehicle.city.sms:
                 m = send_sms(message,phone_number,'emergency')
-                n = send_sms(message,p_phone,'emergency')
+                n = send_sms(message1,p_phone,'emergency')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
@@ -729,41 +747,150 @@ def handle_taxi_csv(file_path,city):
     s3_object.delete()
     return all_errors
 
+# def handle_bulk_image_zip(file_path):
+#     import os,zipfile,shutil
+#     path = '/home/ec2-user/taxiapp/tproject/'
+#     dest = open(path+"images.zip","wb")
+#     for chunk in file_path.chunks():
+#         dest.write(chunk)
+#     dest.close()
+#     zip_ref = zipfile.ZipFile(path+"images.zip", 'r')
+#     try:
+#         os.mkdir(path+'bulk_tmp')
+#     except:
+#         shutil.rmtree(path+'bulk_tmp')
+#         os.mkdir(path+'bulk_tmp')
+#     try:
+#         zip_ref.extractall(path+'bulk_tmp')
+#     except:
+#         os.remove(path+"images.zip")
+#         zip_ref.close()
+#         shutil.rmtree(path+'bulk_tmp')
+#         return ["csv_file_error"]
+#     zip_ref.close()
+#     os.remove(path+"images.zip")
+#     all_errors=[]
+#     for images in os.listdir(path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"):
+#         try:
+#            full_path = path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"+images
+#            taxis = Taxi_Detail.objects.filter(driver_image_name__contains = images.strip())
+#            for t in taxis:
+#                t.driver_image.save("drivers",File(open(full_path)))
+#                t.save()
+#         except Exception as e:
+#             all_errors.append(e)
+#     print(all_errors)
+#     shutil.rmtree(path+'bulk_tmp')
+#     return all_errors
+
+#reference https://www.quora.com/How-do-I-extract-a-zip-file-in-an-Amazon-S3-by-using-Lambda
+
+
+
 def handle_bulk_image_zip(file_path):
-    import os,zipfile,shutil
-    path = '/home/ec2-user/taxiapp/tproject/'
-    dest = open(path+"images.zip","wb")
-    for chunk in file_path.chunks():
-        dest.write(chunk)
-    dest.close()
-    zip_ref = zipfile.ZipFile(path+"images.zip", 'r')
+
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    extension = ".zip"
+    all_errors = []
+    temp_path = 'temp_bulk_image_upload/'+file_path.name
+    #Code to upload to s3 Bucket
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     try:
-        os.mkdir(path+'bulk_tmp')
-    except:
-        shutil.rmtree(path+'bulk_tmp')
-        os.mkdir(path+'bulk_tmp')
+        s3.Bucket(bucketName).put_object(Key=temp_path,Body=file_path)
+    except Exception as e:
+        all_errors.append(e)
+        return ["network_error"]
+    
     try:
-        zip_ref.extractall(path+'bulk_tmp')
-    except:
-        os.remove(path+"images.zip")
-        zip_ref.close()
-        shutil.rmtree(path+'bulk_tmp')
-        return ["csv_file_error"]
-    zip_ref.close()
-    os.remove(path+"images.zip")
+        item = s3.Object(bucket_name=bucketName, key=temp_path)
+        all_errors = unzipAttachment(temp_path, file_path.name)
+
+    except Exception as e:
+        print(e.message)
+        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.')
+        raise e 
+        return(e)
+        all_errors.append(e)    
+    return all_errors
+
+def unzipAttachment(s3_path,filename):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                      aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    tmpFolder = '/tmp/'
+    unzipTmpFile = filename
+    extension = ".zip" 
+    path = os.getcwd()
     all_errors=[]
-    for images in os.listdir(path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"):
+   
+    if not os.path.exists(tmpFolder):
+         os.mkdir(tmpFolder)
+    
+    if not os.path.exists(tmpFolder+unzipTmpFile):
+        try: 
+            #os.remove(tmpFolder+unzipTmpFile)
+            s3.Bucket(bucketName).download_file(s3_path, tmpFolder+unzipTmpFile)
+            os.chdir(tmpFolder)
+            for item in os.listdir(tmpFolder):
+                if item.endswith(extension): 
+                    file_name = os.path.abspath(item)
+                    #print(file_name)
+                    zip_ref = zipfile.ZipFile(file_name) 
+                    zip_ref.extractall(tmpFolder) 
+                    zip_ref.close()
+                    os.remove(file_name)
+            #shutil.rmtree(tmpFolder) 
+        except Exception as e:
+            s3_object = s3.Object(bucket_name=bucketName, key=s3_path)
+            s3_object.delete()
+            all_errors.append(e) 
+            print(e.message)
+            print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.')
+            raise e 
+            return(e)
+
+    
+    tempPath = os.path.join(tmpFolder,'images')
+   
+    for persons in os.listdir(tempPath):
         try:
-           full_path = path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"+images
-           taxis = Taxi_Detail.objects.filter(driver_image_name__contains = images.strip())
-           for t in taxis:
-               t.driver_image.save("drivers",File(open(full_path)))
-               t.save()
+            os.chdir(tempPath)
+            if ( persons == 'drivers') :
+                for driver in os.listdir(persons):                    
+                    tempImagePath = os.path.join((os.path.abspath(persons)), driver)                 
+                    destinationPath = 'images/drivers/' + str(driver)                 
+                    s3.Bucket(bucketName).upload_file(tempImagePath, destinationPath)
+                    object_acl = s3.ObjectAcl(bucketName, destinationPath)
+                    response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
+            if ( persons == 'owners') :
+                for owner in os.listdir(persons):
+                    tempImagePath = os.path.join((os.path.abspath(persons)), owner)
+                    destinationPath = 'images/owners/' + str(owner)
+                    s3.Bucket(bucketName).upload_file(tempImagePath, destinationPath)
+                    object_acl = s3.ObjectAcl(bucketName, destinationPath)
+                    response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+            
         except Exception as e:
             all_errors.append(e)
     print(all_errors)
-    shutil.rmtree(path+'bulk_tmp')
+    os.chdir("../..")
+    shutil.rmtree(tmpFolder)
+    s3_object = s3.Object(bucket_name=bucketName, key=s3_path)
+    s3_object.delete()
     return all_errors
+
+# def deleteZipFile(dst):
+#     for obj in bucket.objects.filter(Prefix=attachmentFolder,Delimiter='/'):
+#         if obj.key.endswith(extension):
+#             if(dst==obj.key):
+#                 #old_source = { 'Bucket': bucketName,'Key': obj.key}
+#                 #new_key = obj.key.replace(attachmentFolder, deletedZipFolder)
+#                 #new_obj = bucket.Object(new_key)
+#                 #new_obj.copy(old_source)
+#                 s3_resource.Object(bucket.name, obj.key).delete()
 
 # def taxi_csv_upload(request):
 #     message = 'Please Upload the Excel file here'
@@ -830,8 +957,11 @@ def bulk_image_upload(request):
                     errors = handle_bulk_image_zip(request.FILES['bulk_image_zip'])
                     if len(errors)==0:
                         return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
-                    elif errors[0] == "csv_file_error":
-                        return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'ERROR: Files are not images.\n','message2':secondary_message})
+                    # elif errors[0] == "csv_file_error":
+                    #     return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'ERROR: Files are not images.\n','message2':secondary_message})
+                    elif errors[0] == "network_error":
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})  
+
                     return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors))+' were NOT UPLOADED because of invalid filename.'})
             else:
                 form = BulkImageUpload()
@@ -1318,3 +1448,135 @@ def DriverImagesMigration(request):
 #     print('Done')
 #     return render(request,'taxiapp/migration.html')
 
+def DriverImageValidation(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    drivers = Driver.objects.filter(is_image_verified=False)
+    destPath = "images/drivers/"
+    for driver in drivers :
+        if(driver.driver_image_name is not None and driver.driver_image_name != '' 
+            and driver.driver_image_name != '-' and driver.driver_image_name != 'profile.png'):
+            if(driver.driver_image is None or driver.driver_image == '' 
+                or driver.driver_image == '-' or driver.driver_image == 'images/profile.png'):  
+                bucket = s3.Bucket(bucketName)                                   
+                fileName = 'drivers/'+driver.driver_image_name
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                # if len(objs) > 0 and objs[0].key == fileName:
+                #     print("Exists!")
+                # else:
+                #     print("Doesn't exist")                
+                if len(objs) > 0:
+                    source= { 'Bucket' : bucketName, 'Key': fileName}
+                    destination = destPath + driver.driver_image_name
+                    bucket.copy(source, destination)
+
+                    object_acl = s3.ObjectAcl(bucketName, destination)
+                    response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
+                    driver.driver_image = destination
+                    driver.is_image_verified = True
+                    driver.save()
+            else:
+                bucket = s3.Bucket(bucketName)                                   
+                fileName = str(driver.driver_image)
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                if (len(objs) == 0):
+                    fileName = 'drivers/'+driver.driver_image_name
+                    objs1 = list(bucket.objects.filter(Prefix=fileName))
+                    if len(objs1) > 0:
+                        source= { 'Bucket' : bucketName, 'Key': fileName}
+                        destination = destPath + driver.driver_image_name
+                        bucket.copy(source, destination)
+
+                        object_acl = s3.ObjectAcl(bucketName, destination)
+                        response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
+                        driver.driver_image = destination
+                        driver.is_image_verified = True
+                        driver.save()
+                else:
+                    driver.is_image_verified = True
+                    driver.save()
+        elif(driver.driver_image_name is None or driver.driver_image_name == '' 
+            or driver.driver_image_name == '-' or driver.driver_image_name == 'profile.png'):
+
+            if(driver.driver_image_name != 'profile.png'):
+                driver.driver_image_name = 'profile.png'
+            if(driver.driver_image != 'images/profile.png'):
+                driver.driver_image = 'images/profile.png'
+
+            driver.is_image_verified = True
+            driver.save()
+
+
+    return render(request,'taxiapp/migration.html')
+
+
+def OwnarImageValidation(request):
+    bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+    s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    owners = Owner.objects.filter(is_image_verified=False)
+    destPath = "images/owners/"
+    for owner in owners :
+        if(owner.owner_image_name is not None and owner.owner_image_name != '' 
+            and owner.owner_image_name != '-' and owner.owner_image_name != 'profile.png'):
+            if(owner.owner_image is None or owner.owner_image == '' 
+                or owner.owner_image == '-' or owner.owner_image == 'images/profile.png'):  
+                bucket = s3.Bucket(bucketName)                                   
+                fileName = 'drivers/'+owner.owner_image_name
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                # if len(objs) > 0 and objs[0].key == fileName:
+                #     print("Exists!")
+                # else:
+                #     print("Doesn't exist")                
+                if len(objs) > 0:
+                    source= { 'Bucket' : bucketName, 'Key': fileName}
+                    destination = destPath + owner.owner_image_name
+                    bucket.copy(source, destination)
+                    
+                    object_acl = s3.ObjectAcl(bucketName, destination)
+                    response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
+                    owner.owner_image = destination
+                    owner.save()
+            
+            else:
+                bucket = s3.Bucket(bucketName)                                   
+                fileName = str(owner.owner_image)
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                if (len(objs) == 0):
+                    fileName = 'drivers/'+owner.owner_image_name
+                    objs1 = list(bucket.objects.filter(Prefix=fileName))
+                    if len(objs1) > 0:
+                        source= { 'Bucket' : bucketName, 'Key': fileName}
+                        destination = destPath + owner.owner_image_name
+                        bucket.copy(source, destination)
+
+                        object_acl = s3.ObjectAcl(bucketName, destination)
+                        response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+
+                        owner.owner_image = destination
+                        owner.is_image_verified = True
+                        owner.save()
+                else:
+                    owner.is_image_verified = True
+                    owner.save()
+
+        elif(owner.owner_image_name is None or owner.owner_image_name == '' 
+            or owner.owner_image_name == '-' or owner.owner_image_name == 'profile.png'):
+
+            if(owner.owner_image_name != 'profile.png'):
+                owner.owner_image_name = 'profile.png'
+            if(owner.owner_image != 'images/profile.png'):
+                owner.owner_image = 'images/profile.png'
+
+            owner.is_image_verified = True
+            owner.save()
+            
+            
+    return render(request,'taxiapp/migration.html')
+
+
+     

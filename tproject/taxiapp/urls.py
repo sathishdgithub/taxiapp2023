@@ -15,7 +15,7 @@ urlpatterns = [
 	url(r'^admin_login/', views.admin_login, name = "admin_login"),
         url(r'^admin_logout/', views.admin_logout, name = "admin_logout"),
 	url(r'^taxi_xls_upload/$', views.taxi_csv_upload, name='taxi_csv_upload'),
-        url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
+        #url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
 #	url(r'^taxi/(?P<pk>[\w\-]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^taxi/(?P<pk>[\w|\W]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^complaint/', views.complaint_form, name='complaint_form'),
@@ -42,6 +42,8 @@ urlpatterns = [
         # url(r'^vehicle_qrcode_migration/$',views.VehicleQrCodeMigration,name='vehicle_qrcode_migration'),
         # url(r'^driver_qrcode_migration/$',views.DriverQrCodeMigration,name='driver_qrcode_migration'),
         #url(r'^image_grands_public/$',views.ImageGrandPublic,name='image_grands_public'),
+        url(r'^driver_image_validation/$',views.DriverImageValidation,name='driver_image_validation'),
+        url(r'^owner_image_validation/$',views.OwnarImageValidation,name='driver_image_validation'),
 
 ]       
 
