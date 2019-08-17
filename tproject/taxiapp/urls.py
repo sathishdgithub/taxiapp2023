@@ -43,7 +43,7 @@ urlpatterns = [
         # url(r'^driver_qrcode_migration/$',views.DriverQrCodeMigration,name='driver_qrcode_migration'),
         #url(r'^image_grands_public/$',views.ImageGrandPublic,name='image_grands_public'),
         url(r'^driver_image_validation/$',views.DriverImageValidation,name='driver_image_validation'),
-        url(r'^owner_image_validation/$',views.OwnarImageValidation,name='driver_image_validation'),
+        url(r'^owner_image_validation/$',views.OwnerImageValidation,name='owner_image_validation'),
 
 ]       
 

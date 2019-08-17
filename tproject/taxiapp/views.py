@@ -1513,7 +1513,7 @@ def DriverImageValidation(request):
     return render(request,'taxiapp/migration.html')
 
 
-def OwnarImageValidation(request):
+def OwnerImageValidation(request):
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
