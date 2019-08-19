@@ -33,6 +33,7 @@ from botocore.exceptions import NoCredentialsError
 from io import StringIO
 from . import constants
 import urllib,shutil,os,zipfile
+from datetime import date,tzinfo
 
 
 
@@ -254,7 +255,7 @@ def taxi_new(request):
 def complaint_form(request):
     if request.method == "POST":
         form = ComplaintUserForm(request.POST)
-        if form.is_valid():
+        if form.is_valid():            
             form.save()
             t = Vehicle.objects.get(id=form.instance.vehicle.id)
             t.num_of_complaints = t.num_of_complaints+1
@@ -311,6 +312,7 @@ def complaint_success(request,pk):
         phone_number = police.sms_number
         whatsapp_number = police.whatsapp_number
         complaint.assigned_to = police
+        complaint.created_time = datetime.now().date()
         complaint.save()
         #taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         vehicleObj = Vehicle.objects.get(id=complaint.vehicle.id)
@@ -351,10 +353,18 @@ def complaint_resolve(request):
         complaintStatement = Complaint_Statement.objects.get(id=complaintId)
         complaintStatement.message = message
         complaintStatement.resolved = True
+        complaintStatement.resolved_time = datetime.now().date()
         complaintStatement.save()
-        #smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(complaintStatement.created_time)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
-        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
-        m = send_sms(smsMessage,complaintStatement.phone_number,'complaint')
+        
+        resolved_date = complaintStatement.resolved_time
+        resolved_date.strftime('%m-%d-%y %H:%M:%S')
+        
+        print(resolved_date)
+        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
+
+        print(smsMessage)
+        print(complaintStatement.phone_number)
+        m = send_sms(smsMessage,str(complaintStatement.phone_number),'complaint')
         return HttpResponseRedirect("/taxi_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
@@ -378,6 +388,7 @@ def complaint_view(request,pk):
             except Exception as e:
                 print(e.message)
             reason_statement = ''
+
             return render(request,'taxiapp/complaint_view.html',{'row':row,'driver':driver})
         else :
             return render(request,'taxiapp/complaint_view.html',{'row':row})

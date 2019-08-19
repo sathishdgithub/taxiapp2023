@@ -457,6 +457,8 @@ class Complaint_Statement(models.Model):
         message              = models.CharField(null=True,blank=True,max_length=500)
         resolved		     = models.BooleanField(default=False)
         is_emergency_text    = models.BooleanField(default=False)
+        created_time = models.DateTimeField(blank=True)
+        resolved_time = models.DateTimeField(blank=True)
         def __str__(self):
              return str(self.complaint_number)+' '+self.reason.reason
 
