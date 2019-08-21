@@ -44,7 +44,9 @@ urlpatterns = [
         #url(r'^image_grands_public/$',views.ImageGrandPublic,name='image_grands_public'),
         url(r'^driver_image_validation/$',views.DriverImageValidation,name='driver_image_validation'),
         url(r'^owner_image_validation/$',views.OwnerImageValidation,name='owner_image_validation'),
-
+        url(r'^terms_of_use/',views.Terms_Of_Use,name='Terms_Of_Use'),
+        url(r'^privacy_policy/',views.Privacy_Policy,name='Privacy_Policy'),
+        url(r'^about_us/',views.About_Us,name='About_Us'),
 ]       
 
 handler404 = views.handler404

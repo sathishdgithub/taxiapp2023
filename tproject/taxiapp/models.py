@@ -377,7 +377,7 @@ class Vehicle(models.Model):
 
 class Driver(models.Model):
       #vehicle_id_fk = models.ForeignKey(Vehicle,null=True)
-      vehicle = models.ForeignKey(Vehicle,null=True)
+      vehicle = models.ForeignKey(Vehicle, related_name="drivers", null=True)
       traffic_number = models.CharField(max_length=22,null=True,blank=True)
       driver_name = models.CharField(max_length = 40, verbose_name="Name")
       address = models.CharField(max_length = 200, blank = True)

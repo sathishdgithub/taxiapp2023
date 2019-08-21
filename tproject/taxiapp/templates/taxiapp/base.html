@@ -19,7 +19,10 @@
     <!-- Speaking of Google, don't forget to set your site up:
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
-
+    
+    <!-- footer -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+   
     </head>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"/>
@@ -30,6 +33,19 @@
 
 
 <style type="text/css">
+
+.footer {
+       position: fixed;
+       left: 0;
+       bottom: 0;
+       width: 100%;
+       background-color: #d9edf7;       
+       color: white;
+       text-align: center;
+      
+       
+       /* margin-bottom: 1px; */
+}
 
 .form-signin
 {
@@ -107,11 +123,14 @@
     margin-top: 10px;
 }
 
+.navbar-color {
+    background-color: #d9edf7;
+}
 </style>
 
 <body> 
-<nav class="navbar navbar-default" role="navigation">
-  <div class="container">
+<nav class="navbar navbar-default navbar-color " role="navigation">
+  <div class="container" style="width: auto;">
     <!-- Brand and toggle get grouped for better mobile display 
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-slide-dropdown">
@@ -145,6 +164,15 @@
             </div>
             <button type="submit" class="btn btn-default">Submit</button>
         </form> -->
+        {%load staticfiles%}
+        <ul class="nav navbar-nav">
+          <li>
+              <a>
+                <!-- <img src="{%static 'location_field/images/marker-icon-2x.png'%}" height="30" width="25"> -->
+                <img src="https://taxipublic.s3.amazonaws.com/images/logo.png" height="40" width="40">
+              </a>
+          </li>
+        </ul>
         <ul class="nav navbar-nav navbar-right">
           <!--  <li><a href="#">Link</a></li> -->
             <li class="dropdown">
@@ -181,7 +209,37 @@
             </div>
         </div>
     </div>
+
+   <!-- footer -->
+
+  
+
 </body>
+
+<nav class="navbar navbar-default navbar-color " role="navigation">
+    <div class="container" style="width: auto;">
+
+<div class="footer" style="margin-top: 1px;">
+  
+  <div class="links"  style="padding-top: 5px;">
+      <!-- <a href="privacy_policy" class="kustomborder">Privacy policy</a>&nbsp;&nbsp;
+      <a href="terms_of_use" class="kustomborder">Tearms Of Use</a>&nbsp;&nbsp;
+      <a href="about_us" class="kustomborder">About Us</a>&nbsp; -->
+
+      <a href="privacy_policy" style="color: black;text-decoration: underline;">Privacy policy</a>&nbsp;&nbsp;
+      <a href="terms_of_use"  style="color: black;text-decoration: underline;">Tearms Of Use</a>&nbsp;&nbsp;
+      <a href="about_us"  style="color: black;text-decoration: underline;">About Us</a>&nbsp;
+  
+      <div class="link">
+  
+      </div>
+  </div>
+  
+<h6 style="color: black; margin-top: 5px; margin-bottom: 5px;">Copyright @ - 2019. Powered by valData Pvt. Ltd.</h6>
+</div> 
+</div> 
+
+
 
 <script type="text/javascript">
     $(document).ready(function(){

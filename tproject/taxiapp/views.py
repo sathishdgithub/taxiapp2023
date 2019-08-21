@@ -33,8 +33,8 @@ from botocore.exceptions import NoCredentialsError
 from io import StringIO
 from . import constants
 import urllib,shutil,os,zipfile
-from datetime import date,tzinfo
-
+from datetime import date, tzinfo, datetime, timedelta
+ 
 
 
 
@@ -53,13 +53,6 @@ def strip_scheme(url):
     return parsed.geturl().replace(scheme, '', 1)
 
 def googl(url):
-    # params = simplejson.dumps({'longUrl': url})
-    # headers = { 'Content-Type' : 'application/json' }
-    # req = urllib2.Request('https://www.googleapis.com/urlshortener/v1/url?key='+settings.GOOGLE_URL_SHORTENER_KEY, params, headers)
-    # f = urllib2.urlopen(req)
-    # return strip_scheme(simplejson.loads(f.read())['id'])
-    #ACCESS_TOKEN = '135297e60fed60786d87b5e98b41e8e6e9e3675f' 
-
     """ Code : Using Cutly Acccess Token """
     req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url)
     f = urllib2.urlopen(req)
@@ -152,6 +145,21 @@ def taxi_detail(request, pk):
     if(len(drivers) == 0 and vehicle.id is not None):
         drivers = Driver.objects.filter(vehicle = vehicle)
     
+    for driver in drivers:
+        if (driver is not None):
+            bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+            s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+            bucket = s3.Bucket(bucketName)   
+            try:                                
+                fileName = str(driver.driver_image)
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                if(len(objs) == 0):
+                    driver.driver_image = 'images/profile.png'
+            except Exception as e:
+                driver.driver_image = 'images/profile.png'
+                #print(e)
+
     if (vehicle.id is not None):
         m = vehicle
         k,p = m.number_plate,''
@@ -166,15 +174,6 @@ def taxi_detail(request, pk):
                 p = p+k[i]
         m.number_plate = p
 
-    # vehicleObj=Vehicle()
-    # ownerObj=Owner()
-    # try :
-    #     vehicleObj = vcl[0] if vcl is not None and len(vcl) > 0 else None
-    #     ownerObj = owner[0] if owner is not None and len(owner) > 0 else None
-    # except Exception as e :
-    #     print(e.message)
-    
-    #if(vehicle.id is not None or owner is not None) :
     if (owner is not None):
         bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
         s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -193,32 +192,6 @@ def taxi_detail(request, pk):
     else:
         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
 
-# def taxi_detail(request, pk):
-#     if ' ' in pk:
-#         pk = pk.replace(' ','')
-#     taxi = Taxi_Detail.objects.filter(traffic_number__iexact=pk)
-#     if len(taxi)<1:
-#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk,owner_driver="Owner")
-#     if len(taxi)<1:
-#         taxi = Taxi_Detail.objects.filter(number_plate__iexact=pk)
-# #    taxi = get_object_or_404(Taxi_Detail, traffic_number=pk)
-#     if len(taxi) > 0:
-#         m = taxi[0]
-#         k,p = m.number_plate,''
-#         k.replace('-','')
-#         start,p = k[0],k[0]
-#         for i in range(1,len(k)):
-#             if k[i] == '-':
-#                 pass
-#             elif ((k[i-1].isalpha()) and (k[i].isdigit())) or ((k[i-1].isdigit()) and (k[i].isalpha())):
-#                 p = p+' '+k[i]
-#             else:
-#                 p = p+k[i]
-#         m.number_plate = p
-#         return render(request, 'taxiapp/taxi_detail.html', {'taxi': m})
-#     else:
-#         return render(request, 'taxiapp/taxi_detail_fail.html', {'message':"No taxis with the given Traffic Number or Number Plate found."})
-
 def taxi_new(request):
     if request.method == "POST":
         form = TaxidetailsForm(request.POST)
@@ -232,25 +205,6 @@ def taxi_new(request):
     else:
         form = TaxidetailsForm()
     return render(request, 'taxiapp/taxi_edit.html', {'form': form})
-
-# def complaint_form(request):
-#     if request.method == "POST":
-#         form = ComplaintUserForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             t = Taxi_Detail.objects.get(id=form.instance.taxi.id)
-#             t.num_of_complaints = t.num_of_complaints+1
-#             t.save()
-#             return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
-#     else:
-#         taxi_id = request.GET.get('id', '')
-#         passenger_phone = request.GET.get('passenger_phone','')
-#         passenger_origin = request.GET.get('passenger_origin','')
-#         passenger_destination = request.GET.get('passenger_destination','')
-#         form = ComplaintUserForm(initial={'taxi':taxi_id,'phone_number':passenger_phone,\
-#                'origin_area':passenger_origin,'destination_area':passenger_destination})
-#         form.fields['taxi'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
-    	#   return render(request, 'taxiapp/complaint.html', {'form': form})
 
 def complaint_form(request):
     if request.method == "POST":
@@ -331,21 +285,6 @@ def complaint_success(request,pk):
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
 
-# def complaint_resolve(request,pk):
-#     if request.user.is_authenticated():
-#         row = Complaint_Statement.objects.get(id=pk)
-#         #taxi = row.taxi
-#         vehicle = row.vehicle
-#         #t = Taxi_Detail.objects.get(id=taxi.id)
-#         t = Vehicle.objects.get(id=vehicle.id)
-#         t.num_of_complaints = max(0,t.num_of_complaints-1)
-#         t.save()
-#         row.resolved = True
-#         row.save()
-#         return HttpResponseRedirect("/taxi_list") 
-#     else:
-#         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
-
 def complaint_resolve(request):
     if request.user.is_authenticated():
         message = request.GET.get('message')
@@ -394,23 +333,6 @@ def complaint_view(request,pk):
             return render(request,'taxiapp/complaint_view.html',{'row':row})
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_view/"+str(pk))
-
-# def taxi_list(request):
-#     if request.user.is_authenticated():
-#         if request.user.is_admin:
-#             rows = Taxi_Detail.objects.all()
-#             rows_c = Complaint_Statement.objects.all()
-#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
-#         else:
-#             city = request.user.city
-#             rows = Taxi_Detail.objects.filter(city=city)
-#             rows_c = Complaint_Statement.objects.filter(city=city)
-#             return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rows})
-#     else:
-#         return HttpResponseRedirect("/admin_login?next=taxi_list")
-
-from datetime import datetime, timedelta
-
 
 def taxi_list(request):
     page = request.GET.get('page', 1)
@@ -509,10 +431,6 @@ def taxi_emergency(request):
             driver = Driver()
             try:
                 driver = Driver.objects.get(vehicle=vehicle)
-                
-                # 'vehicle','reason','city','phone_number','complaint','area','origin_area'
-                # ,'destination_area','message')
-                #https://www.google.co.in/maps/place/17.4809535,78.39558749999999
             except Exception as e:
                 print(e.message)
 
@@ -558,135 +476,10 @@ def date_form(date):
         elif (len(y)==4) and (int(d)<=12 and int(d)>=1):                                                                                                          return y+'-'+d+'-'+m                                                             
     return None    
 
-# def handle_taxi_csv(file_path,city):
-#     import os,numpy as np
-#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
-#     headers = ['AUTO NUMBER','TRAFFIC NUMBER','NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER','DRIVING LICENSE NUMBER','DATE OF VALIDITY','AUTO STAND','UNION','INSURANCE','CAPACITY OF PASSENGERS','POLLUTION','ENGINE NUMBER','CHASIS NUMBER','OWNERDRIVER','DRIVER IMAGE FILENAME']
-#     #Code to upload to s3 Bucket
-#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-#     try:
-#         s3.Bucket(bucketName).put_object(Key=file_path.name,Body=file_path)
-#     except Exception as e:
-#         return ["network_error"]
-          
-#     all_errors=[]
-#     try:
-#         s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
-#         s3_data = StringIO(s3_object.get()['Body'].read().decode('utf-8'))
-#         data = pd.read_csv(s3_data)
-#         data = data.replace(np.nan, '', regex=True)
-#         if len(headers) == len(data.columns):
-#             for column in data.columns:
-#                 if column not in headers:
-#                     s3_object.delete()
-#                     return ["csv_header_error"]
-#         else :
-#             s3_object.delete()
-#             return ["csv_header_error"]
-#     except Exception as e:
-#         s3_object.delete()
-#         return ["csv_file_error"]
-#     rowNumber = 1
-#     for index,row in data.iterrows(): 
-#         rowNumber+=1
-#         try:                                                                          
-#             c = City_Code.objects.get(pk=city)
-#             #p = Taxi_Detail(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],driving_license_number=row["DRIVING LICENSE NUMBER"],date_of_validity=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],owner_driver=row["OWNERDRIVER"],driver_image_name=row["DRIVER IMAGE FILENAME"],city=c)
-#             v = Vehicle(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],rc_expiry=date_form(row["DATE OF VALIDITY"]),autostand=row['AUTO STAND'],union=row['UNION'],insurance=date_form(row["INSURANCE"]),capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=date_form(row["POLLUTION"]),engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],is_owner_driver=row["OWNERDRIVER"],city=c)
-#             print(v)
-#             d = Driver(driver_name=row["NAME"],son_of=row["FATHER NAME"],date_of_birth=date_form(row["DATE OF BIRTH"]),phone_number=row["PHONE NUMBER"],address=row["ADDRESS"],aadhar_number=row["AADHAR NUMBER"],dl_number=row["DRIVING LICENSE NUMBER"],driver_image_name=row["DRIVER IMAGE FILENAME"])
-#             print(d)
-#             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
-#                 v.save()
-#                 d.save()
-#         except Exception as e:
-#             all_errors.append(rowNumber)
-#     s3_object.delete()
-#     return all_errors
-
-# def handle_taxi_csv(file_path,city):
-#     import os,numpy as np
-#     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
-   
-#     owner_vehicle_headers = ['AUTO NUMBER','OWNER NAME','ADDRESS','DATE OF BIRTH','FATHER NAME','PHONE NUMBER','AADHAR NUMBER','OWNER IMAGE','OWNER IMAGE NAME','DRIVING LICENSE NUMBER','DATE OF VALIDITY','TRAFFIC NUMBER','INSURANCE DATE','AUTO STAND','UNION','CAPACITY OF PASSENGERS','POLLUTION DATE','ENGINE NUMBER',
-#                              'CHASIS NUMBER','IS OWNER DRIVER','RC NUMBER','RC EXPIRY']
-#     driver_headers = ['AUTO NUMBER','DRIVER NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER',
-#                       'DRIVING LICENSE NUMBER','DATE OF VALIDITY','DRIVER IMAGE FILENAME']
-
-#     #Code to upload to s3 Bucket
-#     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-#     try:
-#         s3.Bucket(bucketName).put_object(Key=file_path.name,Body=file_path)
-#     except Exception as e:
-#         return ["network_error"]
-          
-#     all_errors=[]
-#     try:
-#         s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
-#         owner_vehicle_df = pd.read_excel(s3_object.get()['Body'],sheetname="Vehicle_Owner")
-#         driver_df = pd.read_excel(s3_object.get()['Body'],sheetname="Driver")
-#         owner_vehicle_data = owner_vehicle_df.replace(np.nan, '', regex=True)
-#         driver_data = driver_df.replace(np.nan, '', regex=True)
-
-#         if ( len(owner_vehicle_headers) == len(owner_vehicle_data.columns) and len(driver_headers) == len(driver_data.columns)) :
-#             for ov_column,dvr_column in zip(owner_vehicle_data.columns,driver_data.columns):
-#                 if ( ov_column not in owner_vehicle_headers or dvr_column not in driver_headers ):
-#                     s3_object.delete()
-#                     return ["csv_header_error"]
-#         else :
-#             s3_object.delete()
-#             return ["csv_header_error"]
-#     except Exception as e:
-#         s3_object.delete()
-#         return ["csv_file_error"]
-
-#     """code to insert First Sheet named - Vehicle_Owner  into Vehicle and Owner Tables"""
-#     rowNumber = 1
-#     for index,row in owner_vehicle_data.iterrows(): 
-#         rowNumber+=1
-#         try:                                                                          
-#             c = City_Code.objects.get(pk=city)
-#             if (len(row["TRAFFIC NUMBER"]) > 3) or (row["TRAFFIC NUMBER"] in ['','-']):
-#                 active = Active.objects.get(active_name = "Active")
-#                 owner = Owner(owner_name=row["OWNER NAME"],address=row["ADDRESS"],date_of_birth=row["DATE OF BIRTH"],son_of=row['FATHER NAME'],phone_number=row['PHONE NUMBER'],aadhar_number=row['AADHAR NUMBER'],owner_image=row['OWNER IMAGE'],owner_image_name=row["OWNER IMAGE NAME"],active = active)
-#                 owner.save()   
-#                 vehicle = Vehicle(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],insurance = row["INSURANCE DATE"], rc_number=row['RC NUMBER'],autostand=row['AUTO STAND'],union=row['UNION'],capacity_of_passengers=row["CAPACITY OF PASSENGERS"],pollution=row["POLLUTION DATE"],engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],is_owner_driver=row["IS OWNER DRIVER"],city=c,owner = owner)
-#                 vehicle.save()
-#         except Exception as e:
-#             all_errors.append(rowNumber)
-#             s3_object.delete()
-#             return all_errors
-
-#     """code to insert Second Sheet named - Driver  into Driver Table"""
-#     rowNumber = 1
-#     for index,row in driver_data.iterrows(): 
-#         rowNumber+=1
-#         try:                                                                          
-#             if (len(row["AUTO NUMBER"]) > 3) or (row["AUTO NUMBER"] in ['','-']):
-#                 vehicle = Vehicle.objects.get(number_plate = row["AUTO NUMBER"])
-#                 active = Active.objects.get(active_name = "Active")
-#                 d = Driver(driver_name = row['DRIVER NAME'],traffic_number=row['AUTO NUMBER'],address=row['ADDRESS'],date_of_birth = row['DATE OF BIRTH'],son_of = row['FATHER NAME'],phone_number=row['PHONE NUMBER'], aadhar_number = row['AADHAR NUMBER'],dl_number=row['DRIVING LICENSE NUMBER'],dl_expiry =date_form(row['DATE OF VALIDITY']),driver_image=row['DRIVER IMAGE FILENAME'],vehicle=vehicle,active=active)
-#                 d.save()
-#         except Exception as e:
-#             all_errors.append(rowNumber)
-#             s3_object.delete()
-#             return all_errors
-
-#     s3_object.delete()
-#     return all_errors
-
 def handle_taxi_csv(file_path,city):
     import os,numpy as np
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
-   
-    # owner_vehicle_headers = ['AUTO NUMBER','OWNER NAME','ADDRESS','DATE OF BIRTH','FATHER NAME','PHONE NUMBER','AADHAR NUMBER','OWNER IMAGE','OWNER IMAGE NAME','DRIVING LICENSE NUMBER','DATE OF VALIDITY','TRAFFIC NUMBER','INSURANCE DATE','AUTO STAND','UNION','CAPACITY OF PASSENGERS','POLLUTION DATE','ENGINE NUMBER',
-    #                          'CHASIS NUMBER','IS OWNER DRIVER','RC NUMBER','RC EXPIRY']
     owner_vehicle_headers = ['Owner Image Name (30)','Vehicle Number (12)','Traffic Number (13)','Owner Name (40)','Father Name (40)','DOB (DD/MM/YYYY)','ADDRESS (200)','Phone (10)','Aadhaar (12)','DL Number (20)','DL Expiry (DD/MM/YYYY)','Blood Group (3)','Vehicle Make (20)','Vehicle Model (20)','Capacity (2)','Mfg Date (DD/MM/YYYY)','RC Expiry (DD/MM/YYYY)','Engine Number (20)','Chassis Number (25)','Insurance provider (20)','Insurance number (30)','Insurance Date (DD/MM/YYYY)','Auto Stand (40)','Union (40)','Pollution (DD/MM/YYYY)']
-
-    # driver_headers = ['AUTO NUMBER','DRIVER NAME','FATHER NAME','DATE OF BIRTH','PHONE NUMBER','ADDRESS','AADHAR NUMBER',
-    #                   'DRIVING LICENSE NUMBER','DATE OF VALIDITY','DRIVER IMAGE FILENAME']
     driver_headers = ['Driver Image Name (30)','Vehicle Number (12)','Driver Name (40)','Father Name (40)','DOB (DD/MM/YYYY)','Address (200)','Phone (10)','Aadhaar (12)','DL Number (20)','DL Expiry (DD/MM/YYYY)','Blood Group (3)']
 
     #Code to upload to s3 Bucket
@@ -726,10 +519,8 @@ def handle_taxi_csv(file_path,city):
             c = City_Code.objects.get(pk=city)
             if (len(row["Traffic Number (13)"]) > 3) or (row["Traffic Number (13)"] in ['','-']):
                 active = Active.objects.get(active_name = "active")
-                # owner = Owner(owner_name=row["OWNER NAME"],address=row["ADDRESS"],date_of_birth=row["DATE OF BIRTH"],son_of=row['FATHER NAME'],phone_number=row['PHONE NUMBER'],aadhar_number=row['AADHAR NUMBER'],owner_image=row['OWNER IMAGE'],owner_image_name=row["OWNER IMAGE NAME"],active = active)
                 owner = Owner(owner_name=row["Owner Name (40)"],address=row["ADDRESS (200)"],date_of_birth=row["DOB (DD/MM/YYYY)"],son_of=row['Father Name (40)'],phone_number=row['Phone (10)'],aadhar_number=row['Aadhaar (12)'],owner_image_name=row["Owner Image Name (30)"],blood_group=row["Blood Group (3)"],dl_number = row["DL Number (20)"],dl_expiry= row["DL Expiry (DD/MM/YYYY)"],active = active)
                 owner.save()   
-                #vehicle = Vehicle(number_plate=row["AUTO NUMBER"],traffic_number=row["TRAFFIC NUMBER"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = row["INSURANCE DATE"], rc_number=row['RC NUMBER'],autostand=row['AUTO STAND'],union=row['UNION'],capacity_of_passengers=row["Capacity (2)"],pollution=row["POLLUTION DATE"],engine_number=row["ENGINE NUMBER"],chasis_number=row["CHASIS NUMBER"],is_owner_driver=row["IS OWNER DRIVER"],mfg_date=row["Mfg Date (DD/MM/YYYY)"],city=c,owner = owner)
                 vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = row["Insurance Date (DD/MM/YYYY)"],insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=row["Pollution (DD/MM/YYYY)"],engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=row["Mfg Date (DD/MM/YYYY)"],rc_expiry=row["RC Expiry (DD/MM/YYYY)"],city=c,owner = owner)
                 vehicle.save()
         except Exception as e:
@@ -746,7 +537,6 @@ def handle_taxi_csv(file_path,city):
             if (len(row["Vehicle Number (12)"]) > 3) or (row["Vehicle Number (12)"] in ['','-']):
                 vehicle = Vehicle.objects.get(number_plate = row["Vehicle Number (12)"])
                 active = Active.objects.get(active_name = "active")
-                #d = Driver(driver_name = row['Driver Name (40)'],traffic_number=row['Vehicle Number (12)'],address=row['ADDRESS'],date_of_birth = row['DATE OF BIRTH'],son_of = row['FATHER NAME'],phone_number=row['PHONE NUMBER'], aadhar_number = row['AADHAR NUMBER'],dl_number=row['DRIVING LICENSE NUMBER'],dl_expiry =date_form(row['DATE OF VALIDITY']),driver_image=row['DRIVER IMAGE FILENAME'],vehicle=vehicle,blood_group=row["Blood Group (3)",active=active)
                 d = Driver(driver_name = row['Driver Name (40)'],traffic_number=row['Vehicle Number (12)'],address=row['Address (200)'],date_of_birth = row['DOB (DD/MM/YYYY)'],son_of = row['Father Name (40)'],phone_number=row['Phone (10)'], aadhar_number = row['Aadhaar (12)'],dl_number=row['DL Number (20)'],dl_expiry =date_form(row['DL Expiry (DD/MM/YYYY)']),driver_image=row['Driver Image Name (30)'],vehicle=vehicle,blood_group=row["Blood Group (3)"],active=active)
                 d.save()
         except Exception as e:
@@ -757,46 +547,6 @@ def handle_taxi_csv(file_path,city):
 
     s3_object.delete()
     return all_errors
-
-# def handle_bulk_image_zip(file_path):
-#     import os,zipfile,shutil
-#     path = '/home/ec2-user/taxiapp/tproject/'
-#     dest = open(path+"images.zip","wb")
-#     for chunk in file_path.chunks():
-#         dest.write(chunk)
-#     dest.close()
-#     zip_ref = zipfile.ZipFile(path+"images.zip", 'r')
-#     try:
-#         os.mkdir(path+'bulk_tmp')
-#     except:
-#         shutil.rmtree(path+'bulk_tmp')
-#         os.mkdir(path+'bulk_tmp')
-#     try:
-#         zip_ref.extractall(path+'bulk_tmp')
-#     except:
-#         os.remove(path+"images.zip")
-#         zip_ref.close()
-#         shutil.rmtree(path+'bulk_tmp')
-#         return ["csv_file_error"]
-#     zip_ref.close()
-#     os.remove(path+"images.zip")
-#     all_errors=[]
-#     for images in os.listdir(path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"):
-#         try:
-#            full_path = path+'bulk_tmp/'+os.listdir(path+'bulk_tmp/')[0]+"/"+images
-#            taxis = Taxi_Detail.objects.filter(driver_image_name__contains = images.strip())
-#            for t in taxis:
-#                t.driver_image.save("drivers",File(open(full_path)))
-#                t.save()
-#         except Exception as e:
-#             all_errors.append(e)
-#     print(all_errors)
-#     shutil.rmtree(path+'bulk_tmp')
-#     return all_errors
-
-#reference https://www.quora.com/How-do-I-extract-a-zip-file-in-an-Amazon-S3-by-using-Lambda
-
-
 
 def handle_bulk_image_zip(file_path):
 
@@ -893,46 +643,8 @@ def unzipAttachment(s3_path,filename):
     s3_object.delete()
     return all_errors
 
-# def deleteZipFile(dst):
-#     for obj in bucket.objects.filter(Prefix=attachmentFolder,Delimiter='/'):
-#         if obj.key.endswith(extension):
-#             if(dst==obj.key):
-#                 #old_source = { 'Bucket': bucketName,'Key': obj.key}
-#                 #new_key = obj.key.replace(attachmentFolder, deletedZipFolder)
-#                 #new_obj = bucket.Object(new_key)
-#                 #new_obj.copy(old_source)
-#                 s3_resource.Object(bucket.name, obj.key).delete()
-
-# def taxi_csv_upload(request):
-#     message = 'Please Upload the Excel file here'
-#     secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
-#     if request.user.is_authenticated():
-#         if request.user.is_admin or request.user.is_staff:
-#             if request.method == "POST":
-#                 form = TaxiDetailCsvUpload(request.POST, request.FILES)
-#                 if form.is_valid():
-#                     errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
-#                     print(errors)
-#                     if len(errors)==0:
-#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
-#                     elif errors[0] == "csv_header_error":  
-#                          return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
-#                     elif errors[0] == "csv_file_error":
-#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
-#                     elif errors[0] == "network_error":
-#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
-#                     # return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number '+ str((errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
-#                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
-#             else:
-#                 form = TaxiDetailCsvUpload()
-#             return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
-#     else:
-#         return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
-
-
 def taxi_csv_upload(request):
     message = 'Please Upload the Excel file here'
-    #secondary_message = ' The columns should strictly be AUTO NUMBER, TRAFFIC NUMBER, NAME,\nFATHER NAME, DATE OF BIRTH, PHONE NUMBER, ADDRESS, AADHAR NUMBER,\nDRIVING LICENSE NUMBER, DATE OF VALIDITY, AUTO STAND, UNION, INSURANCE,\nCAPACITY OF PASSENGERS, POLLUTION, ENGINE NUMBER, CHASIS NUMBER, OWNERDRIVER, DRIVER IMAGE FILENAME'
     if request.user.is_authenticated():
         if request.user.is_admin or request.user.is_staff:
             if request.method == "POST":
@@ -948,7 +660,6 @@ def taxi_csv_upload(request):
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
                     elif errors[0] == "network_error":
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
-                    # return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number '+ str((errors)) +' duplicates to the previous entries were found in the file and they were NOT UPLOADED'})
                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
                 form = TaxiDetailCsvUpload()
@@ -968,8 +679,6 @@ def bulk_image_upload(request):
                     errors = handle_bulk_image_zip(request.FILES['bulk_image_zip'])
                     if len(errors)==0:
                         return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
-                    # elif errors[0] == "csv_file_error":
-                    #     return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'ERROR: Files are not images.\n','message2':secondary_message})
                     elif errors[0] == "network_error":
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})  
 
@@ -1074,100 +783,6 @@ def handler500(request):
     response.status_code = 500
     return response
 
-# class TaxiDriverOwner(APIView):
-#     authentication_classes = (SessionAuthentication, BasicAuthentication)
-#     permission_classes = (IsAuthenticated,)
-#     def get(self,request,format=None, **kwargs):
-#         cityCode = request.GET.get('cityCode')
-#         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
-#         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
-#         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
-#         numberPlates = request.GET.get('numberPlates') # Number Plates
-#         page = request.GET.get('page', 1) # Page Number
-#         limit = request.GET.get('limit', 10) # No Of Records per page
-        
-#         taxiDetails = Taxi_Detail.objects.all()
-#         if (rangeFrom != None and rangeTo != None):
-#             rangeFromList = rangeFrom.split('-')
-#             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
-#             rangeLen = len(rangeFromList[2])
-#             rangeFromValue = int(rangeFromList[2])
-#             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
-#             rangeList = []            
-#             for i in range(rangeDiff):
-#                 rangFromValuelen = len(str(rangeFromValue))
-#                 leadingZero = rangeLen - rangFromValuelen
-#                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
-#                 rangeFromValue =  rangeFromValue + 1
-#             taxiDetails = taxiDetails.filter(traffic_number__in = rangeList)
-#         if (taxiIds != None):
-#             taxiIdsArray = taxiIds.split(',')
-#             taxiDetails = taxiDetails.filter(traffic_number__in = taxiIdsArray)
-#         if (numberPlates != None):
-#             numberPlatesArray = numberPlates.split(',')
-#             taxiDetails = taxiDetails.filter(number_plate__in = numberPlatesArray)
-#         if (cityCode != None):
-#             taxiDetails = taxiDetails.filter(city__city_code = cityCode)
-
-
-#         paginator = Paginator(taxiDetails, limit)
-#         try:
-#             taxiDetails = paginator.page(page)
-#         except PageNotAnInteger:
-#             taxiDetails = paginator.page(1)
-#         except EmptyPage:
-#             taxiDetails = paginator.page(paginator.num_pages)
-
-#         serializer = TaxiDriverOwnerSerialize(taxiDetails,many=True)        
-#         return Response(data=serializer.data)
-
-# class TaxiComplaints(APIView):
-#     authentication_classes = (SessionAuthentication, BasicAuthentication)
-#     permission_classes = (IsAuthenticated,)
-#     def get(self,request,format=None, **kwargs):
-#         cityCode = request.GET.get('cityCode')
-#         rangeFrom = request.GET.get('rangeFrom')# Last five digits of Traffic Number
-#         rangeTo = request.GET.get('rangeTo') # Last five digits of Traffic Number
-#         taxiIds = request.GET.get('taxiIds') # Traffic Numbers
-#         numberPlates = request.GET.get('numberPlates') # Number Plates
-#         page = request.GET.get('page', 1) # Page Number
-#         limit = request.GET.get('limit', 10) # No Of Records per page
-
-#         complaints = Complaint_Statement.objects.all()
-#         if (rangeFrom != None and rangeTo != None):
-#             rangeFromList = rangeFrom.split('-')
-#             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
-#             rangeLen = len(rangeFromList[2])
-#             rangeFromValue = int(rangeFromList[2])
-#             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
-#             rangeList = []
-#             for i in range(rangeDiff):
-#                 rangFromValuelen = len(str(rangeFromValue))
-#                 leadingZero = rangeLen - rangFromValuelen
-#                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
-#                 rangeFromValue =  rangeFromValue + 1
-#             complaints = complaints.filter(taxi__traffic_number__in = rangeList)
-#         if (taxiIds != None):
-#             taxiIdsArray = taxiIds.split(',')
-#             complaints = complaints.filter(taxi__traffic_number__in = taxiIdsArray)
-#         if (numberPlates != None):
-#             numberPlatesArray = numberPlates.split(',')
-#             complaints = complaints.filter(taxi__number_plate__in = numberPlatesArray)
-#         if (cityCode != None):
-#             complaints = complaints.filter(city__city_code = cityCode)
-
-#         paginator = Paginator(complaints, limit)
-#         try:
-#             complaints = paginator.page(page)
-#         except PageNotAnInteger:
-#             complaints = paginator.page(1)
-#         except EmptyPage:
-#             complaints = paginator.page(paginator.num_pages)
-        
-#         serializer = TaxiComplaintsSerialize(complaints,many=True)        
-#         return Response(data=serializer.data)
-
-
 class TaxiDriverOwner(APIView):
     authentication_classes = (SessionAuthentication, BasicAuthentication)
     permission_classes = (IsAuthenticated,)
@@ -1180,17 +795,13 @@ class TaxiDriverOwner(APIView):
         page = request.GET.get('page', 1) # Page Number
         limit = request.GET.get('limit', 10) # No Of Records per page
         
-        #vehicleDetails = Vehicle.objects.all()
-        driverDetails = Driver.objects.all()
-        #print(len(driverDetails))
+        vehicleDetails = Vehicle.objects.all()
         if (rangeFrom != None and rangeTo != None):
             rangeFromList = rangeFrom.split('-')
             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
             rangeLen = len(rangeFromList[2])
             rangeFromValue = int(rangeFromList[2])
-            #print(rangeFromValue)
             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
-            #print(rangeDiff)
             rangeList = []            
             for i in range(rangeDiff):
                 rangFromValuelen = len(str(rangeFromValue))
@@ -1198,26 +809,24 @@ class TaxiDriverOwner(APIView):
                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
                 rangeFromValue =  rangeFromValue + 1
             print(rangeList)
-            driverDetails = driverDetails.filter(vehicle__traffic_number__in = rangeList)
+            vehicleDetails = vehicleDetails.filter(traffic_number__in = rangeList)
         if (taxiIds != None):
             taxiIdsArray = taxiIds.split(',')
-            driverDetails = driverDetails.filter(vehicle__traffic_number__in = taxiIdsArray)
+            vehicleDetails = vehicleDetails.filter(traffic_number__in = taxiIdsArray)
         if (numberPlates != None):
             numberPlatesArray = numberPlates.split(',')
-            driverDetails = driverDetails.filter(vehicle__number_plate__in = numberPlatesArray)
+            vehicleDetails = vehicleDetails.filter(number_plate__in = numberPlatesArray)
         if (cityCode != None):
-            driverDetails = driverDetails.filter(vehicle__city__city_code = cityCode)
-            #print(len(driverDetails))
-                       
-        paginator = Paginator(driverDetails, limit)
+            vehicleDetails = vehicleDetails.filter(city__city_code = cityCode)
+        paginator = Paginator(vehicleDetails, limit)
         try:
-            driverDetails = paginator.page(page)
+            vehicleDetails = paginator.page(page)
         except PageNotAnInteger:
-            driverDetails = paginator.page(1)
+            vehicleDetails = paginator.page(1)
         except EmptyPage:
-            driverDetails = paginator.page(paginator.num_pages)
+            vehicleDetails = paginator.page(paginator.num_pages)
 
-        serializer = TaxiDriverOwnerSerialize(driverDetails,many=True)        
+        serializer = TaxiDriverOwnerSerialize(vehicleDetails,many=True)        
         return Response(data=serializer.data)
 
 class TaxiComplaints(APIView):
@@ -1355,7 +964,6 @@ def OwnerImagesMigration(request):
             try:
                 dest = s3.Bucket(bucketName)
                 source= { 'Bucket' : bucketName, 'Key': str(owner.owner_image)}
-                #source= { 'Bucket' : "taxipublic", 'Key': str(owner.owner_image)}
                 dest.copy(source, ownerDestPath + ownerImage)
                 #Grant public Permisions
                 object_acl = s3.ObjectAcl(bucketName, ownerDestPath + ownerImage)
@@ -1371,7 +979,6 @@ def DriverImagesMigration(request):
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    #drivers = Driver.objects.all()
     path = 'drivers/'
     drivers = Driver.objects.filter(driver_image__startswith=path)
     driverDestPath = "images/drivers/"
@@ -1386,7 +993,6 @@ def DriverImagesMigration(request):
             try:
                 dest = s3.Bucket(bucketName)
                 source= { 'Bucket' : bucketName, 'Key': str(driver.driver_image)}
-                #source= { 'Bucket' : "taxipublic", 'Key': str(driver.driver_image)}
                 dest.copy(source, driverDestPath + driverImage)
                 #Grant public Permisions
                 object_acl = s3.ObjectAcl(bucketName, driverDestPath + driverImage)
@@ -1473,10 +1079,6 @@ def DriverImageValidation(request):
                 bucket = s3.Bucket(bucketName)                                   
                 fileName = 'drivers/'+driver.driver_image_name
                 objs = list(bucket.objects.filter(Prefix=fileName))
-                # if len(objs) > 0 and objs[0].key == fileName:
-                #     print("Exists!")
-                # else:
-                #     print("Doesn't exist")                
                 if len(objs) > 0:
                     source= { 'Bucket' : bucketName, 'Key': fileName}
                     destination = destPath + driver.driver_image_name
@@ -1538,10 +1140,6 @@ def OwnerImageValidation(request):
                 bucket = s3.Bucket(bucketName)                                   
                 fileName = 'drivers/'+owner.owner_image_name
                 objs = list(bucket.objects.filter(Prefix=fileName))
-                # if len(objs) > 0 and objs[0].key == fileName:
-                #     print("Exists!")
-                # else:
-                #     print("Doesn't exist")                
                 if len(objs) > 0:
                     source= { 'Bucket' : bucketName, 'Key': fileName}
                     destination = destPath + owner.owner_image_name
@@ -1588,6 +1186,15 @@ def OwnerImageValidation(request):
             
             
     return render(request,'taxiapp/migration.html')
+
+def Terms_Of_Use(request):
+    return render(request,'terms_of_use.html')
+
+def Privacy_Policy(request):
+    return render(request,'privacy_policy.html')
+def About_Us(request):
+    return render(request,'about_us.html')
+
 
 
      

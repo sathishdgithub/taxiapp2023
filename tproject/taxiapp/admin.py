@@ -225,7 +225,7 @@ class VehicleAdmin(admin.ModelAdmin):
 class DriverAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return request.user.is_staff and request.user.is_admin    
-    exclude = ('qr_code','created_time','modified_by','modified_time','qr_image')
+    exclude = ('qr_code','created_time','modified_by','modified_time','qr_image','is_image_verified')
     list_display = ('traffic_number','driver_name','phone_number','dl_number','driver_image_name')
     # def qr_image(self, obj):  # receives the instance as an argument
     #     return '<img width=75 height=75 src="{thumb}" />'.format(
@@ -237,7 +237,7 @@ class DriverAdmin(admin.ModelAdmin):
 class OwnerAdmin(admin.ModelAdmin):
     def has_module_permission(self, request):
         return request.user.is_staff and request.user.is_admin    
-    exclude = ('created_time','modified_by','modified_time')
+    exclude = ('created_time','modified_by','modified_time','is_image_verified')
     list_display = ('owner_name','date_of_birth','phone_number','owner_image','dl_number')
 
 class RatingTypeAdmin(admin.ModelAdmin):
