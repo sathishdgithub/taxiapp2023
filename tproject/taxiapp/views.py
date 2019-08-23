@@ -474,7 +474,13 @@ def date_form(date):
         if (len(y)==4) and (int(m)<=12 and int(m)>=1):                                                                                         
             return y+'-'+m+'-'+d                                                                                                               
         elif (len(y)==4) and (int(d)<=12 and int(d)>=1):                                                                                                          return y+'-'+d+'-'+m                                                             
-    return None    
+    return None
+
+def convertToDate(datestr):
+    date = None
+    if(datestr is not None and datestr != '' and datestr != '-'):
+        date = pd.to_datetime(datestr).strftime('%Y-%m-%d')
+    return date
 
 def handle_taxi_csv(file_path,city):
     import os,numpy as np
@@ -518,11 +524,12 @@ def handle_taxi_csv(file_path,city):
         try:                                                                          
             c = City_Code.objects.get(pk=city)
             if (len(row["Traffic Number (13)"]) > 3) or (row["Traffic Number (13)"] in ['','-']):
-                active = Active.objects.get(active_name = "active")
-                owner = Owner(owner_name=row["Owner Name (40)"],address=row["ADDRESS (200)"],date_of_birth=row["DOB (DD/MM/YYYY)"],son_of=row['Father Name (40)'],phone_number=row['Phone (10)'],aadhar_number=row['Aadhaar (12)'],owner_image_name=row["Owner Image Name (30)"],blood_group=row["Blood Group (3)"],dl_number = row["DL Number (20)"],dl_expiry= row["DL Expiry (DD/MM/YYYY)"],active = active)
+                active = Active.objects.get(active_name = "active") 
+                owner = Owner(owner_name=row["Owner Name (40)"],address=row["ADDRESS (200)"],date_of_birth=convertToDate(row["DOB (DD/MM/YYYY)"]),son_of=row['Father Name (40)'],phone_number=row['Phone (10)'],aadhar_number=row['Aadhaar (12)'],owner_image_name=row["Owner Image Name (30)"],blood_group=row["Blood Group (3)"],dl_number = row["DL Number (20)"],dl_expiry= convertToDate(row["DL Expiry (DD/MM/YYYY)"]),active = active)
                 owner.save()   
-                vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = row["Insurance Date (DD/MM/YYYY)"],insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=row["Pollution (DD/MM/YYYY)"],engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=row["Mfg Date (DD/MM/YYYY)"],rc_expiry=row["RC Expiry (DD/MM/YYYY)"],city=c,owner = owner)
+                vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner)
                 vehicle.save()
+                
         except Exception as e:
             print(e.message)
             all_errors.append(rowNumber)
@@ -535,9 +542,14 @@ def handle_taxi_csv(file_path,city):
         rowNumber+=1
         try:                                                                          
             if (len(row["Vehicle Number (12)"]) > 3) or (row["Vehicle Number (12)"] in ['','-']):
-                vehicle = Vehicle.objects.get(number_plate = row["Vehicle Number (12)"])
+                
+                number_plate = row["Vehicle Number (12)"]
+                if ' ' in number_plate:
+                    number_plate = number_plate.replace(' ','')
+              
+                vehicle = Vehicle.objects.get(number_plate = number_plate)
                 active = Active.objects.get(active_name = "active")
-                d = Driver(driver_name = row['Driver Name (40)'],traffic_number=row['Vehicle Number (12)'],address=row['Address (200)'],date_of_birth = row['DOB (DD/MM/YYYY)'],son_of = row['Father Name (40)'],phone_number=row['Phone (10)'], aadhar_number = row['Aadhaar (12)'],dl_number=row['DL Number (20)'],dl_expiry =date_form(row['DL Expiry (DD/MM/YYYY)']),driver_image=row['Driver Image Name (30)'],vehicle=vehicle,blood_group=row["Blood Group (3)"],active=active)
+                d = Driver(driver_name = row['Driver Name (40)'],address=row['Address (200)'],date_of_birth = convertToDate(row['DOB (DD/MM/YYYY)']),son_of = row['Father Name (40)'],phone_number=row['Phone (10)'], aadhar_number = row['Aadhaar (12)'],dl_number=row['DL Number (20)'],dl_expiry = convertToDate(row['DL Expiry (DD/MM/YYYY)']),driver_image=row['Driver Image Name (30)'],vehicle=vehicle,blood_group=row["Blood Group (3)"],active=active)
                 d.save()
         except Exception as e:
             print(e.message)
