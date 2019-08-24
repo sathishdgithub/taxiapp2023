@@ -358,7 +358,8 @@ def taxi_list(request):
                 city_code = 'All'
         else:
            city = request.user.city
-
+           city_code = city.city_code
+        
         if (city_code == 'All') :
             rows = Vehicle.objects.select_related()
             rows_c = Complaint_Statement.objects.select_related('vehicle')
