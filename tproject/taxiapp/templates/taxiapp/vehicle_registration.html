@@ -1,0 +1,198 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+.container {
+    width: 800px;
+}
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO */
+[type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+[type=radio] + img {
+  cursor: pointer;
+}
+
+/* CHECKED STYLES */
+[type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+}
+
+/* Rating Star Widgets Style */
+.rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+}
+
+/* Idle State of the stars */
+.rating-stars ul > li.star > i.fa {
+  font-size:2.5em; /* Change the size of the stars */
+  color:#ccc; /* Color on idle state */
+}
+
+/* Hover state of the stars */
+.rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+}
+
+/* Selected state of the stars */
+.rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+}
+
+</style>
+    
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Vehicle registration</h3>
+      </div>
+      <form action="/vehicle_register_details/" method="POST">
+        {%csrf_token%}
+      <table align="center" border="0">
+          <tr>
+              <td>Traffic number</td>
+              <td>
+                  <input type="text" placeholder="Traffic number" name="traffic_number" required maxlength="28"> 
+              </td>
+          </tr>
+          <tr>
+                <td>Number plate</td>
+                  <td>
+                    <input type="text" placeholder="Number plate" name="number_plate" required maxlength="24"> 
+                </td>
+            </tr>
+            <tr>
+                    <td>Auto Stand </td>
+                    <td>
+                        <input type="text" placeholder="Auto Stand" name="autostand"  max="80"> 
+                    </td>
+            </tr>
+            <tr>
+              <td>Union</td>
+                  <td>
+                  <input type="text" placeholder="Union" name="union"  maxlength="100"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Insurance</td>
+                  <td>
+                  <input type="date" placeholder="Insurance" name="insurance" > 
+              </td>
+            </tr>
+            <tr>
+              <td>pollution</td>
+                  <td>
+                  <input type="date" placeholder="pollution" name="pollution" > 
+              </td>
+            </tr>
+            <tr>
+              <td>engine number</td>
+                  <td>
+                  <input type="text" placeholder="engine number" name="engine_number"  maxlength="40"> 
+              </td>
+            </tr>
+            <tr>
+              <td>chasis number</td>
+              <td>
+                  <input type="text" placeholder="chasis number" name="chasis_number"  maxlength="30">  
+              </td>
+            </tr>
+            <tr>
+              <td>rc_number</td>
+              <td>
+                  <input type="text" placeholder="rc_number" name="rc_number" required maxlength="28"> 
+              </td>
+            </tr>
+            <tr>
+              <td>rc_expiry</td>
+              <td>
+                  <input type="date" placeholder="rc_expiry" name="rc_expiry"> 
+              </td>
+            </tr>
+            <!-- <tr>
+            <td>created_by:
+                    <input type="text" placeholder="created_by" name="created_by" required> 
+                </td>
+              </tr>
+                <tr>
+                    <td>modified_by:
+                        <input type="text" placeholder="modified_by" name="modified_by" required> 
+                    </td>
+                   </tr>
+                        <td>active:
+                            <input type="text" placeholder="active" name="active" required> 
+                        </td>
+                      </tr> -->
+                      <tr> 
+                      
+                          <td>city</td>
+                          <td>
+                              <!-- <input type="text" placeholder="city" name="city" required>  -->
+                              <select name="city_code" id="city_code">
+                                     {% for city in cities %}
+                                     <option value={{city.city_code}}>{{city.city}}</option>
+                                      {% endfor %}
+                              </select>
+                          </td>
+                        </tr>
+                        <tr>
+                            <td>capacity_of_passengers</td>
+                            <td>
+                                <input type="number" placeholder="capacity_of_passengers" name="capacity_of_passengers"  maxlength="14"> 
+                            </td>
+                          </tr>
+                        <tr>
+                          <td>Owner_name</td>
+                          <td>
+                              <input type="text" placeholder="Owner_name" name="Owner_name" required> 
+                          </td>
+                        </tr>
+                        <tr>
+                            <td>Owner_Phone_no</td>
+                            <td>
+                                <input type="text" placeholder="Owner_Phone_no" name="Owner_Phone_no" required> 
+                            </td>
+                          </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td align="center">
+                                <button type="submit" class="btn btn-success btn-sm">Save</button>
+                            </td>
+                        </tr>
+                    </table>
+                    </form>
+                    <!-- <div class="profile-userbuttons center-block">
+                      <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
+                        style="margin:0.5em;">submit</button>
+                    </div> -->
+      </div>
+   
+{% endblock %}

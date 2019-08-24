@@ -516,3 +516,24 @@ class Customer_Rating(models.Model):
     class Meta:
         verbose_name = 'Customer Rating'
         verbose_name_plural = 'Customer Ratings'
+
+class Vehicle_Registration(models.Model):
+    traffic_number = models.CharField(max_length = 28,default='',unique=True)
+    number_plate = models.CharField(max_length = 24)
+    vehicle_type = models.ForeignKey(Vehicle_type,null=True)
+    autostand = models.CharField(max_length=80,null=True,blank=True, verbose_name="Stand")
+    union = models.CharField(max_length=100,null=True,blank=True)
+    city = models.ForeignKey(City_Code, blank=True)
+    insurance = models.DateField(null=True,blank=True)
+    pollution = models.DateField(null=True,blank=True)
+    engine_number = models.CharField(max_length=40,null=True,blank=True)
+    chasis_number = models.CharField(max_length=30,null=True,blank=True)
+    rc_number = models.CharField(max_length = 28,default='')
+    rc_expiry = models.DateField(null=True,blank=True)
+    num_of_complaints = models.BigIntegerField(default=0)
+    active = models.ForeignKey(Active,null=True)
+    created_by = models.CharField(max_length=50,null = True,blank= True)
+    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_by = models.CharField(max_length=50,null = True,blank= True)
+    modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    capacity_of_passengers = models.PositiveSmallIntegerField(null = True,blank= True)

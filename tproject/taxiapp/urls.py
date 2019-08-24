@@ -47,6 +47,8 @@ urlpatterns = [
         url(r'^terms_of_use/',views.Terms_Of_Use,name='Terms_Of_Use'),
         url(r'^privacy_policy/',views.Privacy_Policy,name='Privacy_Policy'),
         url(r'^about_us/',views.About_Us,name='About_Us'),
+        url(r'^vehice_registrations/',views.Vehice_Registration,name='Vehice_Registration'),
+        url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details')
 ]       
 
 handler404 = views.handler404
