@@ -1356,6 +1356,136 @@ def Vehicle_Register_Details(request):
     #return render(request, 'taxiapp/drivers_list.html', {'message':'successfully registered.','form' : form})
     return HttpResponseRedirect("/?message=successfully registered.")
 
+def Add_Vehicle(request):
+    cities = City_Code.objects.values_list('city', flat=True).distinct()
+    vehice_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
+    return render(request,'taxiapp/add_vehicle.html',{'cities':cities,'vehice_type':vehice_type})
+
+def Add_Driver(request):
+    vehicle_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
+    return render(request,'taxiapp/add_driver.html',{'vehicle_type':vehicle_type})
+
+def Add_Vehicle_Details(request):
+
+    print("********************")
+    print(request.POST)
+    
+
+
+    #Read Owner Details
+    # owner_name = request.POST.get('o_owner_name')
+    # address = request.POST.get('o_address')
+    # date_of_birth =request.POST.get('o_date_of_birth')
+    # son_of =request.POST.get('o_son_of')
+    # phone_number =request.POST.get('o_phone_number')
+    # aadhar_number =request.POST.get('o_aadhar_number')
+    # dl_number =request.POST.get('o_dl_number')
+    # dl_expiry =request.POST.get('o_dl_expiry')
+    
+    # owner = Owner(
+    #   owner_name = owner_name,
+    #   address = address,
+    #   date_of_birth = date_of_birth,
+    #   son_of =son_of,
+    #   phone_number = phone_number,
+    #   aadhar_number = aadhar_number,
+    #   dl_number = dl_number,
+    #   dl_expiry = dl_expiry,
+    #   #active = models.ForeignKey(Active,null=True)
+	#   )
+
+    # owner.save()
+      
+    # #Read Vehicle Details
+    # traffic_number=request.POST.get('v_traffic_number')
+    # number_plate=request.POST.get('v_number_plate')
+    # autostand=request.POST.get('v_autostand')
+    # insurance=request.POST.get('v_insurance')
+    # union=request.POST.get('v_union')
+    # pollution=request.POST.get('v_pollution')
+    # engine_number=request.POST.get('v_engine_number')
+    # chasis_number=request.POST.get('v_chasis_number')
+    # rc_expiry=request.POST.get('v_rc_expiry')
+    # # rc_number=request.POST.get('rc_number')
+    # num_of_complaints=0
+    # active = Active.objects.get(active_name__iexact = 'Inactive')
+    # #Set city code object by getting from table
+    # city =request.POST.get('v_city')
+    # city = City_Code.objects.get(city=city)
+    # vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    # capacity_of_passengers=request.POST.get('v_capacity_of_passengers')
+    # vehicle=Vehicle(traffic_number=traffic_number,number_plate=number_plate,autostand=autostand,
+    # insurance=insurance,union=union,pollution=pollution,engine_number=engine_number,
+    # chasis_number=chasis_number,rc_expiry=rc_expiry,num_of_complaints=num_of_complaints,
+    # active=active,city=city,vehicle_type=vehicle_type,capacity_of_passengers=capacity_of_passengers,owner = owner)
+    # vehicle.save()
+    
+    # #Read Driver Details
+    # #traffic_number=request.POST.get('traffic_number')
+    # driver_name=request.POST.get('d_driver_name')
+    # address=request.POST.get('d_address')
+    # date_of_birth=request.POST.get('d_date_of_birth')
+    # son_of=request.POST.get('d_son_of')
+    # phone_number=request.POST.get('d_phone_number')
+    # aadhar_number=request.POST.get('d_aadhar_number')
+    # dl_number=request.POST.get('d_dl_number')
+    # dl_expiry=request.POST.get('d_dl_expiry')
+    # # vehicle=request.POST.get('vehicles')
+    # # # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    # driver = Driver(
+    #                 # traffic_number=traffic_number,
+    #                 driver_name=driver_name,
+    #                 address=address,
+    #                 date_of_birth=date_of_birth,
+    #                 son_of=son_of,
+    #                 phone_number=phone_number,
+    #                 aadhar_number=aadhar_number,
+    #                 dl_number=dl_number,
+    #                 dl_expiry=dl_expiry,
+    #                 vehicle=vehicle)
+    # driver.save()
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully Vehicle added.'})
+
+def Add_Driver_Details(request):
+    traffic_number=request.POST.get('traffic_number')
+    driver_name=request.POST.get('driver_name')
+    address=request.POST.get('address')
+    date_of_birth=request.POST.get('date_of_birth')
+    son_of=request.POST.get('son_of')
+    phone_number=request.POST.get('phone_number')
+    aadhar_number=request.POST.get('aadhar_number')
+    dl_number=request.POST.get('dl_number')
+    dl_expiry=request.POST.get('dl_expiry')
+    vehicle=request.POST.get('vehicles')
+    # driver_image=request.Files['driver_image']
+    # vehicle=Vehicle_type.objects.get(vehicle_type=vehicle)
+    # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    dr=Driver(traffic_number=traffic_number,driver_name=driver_name,address=address,date_of_birth=date_of_birth,
+    son_of=son_of,phone_number=phone_number,aadhar_number=aadhar_number,dl_number=dl_number,dl_expiry=dl_expiry,
+    vehicle=vehicle)
+    dr.save()
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully Driver details added.'})
+
+def Add_Owner_Details(request):
+    traffic_number=request.POST.get('traffic_number')
+    driver_name=request.POST.get('driver_name')
+    address=request.POST.get('address')
+    date_of_birth=request.POST.get('date_of_birth')
+    son_of=request.POST.get('son_of')
+    phone_number=request.POST.get('phone_number')
+    aadhar_number=request.POST.get('aadhar_number')
+    dl_number=request.POST.get('dl_number')
+    dl_expiry=request.POST.get('dl_expiry')
+    vehicle=request.POST.get('vehicles')
+    # driver_image=request.Files['driver_image']
+    # vehicle=Vehicle_type.objects.get(vehicle_type=vehicle)
+    # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    dr=Driver(traffic_number=traffic_number,driver_name=driver_name,address=address,date_of_birth=date_of_birth,
+    son_of=son_of,phone_number=phone_number,aadhar_number=aadhar_number,dl_number=dl_number,dl_expiry=dl_expiry,
+    vehicle=vehicle)
+    dr.save()
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully Driver details added.'})
+
 
 
      

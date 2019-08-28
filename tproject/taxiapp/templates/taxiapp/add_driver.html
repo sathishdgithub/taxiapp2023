@@ -1,0 +1,176 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+.container {
+    width: 800px;
+}
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO */
+/* [type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+} */
+
+/* IMAGE STYLES */
+/* [type=radio] + img {
+  cursor: pointer;
+} */
+
+/* CHECKED STYLES */
+/* [type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+} */
+
+/* Rating Star Widgets Style */
+/* .rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+} */
+
+/* Idle State of the stars */
+/* .rating-stars ul > li.star > i.fa {
+  font-size:2.5em;
+  color:#ccc;
+} */
+
+/* Hover state of the stars */
+/* .rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+} */
+
+/* Selected state of the stars */
+/* .rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+} */
+
+</style>
+    
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Add Driver</h3>
+      </div>
+      <form action="/add_driver_details/" method="POST" enctype="multipart/form-data" >
+        {%csrf_token%}
+      <table align="center" border="0">
+          <tr>
+              <td>Traffic Number</td>
+              <td>
+                  <input type="text" placeholder="Traffic number" name="Traffic Number" maxlength="22"> 
+              </td>
+          </tr>
+          <tr>
+                <td>Driver Name</td>
+                <td>
+                    <input type="text" placeholder="Driver Name" name="Driver Name" required maxlength="40"> 
+                </td>
+            </tr>
+          <tr>
+                <td>Address</td>
+            <td>
+                    <input type="text" placeholder="address" name="Address" required maxlength="200">   
+                </td>
+            </tr>
+            <tr>
+                    <td>Date Of Birth</td>
+                <td>
+                        <input type="date" placeholder="Date Of Birth" name="date_of_birth"> 
+                    </td>
+            </tr>
+            <tr>
+              <td>Son Of</td>
+            <td>
+                  <input type="text" placeholder="Son Of" name="son_of" required maxlength="40"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Phone Number</td>
+            <td>
+                  <input type="text" placeholder="Phone Number" name="phone_number" >  
+              </td>
+            </tr>
+            <tr>
+              <td>Aadhar Number</td>
+            <td>
+                  <input type="text" placeholder="Aadhar Number" name="aadhar_number" maxlength="22"> 
+              </td>
+            </tr>
+            <tr>
+              <td>DL Number</td>
+            <td>
+                  <input type="text" placeholder="DL Number" name="dl_number" required maxlength="22"> 
+              </td>
+            </tr>
+            <tr>
+              <td>DL Expiry</td>
+            <td>
+                  <input type="date" placeholder="DL Expiry" name="dl_expiry" required> 
+              </td>
+            </tr>
+            <!-- <tr>
+                    <td>Blood group/td>
+                  <td>
+                        <input type="text" placeholder="bleed Group"  name="driver_image" required> 
+                    </td>
+                  </tr> -->
+            <!-- <tr>
+                        <td>Driver Image name</td>
+                      <td>
+                            <input type="file"  name="driver_image" required > 
+                        </td>
+                      </tr>  -->
+
+                      <tr>
+                            <td>Vehicle Type</td>
+                          <td>
+                                <!-- <input type="text" placeholder="city" name="city" required>  -->
+                                <select name="vehicle" id="vehicle">
+                                       {% for x in vehicle_type %}
+                                       <option value={{x}}>{{x}}</option>
+                                        {% endfor %}
+                                </select>
+                            </td>
+                          </tr>
+                          
+                        <tr>
+                          <td></td>
+                            <td accesskey="center">  
+                                <button type="submit" class="btn btn-success btn-sm" >Save</button>
+                            </td>
+                        </tr>
+                        <tr>
+                          <td></td>
+                        </tr>
+                    </table>
+                    </form>
+                    <!-- <div class="profile-userbuttons center-block">
+                      <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
+                        style="margin:0.5em;">submit</button>
+                    </div> -->
+      </div>
+   
+{% endblock %}
