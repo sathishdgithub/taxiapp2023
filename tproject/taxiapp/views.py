@@ -349,7 +349,13 @@ def taxi_list(request):
     if request.user.is_authenticated():
         city_code = None
         city = None
-        #vehicle_type = request.POST.get('vehicletype')
+        vehicle_type = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        print('rangefrom',rangeFrom)
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        print('rangeto',rangeTo)
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
         if request.user.is_admin:
             city_code = request.POST.get('city_code')
             if(city_code is not None and city_code != 'All'):
@@ -374,9 +380,50 @@ def taxi_list(request):
             vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
             dashboardDict = getDashboardData(city)
 
-        #if(vehicle_type is not None)
-            #Apply filter on all for vehicle type
 
+        if(vehicle_type is not None and vehicle_type != 'All'):
+            vehicleType = Vehicle_type.objects.get(vehicle_type = vehicle_type)
+            rows = rows.objects.filter(vehicle_type=vehicleType)
+            rows_c = rows_c.objects.filter(vehicle_vehicle_type=vehicleType)
+            ratings = ratings.objects.filter(vehicle_vehicle_type=vehicleType)
+            vehicleregistrations=vehicleregistrations.objects.filter(vehicle_type=vehicleType)
+            # dashboardDict = getDashboardData(city)
+        if (rangeFrom != None and  rangeFrom !='' and rangeTo != None and rangeTo !=''):
+            rangeFromList = rangeFrom.split('-')
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            print(rangeList)
+            # vehicleDetails = vehicleDetails.filter(traffic_number__in = rangeList)
+            rows = rows.objects.filter(traffic_number__in = rangeList)
+            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = rangeList)
+            ratings=ratings.objects.filter(vehicle_traffic_number__in = rangeList)
+            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = rangeList)
+            # dashboardDict = getDashboardData(city)
+        if (taxiIds != None):
+            taxiIdsArray = taxiIds.split(',')
+            rows = rows.objects.filter(traffic_number__in = taxiIdsArray)
+            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = taxiIdsArray)
+            ratings=ratings.objects.filter(vehicle_traffic_number__in = taxiIdsArray)
+            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = taxiIdsArray)
+            # dashboardDict = getDashboardData(city)
+            # vehicleDetails = vehicleDetails.filter(traffic_number__in = taxiIdsArray)
+        if (numberPlates != None):
+            numberPlatesArray = numberPlates.split(',')
+            rows = rows.objects.filter(traffic_number__in = numberPlatesArray)
+            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = numberPlatesArray)
+            ratings=ratings.objects.filter(vehicle_traffic_number__in = numberPlatesArray)
+            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = numberPlatesArray)
+            # dashboardDict = getDashboardData(city)
+            # vehicleDetails = vehicleDetails.filter(number_plate__in = numberPlatesArray)
+        
         paginator = Paginator(rows, 10)            
         try:
             rowPages = paginator.page(page)
@@ -586,7 +633,7 @@ def convertToDate(datestr):
         date = pd.to_datetime(datestr).strftime('%Y-%m-%d')
     return date
 
-def handle_taxi_csv(file_path,city):
+def handle_taxi_xls(file_path,city):
     import os,numpy as np
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     owner_vehicle_headers = ['Owner Image Name (30)','Vehicle Number (12)','Traffic Number (13)','Owner Name (40)','Father Name (40)','DOB (DD/MM/YYYY)','ADDRESS (200)','Phone (10)','Aadhaar (12)','DL Number (20)','DL Expiry (DD/MM/YYYY)','Blood Group (3)','Vehicle Make (20)','Vehicle Model (20)','Capacity (2)','Mfg Date (DD/MM/YYYY)','RC Expiry (DD/MM/YYYY)','Engine Number (20)','Chassis Number (25)','Insurance provider (20)','Insurance number (30)','Insurance Date (DD/MM/YYYY)','Auto Stand (40)','Union (40)','Pollution (DD/MM/YYYY)']
@@ -603,7 +650,7 @@ def handle_taxi_csv(file_path,city):
     all_errors=[]
     try:
         s3_object = s3.Object(bucket_name=bucketName, key=file_path.name)
-        owner_vehicle_df = pd.read_excel(s3_object.get()['Body'],sheetname="Vehicle_Owner")
+        owner_vehicle_df = pd.read_exce(s3_object.get()['Body'],sheetname="Vehicle_Owner")
         driver_df = pd.read_excel(s3_object.get()['Body'],sheetname="Driver")
         owner_vehicle_data = owner_vehicle_df.replace(np.nan, '', regex=True)
         driver_data = driver_df.replace(np.nan, '', regex=True)
@@ -766,16 +813,16 @@ def taxi_csv_upload(request):
             if request.method == "POST":
                 form = TaxiDetailCsvUpload(request.POST, request.FILES)
                 if form.is_valid():
-                    errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
+                    errors = handle_taxi_xls(request.FILES['taxi_csv'],request.POST["city"])
                     print(errors)
                     if len(errors)==0:
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
-                    elif errors[0] == "csv_header_error":  
+                    elif errors[0] == "xls_header_error":  
                          return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
-                    elif errors[0] == "csv_file_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
+                    elif errors[0] == "xls_file_error":
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type xls. Only xls files are accepted at the moment.\n','message2':''})
                     elif errors[0] == "network_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':''})                          
                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
                 form = TaxiDetailCsvUpload()
