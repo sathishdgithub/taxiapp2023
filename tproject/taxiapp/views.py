@@ -586,7 +586,7 @@ def convertToDate(datestr):
         date = pd.to_datetime(datestr).strftime('%Y-%m-%d')
     return date
 
-def handle_taxi_csv(file_path,city):
+def handle_taxi_xlsx(file_path,city, user_number):
     import os,numpy as np
     bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
     owner_vehicle_headers = ['Owner Image Name (30)','Vehicle Number (12)','Traffic Number (13)','Owner Name (40)','Father Name (40)','DOB (DD/MM/YYYY)','ADDRESS (200)','Phone (10)','Aadhaar (12)','DL Number (20)','DL Expiry (DD/MM/YYYY)','Blood Group (3)','Vehicle Make (20)','Vehicle Model (20)','Capacity (2)','Mfg Date (DD/MM/YYYY)','RC Expiry (DD/MM/YYYY)','Engine Number (20)','Chassis Number (25)','Insurance provider (20)','Insurance number (30)','Insurance Date (DD/MM/YYYY)','Auto Stand (40)','Union (40)','Pollution (DD/MM/YYYY)']
@@ -612,33 +612,35 @@ def handle_taxi_csv(file_path,city):
                 if ( ov_column not in owner_vehicle_headers or dvr_column not in driver_headers ):
                     print(ov_column,dvr_column)
                     s3_object.delete()
-                    return ["csv_header_error"]
+                    return ["xlsx_header_error"]
         else :
             s3_object.delete()
-            return ["csv_header_error"]
+            return ["xlsx_header_error"]
     except Exception as e:
         print(e.message)
         s3_object.delete()
-        return ["csv_file_error"]
+        return ["xlsx_file_error"]
 
     """code to insert First Sheet named - Vehicle_Owner  into Vehicle and Owner Tables"""
     rowNumber = 1
-    for index,row in owner_vehicle_data.iterrows(): 
+    for index,row in owner_vehicle_data.iterrows():
         rowNumber+=1
         try:                                                                          
             c = City_Code.objects.get(pk=city)
             if (len(row["Traffic Number (13)"]) > 3) or (row["Traffic Number (13)"] in ['','-']):
                 active = Active.objects.get(active_name = "active") 
-                owner = Owner(owner_name=row["Owner Name (40)"],address=row["ADDRESS (200)"],date_of_birth=convertToDate(row["DOB (DD/MM/YYYY)"]),son_of=row['Father Name (40)'],phone_number=row['Phone (10)'],aadhar_number=row['Aadhaar (12)'],owner_image_name=row["Owner Image Name (30)"],blood_group=row["Blood Group (3)"],dl_number = row["DL Number (20)"],dl_expiry= convertToDate(row["DL Expiry (DD/MM/YYYY)"]),active = active)
+                owner = Owner(owner_name=row["Owner Name (40)"],address=row["ADDRESS (200)"],date_of_birth=convertToDate(row["DOB (DD/MM/YYYY)"]),son_of=row['Father Name (40)'],phone_number=row['Phone (10)'],aadhar_number=row['Aadhaar (12)'],owner_image_name=row["Owner Image Name (30)"],blood_group=row["Blood Group (3)"],dl_number = row["DL Number (20)"],dl_expiry= convertToDate(row["DL Expiry (DD/MM/YYYY)"]),active = active, created_by = user_number, modified_by = user_number)
+                if(owner.owner_image_name is not None and owner.owner_image_name != ''):
+                    owner.owner_image = 'images/owners/'+owner.owner_image_name
                 owner.save()   
-                vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner)
+                vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner, created_by = user_number, modified_by = user_number)
                 vehicle.save()
                 
         except Exception as e:
-            print(e.message)
+            print('Owner and Vehicle save: ',e.message)
             all_errors.append(rowNumber)
-            s3_object.delete()
-            return all_errors
+            #s3_object.delete()
+            #return all_errors
 
     """code to insert Second Sheet named - Driver  into Driver Table"""
     rowNumber = 1
@@ -653,13 +655,15 @@ def handle_taxi_csv(file_path,city):
               
                 vehicle = Vehicle.objects.get(number_plate = number_plate)
                 active = Active.objects.get(active_name = "active")
-                d = Driver(driver_name = row['Driver Name (40)'],address=row['Address (200)'],date_of_birth = convertToDate(row['DOB (DD/MM/YYYY)']),son_of = row['Father Name (40)'],phone_number=row['Phone (10)'], aadhar_number = row['Aadhaar (12)'],dl_number=row['DL Number (20)'],dl_expiry = convertToDate(row['DL Expiry (DD/MM/YYYY)']),driver_image=row['Driver Image Name (30)'],vehicle=vehicle,blood_group=row["Blood Group (3)"],active=active)
-                d.save()
+                driver = Driver(driver_name = row['Driver Name (40)'],address=row['Address (200)'],date_of_birth = convertToDate(row['DOB (DD/MM/YYYY)']),son_of = row['Father Name (40)'],phone_number=row['Phone (10)'], aadhar_number = row['Aadhaar (12)'],dl_number=row['DL Number (20)'],dl_expiry = convertToDate(row['DL Expiry (DD/MM/YYYY)']),driver_image_name=row['Driver Image Name (30)'],vehicle=vehicle,blood_group=row["Blood Group (3)"],active=active, created_by = user_number, modified_by = user_number)
+                if(driver.driver_image_name is not None and driver.driver_image_name != ''):
+                    driver.driver_image = 'images/drivers/'+driver.driver_image_name
+                driver.save()
         except Exception as e:
-            print(e.message)
+            print('Driver save: ',e.message)
             all_errors.append(rowNumber)
-            s3_object.delete()
-            return all_errors
+            #s3_object.delete()
+            #return all_errors
 
     s3_object.delete()
     return all_errors
@@ -766,16 +770,16 @@ def taxi_csv_upload(request):
             if request.method == "POST":
                 form = TaxiDetailCsvUpload(request.POST, request.FILES)
                 if form.is_valid():
-                    errors = handle_taxi_csv(request.FILES['taxi_csv'],request.POST["city"])
+                    errors = handle_taxi_xlsx(request.FILES['taxi_csv'], request.POST["city"], request.user.user_number)
                     print(errors)
                     if len(errors)==0:
                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.\n','message2':''})
-                    elif errors[0] == "csv_header_error":  
+                    elif errors[0] == "xlsx_header_error":  
                          return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Invalid file headers to upload. Please Re-Validate and try again. \n','message2':''})     
-                    elif errors[0] == "csv_file_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type CSV. Only CSV files are accepted at the moment.\n','message2':secondary_message})
+                    elif errors[0] == "xlsx_file_error":
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File not of type xlsx. Only xlsx files are accepted at the moment.\n','message2':''})
                     elif errors[0] == "network_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})                          
+                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':''})                          
                     return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'File Uploaded Successfully.','message2':'Row Number(s) '+ str((errors)) +' has invalid/duplicate data and they were NOT UPLOADED.'})
             else:
                 form = TaxiDetailCsvUpload()
