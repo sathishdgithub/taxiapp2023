@@ -31,8 +31,8 @@
                       
                             <select class="form-control" name="vehicletype" id="vehicletype">
                                     <option value="All">All</option>
-                                    {% for vehicletype in vehicletypes %}
-                                    <option value="{{vehicletype}}">{{ vehicletype }}</option>
+                                    {% for vcltype in vehicletypes %}
+                                    <option value="{{vcltype}}" {% if vcltype == vehicletype %}selected="selected"{% endif %}>{{ vcltype }}</option>
                                     {% endfor %}
                             </select>
 
@@ -41,22 +41,22 @@
                    
                     <div class="form-group mb-3">
                             Range From :
-                            <input style="width:100px;" class="form-control" type="text" name="rangeFrom" id="rangeFrom" value="" />
+                            <input style="width:100px;" class="form-control" type="text" name="rangeFrom" id="rangeFrom" value="{{rangeFrom}}" />
                     </div>
 
                     <div class="form-group mb-3">
                             Range To :
-                            <input style="width:100px;" class="form-control" type="text" name="rangeTo" id="rangeTo" value="" />
+                            <input style="width:100px;" class="form-control" type="text" name="rangeTo" id="rangeTo" value="{{rangeTo}}" />
                     </div>
 
                     <div class="form-group mb-3">
                             Traffic Number :
-                            <input style="width:100px;" class="form-control" type="text" name="taxiIds" id="taxiIds" value="" />
+                            <input style="width:100px;" class="form-control" type="text" name="taxiIds" id="taxiIds" value="{{taxiIds}}" />
                     </div>
 
                     <div class="form-group mb-3">
                             Number Plate :
-                            <input style="width:100px;" class="form-control" type="text" name="numberPlates" id="numberPlates" value="" />
+                            <input style="width:100px;" class="form-control" type="text" name="numberPlates" id="numberPlates" value="{{numberPlates}}" />
                     </div> 
 
                     <input type="hidden" name ="page" id="page"/>
@@ -99,10 +99,10 @@
                                      
                                      <tr>
                                          <td>{{city_code}}</td>
-                                         <td>{{dashboardDict.todayVRCount}}</td>
-                                         <td>{{dashboardDict.thisWeekVRCount}}</td>
-                                         <td>{{dashboardDict.thisMonthVRCount}}</td>
-                                         <td>{{dashboardDict.thisYearVRCount}}</td>
+                                         <td>{{dashboardDict.todayVR}}</td>
+                                         <td>{{dashboardDict.thisWeekVR}}</td>
+                                         <td>{{dashboardDict.thisMonthVR}}</td>
+                                         <td>{{dashboardDict.thisYearVR}}</td>
                                          <td>{{dashboardDict.total}}</td>
                                          
                                      </tr>

@@ -349,11 +349,9 @@ def taxi_list(request):
     if request.user.is_authenticated():
         city_code = None
         city = None
-        vehicle_type = request.POST.get('vehicletype')
+        vehicletype = request.POST.get('vehicletype')
         rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
-        print('rangefrom',rangeFrom)
         rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
-        print('rangeto',rangeTo)
         taxiIds = request.POST.get('taxiIds') # Traffic Numbers
         numberPlates = request.POST.get('numberPlates') # Number Plates
         if request.user.is_admin:
@@ -381,15 +379,34 @@ def taxi_list(request):
             dashboardDict = getDashboardData(city)
 
 
-        if(vehicle_type is not None and vehicle_type != 'All'):
-            vehicleType = Vehicle_type.objects.get(vehicle_type = vehicle_type)
-            rows = rows.objects.filter(vehicle_type=vehicleType)
-            rows_c = rows_c.objects.filter(vehicle_vehicle_type=vehicleType)
-            ratings = ratings.objects.filter(vehicle_vehicle_type=vehicleType)
-            vehicleregistrations=vehicleregistrations.objects.filter(vehicle_type=vehicleType)
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            rows = rows.filter(vehicle_type=vehicle_type)
+            rows_c = rows_c.filter(vehicle__vehicle_type=vehicle_type)
+            ratings = ratings.filter(vehicle__vehicle_type=vehicle_type)
+            vehicleregistrations=vehicleregistrations.filter(vehicle_type=vehicle_type)
             # dashboardDict = getDashboardData(city)
-        if (rangeFrom != None and  rangeFrom !='' and rangeTo != None and rangeTo !=''):
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisYearVR= thisYearVR)
+
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
             rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
             rangeLen = len(rangeFromList[2])
             rangeFromValue = int(rangeFromList[2])
@@ -402,28 +419,94 @@ def taxi_list(request):
                 rangeFromValue =  rangeFromValue + 1
             print(rangeList)
             # vehicleDetails = vehicleDetails.filter(traffic_number__in = rangeList)
-            rows = rows.objects.filter(traffic_number__in = rangeList)
-            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = rangeList)
-            ratings=ratings.objects.filter(vehicle_traffic_number__in = rangeList)
-            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = rangeList)
+            rows = rows.filter(traffic_number__in = rangeList)
+            rows_c=rows_c.filter(vehicle__traffic_number__in = rangeList)
+            ratings=ratings.filter(vehicle__traffic_number__in = rangeList)
+            vehicleregistrations=vehicleregistrations.filter(traffic_number__in = rangeList)
             # dashboardDict = getDashboardData(city)
-        if (taxiIds != None):
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
             taxiIdsArray = taxiIds.split(',')
-            rows = rows.objects.filter(traffic_number__in = taxiIdsArray)
-            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = taxiIdsArray)
-            ratings=ratings.objects.filter(vehicle_traffic_number__in = taxiIdsArray)
-            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = taxiIdsArray)
-            # dashboardDict = getDashboardData(city)
-            # vehicleDetails = vehicleDetails.filter(traffic_number__in = taxiIdsArray)
-        if (numberPlates != None):
+            rows = rows.filter(traffic_number__in = taxiIdsArray)
+            rows_c=rows_c.filter(vehicle__traffic_number__in = taxiIdsArray)
+            ratings=ratings.filter(vehicle__traffic_number__in = taxiIdsArray)
+            vehicleregistrations=vehicleregistrations.filter(traffic_number__in = taxiIdsArray)
+            
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
             numberPlatesArray = numberPlates.split(',')
-            rows = rows.objects.filter(traffic_number__in = numberPlatesArray)
-            rows_c=rows_c.objects.filter(vehicle_traffic_number__in = numberPlatesArray)
-            ratings=ratings.objects.filter(vehicle_traffic_number__in = numberPlatesArray)
-            vehicleregistrations=vehicleregistrations.objects.filter(traffic_number__in = numberPlatesArray)
-            # dashboardDict = getDashboardData(city)
-            # vehicleDetails = vehicleDetails.filter(number_plate__in = numberPlatesArray)
-        
+            rows = rows.filter(number_plate__in = numberPlatesArray)
+            rows_c=rows_c.filter(vehicle__number_plate__in = numberPlatesArray)
+            ratings=ratings.filter(vehicle__number_plate__in = numberPlatesArray)
+            vehicleregistrations=vehicleregistrations.filter(number_plate__in = numberPlatesArray)
+           
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            numberPlates = ""
+
+        todayVR = dashboardDict['todayVR']
+        dashboardDict.update(todayVR= len(todayVR))
+
+        thisWeekVR = dashboardDict['thisWeekVR']
+        dashboardDict.update(thisWeekVR= len(thisWeekVR))
+
+        thisMonthVR = dashboardDict['thisMonthVR']
+        dashboardDict.update(thisMonthVR= len(thisMonthVR))
+
+        thisYearVR = dashboardDict['thisYearVR']
+        dashboardDict.update(thisYearVR= len(thisYearVR))
+
+        total = len ( Vehicle.objects.all())
+        dashboardDict.update(total = total)
+
+        #print(dashboardDict)
         paginator = Paginator(rows, 10)            
         try:
             rowPages = paginator.page(page)
@@ -431,63 +514,10 @@ def taxi_list(request):
             rowPages = paginator.page(1)
         except EmptyPage:
             rowPages = paginator.page(paginator.num_pages)
-        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,
-        'vehicletypes':vehicletypes,'dashboardDict':dashboardDict,
-        'city_code':city_code,'vehicleregistrations':vehicleregistrations})
-
-        # if request.user.is_admin:
-        #     # Filters from Search
-        #     city_code = request.POST.get('city_code')
-        #     # vehicle_type = request.POST.get('vehicletype')
-        #     # rangeFrom = request.POST.get('rangeFrom')
-        #     # rangeTo = request.POST.get('rangeTo')
-        #     # trafficNumber = request.POST.get('trafficNumber')
-        #     # numberPlate = request.POST.get('numberPlate')
-
-        #     # if city_code == 'All' or city_code is None :
-        #     #     city_code = 'All'
-        #     #     rows = Vehicle.objects.select_related()
-        #     #     rows_c = Complaint_Statement.objects.select_related('vehicle')
-        #     #     ratings = Customer_Rating.objects.select_related('vehicle')
-        #     #     vehicleregistrations = Vehicle_Registration.objects.all()
-        #     # else :
-        #     #     city = City_Code.objects.get(city_code = city_code)
-        #     #     rows = Vehicle.objects.select_related().filter(city = city)
-        #     #     rows_c = Complaint_Statement.objects.filter(city=city)
-        #     #     ratings = Customer_Rating.objects.filter(vehicle__city = city)
-        #     #     vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
-
-            
-        #     paginator = Paginator(rows, 10)            
-        #     try:
-        #         rowPages = paginator.page(page)
-        #     except PageNotAnInteger:
-        #         rowPages = paginator.page(1)
-        #     except EmptyPage:
-        #         rowPages = paginator.page(paginator.num_pages)
-        #     return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,
-        #     'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,'thisWeekVRCount':thisWeekVRCount,
-        #     'thisMonthVRCount':thisMonthVRCount,'thisYearVRCount':thisYearVRCount,'total':total,
-        #     'city_code':city_code,'vehicleregistrations':vehicleregistrations})
-        # else:
-        #     city = request.user.city
-        #     city_code = city.city_code
-        #     rows = Vehicle.objects.select_related().filter(city = city)
-        #     rows_c = Complaint_Statement.objects.filter(city=city)
-        #     ratings = Customer_Rating.objects.filter(vehicle__city = city)
-        #     vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
-        #     paginator = Paginator(rows, 10)
-        #     try:
-        #         rowPages = paginator.page(page)
-        #     except PageNotAnInteger:
-        #         rowPages = paginator.page(1)
-        #     except EmptyPage:
-        #         rowPages = paginator.page(paginator.num_pages)
-        #     return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,
-        #     'cities':cities,'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,
-        #     'thisWeekVRCount':thisWeekVRCount,'thisMonthVRCount':thisMonthVRCount,
-        #     'thisYearVRCount':thisYearVRCount,'total':total,'city_code':city_code,
-        #     'vehicleregistrations':vehicleregistrations})
+        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,
+        'cities':cities,'vehicletypes':vehicletypes,'dashboardDict':dashboardDict, 
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
+        'vehicleregistrations':vehicleregistrations,'rangeTo':rangeTo,'taxiIds':taxiIds})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
@@ -498,57 +528,53 @@ def getDashboardData(city):
         timestamp_from = datetime.now().date() - timedelta(days=1)
         timestamp_to = datetime.now().date()
         todayVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        todayVRCount = len(todayVR)
-        dashboardDict.update(todayVRCount = todayVRCount)
+        dashboardDict.update(todayVR = todayVR)
         # To get last 1 week registration count
         timestamp_from = datetime.now().date() - timedelta(days=7)
         timestamp_to = datetime.now().date()
         thisWeekVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisWeekVRCount = len(thisWeekVR)
-        dashboardDict.update(thisWeekVRCount = thisWeekVRCount)
+        dashboardDict.update(thisWeekVR = thisWeekVR)
         # To get last 1 month registration count
         timestamp_from = datetime.now().date() - timedelta(days=30)
         timestamp_to = datetime.now().date()
         thisMonthVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisMonthVRCount = len(thisMonthVR)
-        dashboardDict.update(thisMonthVRCount = thisMonthVRCount)
+        dashboardDict.update(thisMonthVR = thisMonthVR)
         # To get last 1 year registration count
         timestamp_from = datetime.now().date() - timedelta(days=365)
         timestamp_to = datetime.now().date()
         thisYearVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisYearVRCount = len(thisYearVR)
-        dashboardDict.update(thisYearVRCount = thisYearVRCount)
+        dashboardDict.update(thisYearVR = thisYearVR)
         # To get total count of records
-        total = len ( Vehicle.objects.all())
-        dashboardDict.update(total = total)
+        # total = len ( Vehicle.objects.all())
+        # dashboardDict.update(total = total)
     else:
         # To get today registration count
         timestamp_from = datetime.now().date() - timedelta(days=1)
         timestamp_to = datetime.now().date()
         todayVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        todayVRCount = len(todayVR)
-        dashboardDict.update(todayVRCount = todayVRCount)
+        #todayVRCount = len(todayVR)
+        dashboardDict.update(todayVR = todayVR)
         # To get last 1 week registration count
         timestamp_from = datetime.now().date() - timedelta(days=7)
         timestamp_to = datetime.now().date()
         thisWeekVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisWeekVRCount = len(thisWeekVR)
-        dashboardDict.update(thisWeekVRCount = thisWeekVRCount)
+        #thisWeekVRCount = len(thisWeekVR)
+        dashboardDict.update(thisWeekVR = thisWeekVR)
         # To get last 1 month registration count
         timestamp_from = datetime.now().date() - timedelta(days=30)
         timestamp_to = datetime.now().date()
         thisMonthVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisMonthVRCount = len(thisMonthVR)
-        dashboardDict.update(thisMonthVRCount = thisMonthVRCount)
+        #thisMonthVRCount = len(thisMonthVR)
+        dashboardDict.update(thisMonthVR = thisMonthVR)
         # To get last 1 year registration count
         timestamp_from = datetime.now().date() - timedelta(days=365)
         timestamp_to = datetime.now().date()
         thisYearVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisYearVRCount = len(thisYearVR)
-        dashboardDict.update(thisYearVRCount = thisYearVRCount)
+        #thisYearVRCount = len(thisYearVR)
+        dashboardDict.update(thisYearVR = thisYearVR)
         # To get total count of records
-        total = len ( Vehicle.objects.all())
-        dashboardDict.update(total = total)
+        # total = len ( Vehicle.objects.all())
+        # dashboardDict.update(total = total)
     return dashboardDict
 
 def get_distance(lat,lon,x,y):

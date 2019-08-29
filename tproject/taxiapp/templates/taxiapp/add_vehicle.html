@@ -176,7 +176,7 @@ table, th, td {
                     </table>
                     <!-- </form> -->
                    
-      </div>
+
 
       <div class="panel panel-info">
             <div class="panel-heading">
@@ -252,7 +252,7 @@ table, th, td {
                 <h3 class="panel-title" style="text-align: center;">Add Driver</h3>
               </div>
               <table id="driver" align="center" border="0">
-                <tr id="row">
+                <tr>
                     <!-- <td>Traffic Number</td>
                     <td>
                         <input type="text" placeholder="Traffic Number" name="traffic_number" maxlength="22"> 
@@ -334,16 +334,18 @@ table, th, td {
                             <button type="submit" class="btn btn-success btn-sm">Save</button>
                         </div>
                           </form>
+                        </div>
 <script>                          
 $("#add_new").click(function () { 
 
   $("#driver").each(function () {
       
-      var tds = '<tr id="row">';
+      var tds = '<tr>';
       jQuery.each($('tr:last td', this), function () {
           tds += '<td>' + $(this).html() + '</td>';
       });
       tds += '</tr>';
+      alert(tds);
       if ($('tbody', this).length > 0) {
           $('tbody', this).append(tds);
       } else {
