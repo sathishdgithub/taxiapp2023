@@ -349,7 +349,11 @@ def taxi_list(request):
     if request.user.is_authenticated():
         city_code = None
         city = None
-        #vehicle_type = request.POST.get('vehicletype')
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
         if request.user.is_admin:
             city_code = request.POST.get('city_code')
             if(city_code is not None and city_code != 'All'):
@@ -374,9 +378,135 @@ def taxi_list(request):
             vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
             dashboardDict = getDashboardData(city)
 
-        #if(vehicle_type is not None)
-            #Apply filter on all for vehicle type
 
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            rows = rows.filter(vehicle_type=vehicle_type)
+            rows_c = rows_c.filter(vehicle__vehicle_type=vehicle_type)
+            ratings = ratings.filter(vehicle__vehicle_type=vehicle_type)
+            vehicleregistrations=vehicleregistrations.filter(vehicle_type=vehicle_type)
+            # dashboardDict = getDashboardData(city)
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisYearVR= thisYearVR)
+
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            print(rangeList)
+            # vehicleDetails = vehicleDetails.filter(traffic_number__in = rangeList)
+            rows = rows.filter(traffic_number__in = rangeList)
+            rows_c=rows_c.filter(vehicle__traffic_number__in = rangeList)
+            ratings=ratings.filter(vehicle__traffic_number__in = rangeList)
+            vehicleregistrations=vehicleregistrations.filter(traffic_number__in = rangeList)
+            # dashboardDict = getDashboardData(city)
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            rows = rows.filter(traffic_number__in = taxiIdsArray)
+            rows_c=rows_c.filter(vehicle__traffic_number__in = taxiIdsArray)
+            ratings=ratings.filter(vehicle__traffic_number__in = taxiIdsArray)
+            vehicleregistrations=vehicleregistrations.filter(traffic_number__in = taxiIdsArray)
+            
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            rows = rows.filter(number_plate__in = numberPlatesArray)
+            rows_c=rows_c.filter(vehicle__number_plate__in = numberPlatesArray)
+            ratings=ratings.filter(vehicle__number_plate__in = numberPlatesArray)
+            vehicleregistrations=vehicleregistrations.filter(number_plate__in = numberPlatesArray)
+           
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            numberPlates = ""
+
+        todayVR = dashboardDict['todayVR']
+        dashboardDict.update(todayVR= len(todayVR))
+
+        thisWeekVR = dashboardDict['thisWeekVR']
+        dashboardDict.update(thisWeekVR= len(thisWeekVR))
+
+        thisMonthVR = dashboardDict['thisMonthVR']
+        dashboardDict.update(thisMonthVR= len(thisMonthVR))
+
+        thisYearVR = dashboardDict['thisYearVR']
+        dashboardDict.update(thisYearVR= len(thisYearVR))
+
+        total = len ( Vehicle.objects.all())
+        dashboardDict.update(total = total)
+
+        #print(dashboardDict)
         paginator = Paginator(rows, 10)            
         try:
             rowPages = paginator.page(page)
@@ -384,63 +514,10 @@ def taxi_list(request):
             rowPages = paginator.page(1)
         except EmptyPage:
             rowPages = paginator.page(paginator.num_pages)
-        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,
-        'vehicletypes':vehicletypes,'dashboardDict':dashboardDict,
-        'city_code':city_code,'vehicleregistrations':vehicleregistrations})
-
-        # if request.user.is_admin:
-        #     # Filters from Search
-        #     city_code = request.POST.get('city_code')
-        #     # vehicle_type = request.POST.get('vehicletype')
-        #     # rangeFrom = request.POST.get('rangeFrom')
-        #     # rangeTo = request.POST.get('rangeTo')
-        #     # trafficNumber = request.POST.get('trafficNumber')
-        #     # numberPlate = request.POST.get('numberPlate')
-
-        #     # if city_code == 'All' or city_code is None :
-        #     #     city_code = 'All'
-        #     #     rows = Vehicle.objects.select_related()
-        #     #     rows_c = Complaint_Statement.objects.select_related('vehicle')
-        #     #     ratings = Customer_Rating.objects.select_related('vehicle')
-        #     #     vehicleregistrations = Vehicle_Registration.objects.all()
-        #     # else :
-        #     #     city = City_Code.objects.get(city_code = city_code)
-        #     #     rows = Vehicle.objects.select_related().filter(city = city)
-        #     #     rows_c = Complaint_Statement.objects.filter(city=city)
-        #     #     ratings = Customer_Rating.objects.filter(vehicle__city = city)
-        #     #     vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
-
-            
-        #     paginator = Paginator(rows, 10)            
-        #     try:
-        #         rowPages = paginator.page(page)
-        #     except PageNotAnInteger:
-        #         rowPages = paginator.page(1)
-        #     except EmptyPage:
-        #         rowPages = paginator.page(paginator.num_pages)
-        #     return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,'cities':cities,
-        #     'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,'thisWeekVRCount':thisWeekVRCount,
-        #     'thisMonthVRCount':thisMonthVRCount,'thisYearVRCount':thisYearVRCount,'total':total,
-        #     'city_code':city_code,'vehicleregistrations':vehicleregistrations})
-        # else:
-        #     city = request.user.city
-        #     city_code = city.city_code
-        #     rows = Vehicle.objects.select_related().filter(city = city)
-        #     rows_c = Complaint_Statement.objects.filter(city=city)
-        #     ratings = Customer_Rating.objects.filter(vehicle__city = city)
-        #     vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
-        #     paginator = Paginator(rows, 10)
-        #     try:
-        #         rowPages = paginator.page(page)
-        #     except PageNotAnInteger:
-        #         rowPages = paginator.page(1)
-        #     except EmptyPage:
-        #         rowPages = paginator.page(paginator.num_pages)
-        #     return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,
-        #     'cities':cities,'vehicletypes':vehicletypes,'todayVRCount':todayVRCount,
-        #     'thisWeekVRCount':thisWeekVRCount,'thisMonthVRCount':thisMonthVRCount,
-        #     'thisYearVRCount':thisYearVRCount,'total':total,'city_code':city_code,
-        #     'vehicleregistrations':vehicleregistrations})
+        return render(request,'taxiapp/taxi_list.html',{'rows_c':rows_c,'rows':rowPages,'ratings':ratings,
+        'cities':cities,'vehicletypes':vehicletypes,'dashboardDict':dashboardDict, 
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
+        'vehicleregistrations':vehicleregistrations,'rangeTo':rangeTo,'taxiIds':taxiIds})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
@@ -451,57 +528,53 @@ def getDashboardData(city):
         timestamp_from = datetime.now().date() - timedelta(days=1)
         timestamp_to = datetime.now().date()
         todayVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        todayVRCount = len(todayVR)
-        dashboardDict.update(todayVRCount = todayVRCount)
+        dashboardDict.update(todayVR = todayVR)
         # To get last 1 week registration count
         timestamp_from = datetime.now().date() - timedelta(days=7)
         timestamp_to = datetime.now().date()
         thisWeekVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisWeekVRCount = len(thisWeekVR)
-        dashboardDict.update(thisWeekVRCount = thisWeekVRCount)
+        dashboardDict.update(thisWeekVR = thisWeekVR)
         # To get last 1 month registration count
         timestamp_from = datetime.now().date() - timedelta(days=30)
         timestamp_to = datetime.now().date()
         thisMonthVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisMonthVRCount = len(thisMonthVR)
-        dashboardDict.update(thisMonthVRCount = thisMonthVRCount)
+        dashboardDict.update(thisMonthVR = thisMonthVR)
         # To get last 1 year registration count
         timestamp_from = datetime.now().date() - timedelta(days=365)
         timestamp_to = datetime.now().date()
         thisYearVR = Vehicle.objects.filter(city = city, created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisYearVRCount = len(thisYearVR)
-        dashboardDict.update(thisYearVRCount = thisYearVRCount)
+        dashboardDict.update(thisYearVR = thisYearVR)
         # To get total count of records
-        total = len ( Vehicle.objects.all())
-        dashboardDict.update(total = total)
+        # total = len ( Vehicle.objects.all())
+        # dashboardDict.update(total = total)
     else:
         # To get today registration count
         timestamp_from = datetime.now().date() - timedelta(days=1)
         timestamp_to = datetime.now().date()
         todayVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        todayVRCount = len(todayVR)
-        dashboardDict.update(todayVRCount = todayVRCount)
+        #todayVRCount = len(todayVR)
+        dashboardDict.update(todayVR = todayVR)
         # To get last 1 week registration count
         timestamp_from = datetime.now().date() - timedelta(days=7)
         timestamp_to = datetime.now().date()
         thisWeekVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisWeekVRCount = len(thisWeekVR)
-        dashboardDict.update(thisWeekVRCount = thisWeekVRCount)
+        #thisWeekVRCount = len(thisWeekVR)
+        dashboardDict.update(thisWeekVR = thisWeekVR)
         # To get last 1 month registration count
         timestamp_from = datetime.now().date() - timedelta(days=30)
         timestamp_to = datetime.now().date()
         thisMonthVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisMonthVRCount = len(thisMonthVR)
-        dashboardDict.update(thisMonthVRCount = thisMonthVRCount)
+        #thisMonthVRCount = len(thisMonthVR)
+        dashboardDict.update(thisMonthVR = thisMonthVR)
         # To get last 1 year registration count
         timestamp_from = datetime.now().date() - timedelta(days=365)
         timestamp_to = datetime.now().date()
         thisYearVR = Vehicle.objects.filter(created_time__gte = timestamp_from,created_time__lt = timestamp_to).distinct() 
-        thisYearVRCount = len(thisYearVR)
-        dashboardDict.update(thisYearVRCount = thisYearVRCount)
+        #thisYearVRCount = len(thisYearVR)
+        dashboardDict.update(thisYearVR = thisYearVR)
         # To get total count of records
-        total = len ( Vehicle.objects.all())
-        dashboardDict.update(total = total)
+        # total = len ( Vehicle.objects.all())
+        # dashboardDict.update(total = total)
     return dashboardDict
 
 def get_distance(lat,lon,x,y):
@@ -1359,6 +1432,144 @@ def Vehicle_Register_Details(request):
 #   return render(request,'vehicle_register_success.html',{'message':'successfully registered.'})
     #return render(request, 'taxiapp/drivers_list.html', {'message':'successfully registered.','form' : form})
     return HttpResponseRedirect("/?message=successfully registered.")
+
+def Add_Vehicle(request):
+    cities = City_Code.objects.values_list('city', flat=True).distinct()
+    vehice_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
+    return render(request,'taxiapp/add_vehicle.html',{'cities':cities,'vehice_type':vehice_type})
+
+def Add_Driver(request):
+    vehicle_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
+    return render(request,'taxiapp/add_driver.html',{'vehicle_type':vehicle_type})
+
+def Add_Vehicle_Details(request):
+
+    print("********************")
+    print(request.POST)
+    
+
+
+    #Read Owner Details
+    owner_name = request.POST.get('o_owner_name')
+    address = request.POST.get('o_address')
+    date_of_birth =request.POST.get('o_date_of_birth')
+    son_of =request.POST.get('o_son_of')
+    phone_number =request.POST.get('o_phone_number')
+    aadhar_number =request.POST.get('o_aadhar_number')
+    dl_number =request.POST.get('o_dl_number')
+    dl_expiry =request.POST.get('o_dl_expiry')
+    
+    owner = Owner(
+      owner_name = owner_name,
+      address = address,
+      date_of_birth = date_of_birth,
+      son_of =son_of,
+      phone_number = phone_number,
+      aadhar_number = aadhar_number,
+      dl_number = dl_number,
+      dl_expiry = dl_expiry,
+      #active = models.ForeignKey(Active,null=True)
+	  )
+
+    owner.save()
+      
+    #Read Vehicle Details
+    traffic_number=request.POST.get('v_traffic_number')
+    number_plate=request.POST.get('v_number_plate')
+    autostand=request.POST.get('v_autostand')
+    insurance=request.POST.get('v_insurance')
+    union=request.POST.get('v_union')
+    pollution=request.POST.get('v_pollution')
+    engine_number=request.POST.get('v_engine_number')
+    chasis_number=request.POST.get('v_chasis_number')
+    rc_expiry=request.POST.get('v_rc_expiry')
+    # rc_number=request.POST.get('rc_number')
+    num_of_complaints=0
+    active = Active.objects.get(active_name__iexact = 'Inactive')
+    #Set city code object by getting from table
+    city =request.POST.get('v_city')
+    city = City_Code.objects.get(city=city)
+    vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    capacity_of_passengers=request.POST.get('v_capacity_of_passengers')
+    vehicle=Vehicle(traffic_number=traffic_number,number_plate=number_plate,autostand=autostand,
+    insurance=insurance,union=union,pollution=pollution,engine_number=engine_number,
+    chasis_number=chasis_number,rc_expiry=rc_expiry,num_of_complaints=num_of_complaints,
+    active=active,city=city,vehicle_type=vehicle_type,capacity_of_passengers=capacity_of_passengers,owner = owner)
+    vehicle.save()
+    
+    #Read Driver Details
+    #traffic_number=request.POST.get('traffic_number')
+    driver_name_list=request.POST.getlist('d_driver_name')
+    address_list=request.POST.getlist('d_address')
+    date_of_birth_list=request.POST.getlist('d_date_of_birth')
+    son_of_list=request.POST.getlist('d_son_of')
+    phone_number_list=request.POST.getlist('d_phone_number')
+    aadhar_number_list=request.POST.getlist('d_aadhar_number')
+    dl_number_list=request.POST.getlist('d_dl_number')
+    dl_expiry_list=request.POST.getlist('d_dl_expiry')
+    # vehicle=request.POST.get('vehicles')
+    # # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    if len(driver_name_list) > 0 :
+        for (driver_name,address,date_of_birth,son_of,phone_number,aadhar_number,dl_number,dl_expiry) in zip(
+        driver_name_list,address_list,date_of_birth_list,son_of_list,phone_number_list,
+        aadhar_number_list,dl_number_list,dl_expiry_list) :
+            driver = Driver(
+                        # traffic_number=traffic_number,
+                        driver_name=driver_name,
+                        address=address,
+                        date_of_birth=date_of_birth,
+                        son_of=son_of,
+                        phone_number=phone_number,
+                        aadhar_number=aadhar_number,
+                        dl_number=dl_number,
+                        dl_expiry=dl_expiry,
+                        vehicle=vehicle)
+            driver.save()
+        return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully \
+        Vehicle added.'})
+        
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'Unabled to add \
+    Vehicle/Owner/Drivers Details. Please validate input fields and retry'})
+
+def Add_Driver_Details(request):
+    traffic_number=request.POST.get('traffic_number')
+    driver_name=request.POST.get('driver_name')
+    address=request.POST.get('address')
+    date_of_birth=request.POST.get('date_of_birth')
+    son_of=request.POST.get('son_of')
+    phone_number=request.POST.get('phone_number')
+    aadhar_number=request.POST.get('aadhar_number')
+    dl_number=request.POST.get('dl_number')
+    dl_expiry=request.POST.get('dl_expiry')
+    vehicle=request.POST.get('vehicles')
+    # driver_image=request.Files['driver_image']
+    # vehicle=Vehicle_type.objects.get(vehicle_type=vehicle)
+    # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    dr=Driver(traffic_number=traffic_number,driver_name=driver_name,address=address,date_of_birth=date_of_birth,
+    son_of=son_of,phone_number=phone_number,aadhar_number=aadhar_number,dl_number=dl_number,dl_expiry=dl_expiry,
+    vehicle=vehicle)
+    dr.save()
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully Driver details added.'})
+
+def Add_Owner_Details(request):
+    traffic_number=request.POST.get('traffic_number')
+    driver_name=request.POST.get('driver_name')
+    address=request.POST.get('address')
+    date_of_birth=request.POST.get('date_of_birth')
+    son_of=request.POST.get('son_of')
+    phone_number=request.POST.get('phone_number')
+    aadhar_number=request.POST.get('aadhar_number')
+    dl_number=request.POST.get('dl_number')
+    dl_expiry=request.POST.get('dl_expiry')
+    vehicle=request.POST.get('vehicles')
+    # driver_image=request.Files['driver_image']
+    # vehicle=Vehicle_type.objects.get(vehicle_type=vehicle)
+    # vehicle = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    dr=Driver(traffic_number=traffic_number,driver_name=driver_name,address=address,date_of_birth=date_of_birth,
+    son_of=son_of,phone_number=phone_number,aadhar_number=aadhar_number,dl_number=dl_number,dl_expiry=dl_expiry,
+    vehicle=vehicle)
+    dr.save()
+    return render(request, 'taxiapp/taxi_list.html', {'msg_vehicle_list':'successfully Driver details added.'})
 
 
 

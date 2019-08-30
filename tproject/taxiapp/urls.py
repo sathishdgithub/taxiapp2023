@@ -48,7 +48,12 @@ urlpatterns = [
         url(r'^privacy_policy/',views.Privacy_Policy,name='Privacy_Policy'),
         url(r'^about_us/',views.About_Us,name='About_Us'),
         url(r'^vehice_registrations/',views.Vehice_Registration,name='Vehice_Registration'),
-        url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details')
+        url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details'),
+        url(r'^add_vehicle/',views.Add_Vehicle,name='Add_Vehicle'),
+        url(r'^add_driver/',views.Add_Driver,name='Add_Driver'),
+        url(r'^add_vehicle_details/',views.Add_Vehicle_Details,name='Add_Vehicle_Details'),
+        url(r'^add_driver_details',views.Add_Driver_Details,name='Add_Driver_Details'),
+        
 ]       
 
 handler404 = views.handler404
