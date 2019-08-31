@@ -459,6 +459,7 @@ class Complaint_Statement(models.Model):
         is_emergency_text    = models.BooleanField(default=False)
         created_time = models.DateTimeField(blank=True)
         resolved_time = models.DateTimeField(blank=True)
+        active = models.ForeignKey(Active,null=True)
         def __str__(self):
              return str(self.complaint_number)+' '+self.reason.reason
 
@@ -509,6 +510,7 @@ class Customer_Rating(models.Model):
     created_time = models.DateTimeField(default=datetime.now, blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    active = models.ForeignKey(Active,null=True)
 
     # def __str__(self):
     #     return self.vehicle.number_plate

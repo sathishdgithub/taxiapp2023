@@ -50,9 +50,16 @@ urlpatterns = [
         url(r'^vehice_registrations/',views.Vehice_Registration,name='Vehice_Registration'),
         url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details'),
         url(r'^add_vehicle/',views.Add_Vehicle,name='Add_Vehicle'),
+        url(r'^register_vehicle/',views.Register_Vehicle,name='Register_Vehicle'),
+        url(r'^delete_vehicle/',views.Delete_Vehicle,name='Delete_Vehicle'),
+        url(r'^delete_complaint/',views.Delete_Complaint,name='Delete_Complaint'),
+        url(r'^delete_rating/',views.Delete_Rating,name='Delete_Rating'),
         url(r'^add_driver/',views.Add_Driver,name='Add_Driver'),
-        url(r'^add_vehicle_details/',views.Add_Vehicle_Details,name='Add_Vehicle_Details'),
+        url(r'^add_vehicle_details',views.Add_Vehicle_Details,name='Add_Vehicle_Details'),
         url(r'^add_driver_details',views.Add_Driver_Details,name='Add_Driver_Details'),
+        #remove later
+        #url(r'^SendSMS_Owner_Driver',views.SendSMS_Owner_Driver,name='SendSMS_Owner_Driver'),
+        
         
 ]       
 
