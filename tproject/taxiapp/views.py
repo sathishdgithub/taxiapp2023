@@ -373,12 +373,16 @@ def taxi_list(request):
             rows_c = Complaint_Statement.objects.select_related('vehicle')
             ratings = Customer_Rating.objects.select_related('vehicle')
             vehicleregistrations = Vehicle_Registration.objects.all()
+            #active = Active.objects.get(active_name__iexact = "active") 
+            #vehicleregistrations = Vehicle_Registration.objects.filter(active = active)
             dashboardDict = getDashboardData(None)
         else :
             #city = City_Code.objects.get(city_code = city_code)
             rows = Vehicle.objects.select_related().filter(city = city)
             rows_c = Complaint_Statement.objects.filter(city=city)
             ratings = Customer_Rating.objects.filter(vehicle__city = city)
+            #active = Active.objects.get(active_name__iexact = "active") 
+            #vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city).filter(active = active)
             vehicleregistrations = Vehicle_Registration.objects.select_related().filter(city = city)
             dashboardDict = getDashboardData(city)
 
@@ -1397,46 +1401,46 @@ def About_Us(request):
     return render(request,'about_us.html')
 
 def Vehice_Registration(request):
-    
+    vehicle=Vehicle_type.objects.all()
+    sources=Source.objects.all()
     cities = City_Code.objects.all()
-    print(cities)
-    return render(request,'taxiapp/vehicle_registration.html',{'cities':cities})
+    return render(request,'taxiapp/vehicle_registration.html',{'sources':sources,'vehicle':vehicle,'cities':cities})
 
-def Vehicle_Register_Details(request):
-    traffic_number=request.POST.get('traffic_number')
-    number_plate=request.POST.get('number_plate')
-    autostand=request.POST.get('autostand')
-    insurance=request.POST.get('insurance')
-    union=request.POST.get('union')
-    pollution=request.POST.get('pollution')
-    engine_number=request.POST.get('engine_number')
-    chasis_number=request.POST.get('chasis_number')
-    rc_expiry=request.POST.get('rc_expiry')
-    rc_number=request.POST.get('rc_number')
-    num_of_complaints=0
+# def Vehicle_Register_Details(request):
+#     traffic_number=request.POST.get('traffic_number')
+#     number_plate=request.POST.get('number_plate')
+#     autostand=request.POST.get('autostand')
+#     insurance=request.POST.get('insurance')
+#     union=request.POST.get('union')
+#     pollution=request.POST.get('pollution')
+#     engine_number=request.POST.get('engine_number')
+#     chasis_number=request.POST.get('chasis_number')
+#     rc_expiry=request.POST.get('rc_expiry')
+#     rc_number=request.POST.get('rc_number')
+#     num_of_complaints=0
     
-    active = Active.objects.get(active_name__iexact = 'Inactive')
-    #Set city code object by getting from table
-    city_code =request.POST.get('city_code')
-    city = City_Code.objects.get(city_code=city_code)
-    vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
-    # created_by=''
-    # modified_by=''
-    capacity_of_passengers=request.POST.get('capacity_of_passengers')
-    Owner_name =request.POST.get('Owner_name')
+#     active = Active.objects.get(active_name__iexact = 'Inactive')
+#     #Set city code object by getting from table
+#     city_code =request.POST.get('city_code')
+#     city = City_Code.objects.get(city_code=city_code)
+#     vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+#     # created_by=''
+#     # modified_by=''
+#     capacity_of_passengers=request.POST.get('capacity_of_passengers')
+#     Owner_name =request.POST.get('Owner_name')
    
-    Owner_Phone_no =request.POST.get('Owner_Phone_no')
+#     Owner_Phone_no =request.POST.get('Owner_Phone_no')
 
-    v1=Vehicle_Registration(traffic_number=traffic_number,number_plate=number_plate,autostand=autostand,
-    insurance=insurance,union=union,pollution=pollution,engine_number=engine_number,chasis_number=chasis_number,
-    rc_expiry=rc_expiry,rc_number=rc_number,num_of_complaints=num_of_complaints,created_by=Owner_name,
-    modified_by=Owner_name,active=active,city=city,vehicle_type=vehicle_type,
-    capacity_of_passengers=capacity_of_passengers)
-    v1.save() 
-    #Send SMS which you captured owner name and PH No
-    message = 'Hi ' + str(Owner_name) + '\nVehicle Registration is Success.'
-    m = send_sms(message,Owner_Phone_no,'complaint')
-    return HttpResponseRedirect("/?message=successfully registered.")
+#     v1=Vehicle_Registration(traffic_number=traffic_number,number_plate=number_plate,autostand=autostand,
+#     insurance=insurance,union=union,pollution=pollution,engine_number=engine_number,chasis_number=chasis_number,
+#     rc_expiry=rc_expiry,rc_number=rc_number,num_of_complaints=num_of_complaints,created_by=Owner_name,
+#     modified_by=Owner_name,active=active,city=city,vehicle_type=vehicle_type,
+#     capacity_of_passengers=capacity_of_passengers)
+#     v1.save() 
+#     #Send SMS which you captured owner name and PH No
+#     message = 'Hi ' + str(Owner_name) + '\nVehicle Registration is Success.'
+#     m = send_sms(message,Owner_Phone_no,'complaint')
+#     return HttpResponseRedirect("/?message=successfully registered.")
 
 def Add_Vehicle(request):
     vehicleId = request.POST.get('vehicleId')
@@ -1538,6 +1542,7 @@ def Add_Driver(request):
     return render(request,'taxiapp/add_driver.html',{'vehicle_type':vehicle_type})
 
 def Add_Vehicle_Details(request):
+    print(request.POST)
     active = Active.objects.get(active_name__iexact = 'active')
 
     ownerId = request.POST.get('ownerId')
@@ -1642,7 +1647,7 @@ def Add_Driver_Details(request):
     #return render(request, 'taxiapp/taxi_list.html', {'message':'successfully Driver details added.'})
     return HttpResponseRedirect("/taxi_list?message=successfully Driver details added.&activeTab=vehicles")
 
-def SendSMS_Owner_Driver(request):
+def SendSMS_Owner_Driver():
     month = date.today().month
     year = date.today().year
     owners = Owner.objects.filter(dl_expiry__month = month,dl_expiry__year = year)
@@ -1650,8 +1655,8 @@ def SendSMS_Owner_Driver(request):
         try :
             if owner.phone_number is not None and owner.phone_number != '' :
                 message = 'Dear '+str(owner.owner_name)+',\n'+'Your Driving License '+str(owner.dl_number)+' is going to expire on '+str(owner.dl_expiry)+'.'
-                m = send_sms(message,owner.phone_number,'complaint')
-                #print(message)
+                #m = send_sms(message,owner.phone_number,'complaint')
+                print(message)
         except Exception as e:
             print(e.message)
     
@@ -1660,8 +1665,8 @@ def SendSMS_Owner_Driver(request):
         try :
             if vehicle.owner.phone_number is not None and vehicle.owner.phone_number != '' :
                 message = 'Dear '+str(vehicle.owner.owner_name)+',\n'+'Your RC for the Vehicle Number'+str(vehicle.number_plate)+' is going to expire on '+str(vehicle.rc_expiry)+'.'
-                m = send_sms(message,vehicle.owner.phone_number,'complaint')
-                #print(message)
+                #m = send_sms(message,vehicle.owner.phone_number,'complaint')
+                print(message)
         except Exception as e:
             print(e.message)
 
@@ -1670,12 +1675,41 @@ def SendSMS_Owner_Driver(request):
         try :
             if driver.phone_number is not None and driver.phone_number != '' :
                 message = 'Dear '+str(driver.driver_name)+',\n'+'Your Driving License '+str(driver.dl_number)+' is going to expire on '+str(driver.dl_expiry)+'.'
-                m = send_sms(message,driver.phone_number,'complaint')
-                #print(message)
+                #m = send_sms(message,driver.phone_number,'complaint')
+                print(message)
         except Exception as e:
             print(e.message)
             
+# def Delete_Driver(request):
+#     driverId = request.POST.get('driverId')
+#     driver = Vehicle.objects.get(id = driverId)
+#     active = Active.objects.get(active_name__iexact = 'Inactive')
+#     driver.active = active
+#     driver.save()
+#     return HttpResponseRedirect("/taxi_list?message=successfully deleted.&activeTab=vehicles") 
 
-
+def Vehicle_Register_Details(request):
+    #print("Inside Vehicle Reg")
+    name = request.POST.get('name')
+    vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
+    vehicle_number = request.POST.get('vehicle_number')
+    phone_number = request.POST.get('phone_number')
+    source = request.POST.get('source')
+    sourcename=Source.objects.get(source_name='SafeAutoTaxi Center')
+    receipt_number = 'AUTO-000001'
+    created_by = name
+    created_time = datetime.now()
+    # city_code =request.POST.get('city_code')
+    # city = City_Code.objects.get(city_code=city_code)
+    #active = 'active'
+    active = Active.objects.get(active_name__iexact = "active") 
+    registered = 'no'
+    v1 = Vehicle_Registration(name=name,vehicle_type=vehicle_type,vehicle_number=vehicle_number,
+    phone_number=phone_number,source=sourcename,receipt_number=receipt_number,
+    created_by=created_by,created_time=created_time,
+    active=active,registered=registered)
+    v1.save()
+    return render(request, 'taxiapp/drivers_list.html', {'message':'successfully Vehicle registered.'})
+   
 
      

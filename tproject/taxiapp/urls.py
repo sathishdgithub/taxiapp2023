@@ -59,7 +59,7 @@ urlpatterns = [
         url(r'^add_driver_details',views.Add_Driver_Details,name='Add_Driver_Details'),
         #remove later
         #url(r'^SendSMS_Owner_Driver',views.SendSMS_Owner_Driver,name='SendSMS_Owner_Driver'),
-        
+        #url(r'delete_driver',views.Delete_Driver,name='Delete_Driver'),
         
 ]       
 

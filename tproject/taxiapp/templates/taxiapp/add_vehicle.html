@@ -253,6 +253,7 @@ table, th, td {
               <div style="overflow-x: auto;">
               <table id="driver" align="center" border="0">
                 <tr>
+                    <th>Select</th>
                     <th>Driver Name</th>
                     <th>Address</th>
                     <th>Date Of Birth</th>
@@ -260,11 +261,14 @@ table, th, td {
                     <th>Phone Number</th>
                     <th>Aadhar Number</th>
                     <th>DL Number</th>
-                    <th>DL Expiry</th>
+                    <th>DL Expiry</th>                    
                 </tr>
                 {% if drivers|length > 0 %}
                 {% for driver in drivers %}
                 <tr>
+                    <td>  
+                        <input type="checkbox" name="record">
+                    </td>
                     <td>
                         <input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}">
                           <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = "{{driver.driver_name}}"> 
@@ -289,11 +293,44 @@ table, th, td {
                     </td>
                   <td>
                         <input type="text" placeholder="DL Expiry" name="d_dl_expiry" id="d_dl_expiry" value = "{{driver.dl_expiry}}">  
-                    </td>
+                    </td> 
                   </tr>
                   {% endfor %}
+                  <tr>
+                      <td>  
+                          <input type="checkbox" name="record">
+                      </td> 
+                    <td>
+                        <input type="hidden" name="driverId" id="driverId" value = "">
+                          <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = ""> 
+                      </td>
+                  <td>
+                          <input type="text" placeholder="Address" name="d_address" id="d_address" required maxlength="200" value = "">    
+                      </td>
+                      <td>
+                              <input type="text" placeholder="Date Of Birth" name="d_date_of_birth" id="d_date_of_birth" value = ""> 
+                          </td>
+                  <td>
+                        <input type="text" placeholder="Son Of" name="d_son_of" id="d_son_of" required maxlength="40" value = "">
+                    </td>    
+                  <td>
+                        <input type="text" placeholder="Phone Number" name="d_phone_number" id="d_phone_number" value = ""> 
+                    </td>
+                  <td>
+                        <input type="text" placeholder="Aadhar Number" name="d_aadhar_number" id="d_aadhar_number" maxlength="22" value = ""> 
+                    </td>   
+                  <td>
+                        <input type="text" placeholder="DL Number number" name="d_dl_number" id="d_dl_number" required maxlength="22" value = "">  
+                    </td>
+                  <td>
+                        <input type="text" placeholder="DL Expiry" name="d_dl_expiry" id="d_dl_expiry" value = "">  
+                    </td>
+                  </tr>
                   {% else %}
                   <tr>
+                      <td>  
+                          <input type="checkbox" name="record">
+                      </td> 
                     <td>
                         <input type="hidden" name="driverId" id="driverId" value = "">
                           <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = ""> 
@@ -329,7 +366,8 @@ table, th, td {
                             </tr> -->
                           <div id="add_new" class="btn btn-success btn-sm">ADD NEW
                             </div>
-                            <br>
+                            <button type="button" id="delete-row" class="btn btn-success btn-sm">Delete Row</button>
+                            <br>                            
                             &nbsp;&nbsp;
                           </div>
                           </div>
@@ -344,13 +382,13 @@ table, th, td {
 $("#add_new").click(function () { 
 
   $("#driver").each(function () {
-      
+
       var tds = '<tr>';
       jQuery.each($('tr:last td', this), function () {
           tds += '<td>' + $(this).html() + '</td>';
       });
       tds += '</tr>';
-      // alert(tds);
+      //console.log(tds);
       if ($('tbody', this).length > 0) {
           $('tbody', this).append(tds);
       } else {
@@ -359,9 +397,24 @@ $("#add_new").click(function () {
   });
 });
 
-// function submitUpdate() {
-//   document.getElementById("add_vehicle").submit();
-// }
+// Find and remove selected table rows
+$("#delete-row").click(function() {
+  var arr = []
+  $("#driver").find('input[name="record"]').each(function(){
+    if($(this).is(":checked")) {
+      var driverId = $(this).parents("tr").find('input[id="driverId"]').val();
+      alert(driverId);
+      if(driverId != 'undefined' && driverId != '')
+      {
+        arr.push(driverId)
+      }
+      console.log(arr)      
+      $(this).parents("tr").remove();
+    }
+  });
+  return arr;
+});
+
 </script>
 
 <script>

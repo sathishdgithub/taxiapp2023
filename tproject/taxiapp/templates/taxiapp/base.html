@@ -168,9 +168,9 @@
         {%load staticfiles%}
         <ul class="nav navbar-nav">
           <li>
-              <a>
+              <a href="/#/">
                 <!-- <img src="{%static 'location_field/images/marker-icon-2x.png'%}" height="30" width="25"> -->
-                <img src="https://taxipublic.s3.amazonaws.com/images/logo.png" height="40" width="40">
+                <img src="https://taxipublic.s3.amazonaws.com/images/logo.png"  height="40" width="40" style="margin-top: -7px;">
               </a>
           </li>
         </ul>
@@ -181,6 +181,7 @@
               <ul class="dropdown-menu" role="menu">
               {% if user.is_authenticated %}
                 {% if user.is_admin or user.is_staff %}
+                <li><a href="/taxi_list/">Dashboards</a></li>
                 <li><a href="/admin">Access Admin Console</a></li>
 		<li><a href="/taxi_xls_upload">Bulk Upload Taxi Data</a></li>
                 <!-- <li><a href="/bulk_image_upload">Bulk Driver Photos Upload</a></li> -->

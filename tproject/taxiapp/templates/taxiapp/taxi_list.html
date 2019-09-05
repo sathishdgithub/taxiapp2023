@@ -143,6 +143,7 @@
                                         <th>Vehicle Number</th>
                                         <th>City</th>
                                         <th>Name</th>
+                                        <th>Created Time</th>
                                         <th>Phone Number</th>       
                                         <th>Average Rating</th>
                                         <th>Number of Complaints</th>
@@ -157,6 +158,7 @@
                                         <th>Vehicle Number</th>
                                         <th>City</th>
                                         <th>Name</th>
+                                        <th>Created Time</th>
                                         <th>Phone Number</th>       
                                         <th>Average Rating</th>
                                         <th>Number of Complaints</th>
@@ -172,6 +174,7 @@
                                         <td>{{row.number_plate}}</td>
                                         <td>{{row.city.city}}</td>
                                         <td>{{row.owner.owner_name}}</td>
+                                        <td>{{row.created_time}}</td>
                                         <td>{{row.owner.phone_number}}</td>
                                         <td></td>
                                         <td>{{row.num_of_complaints}}</td>
@@ -264,13 +267,20 @@
                 <div>
                         <center><h3>Complaints</h3></center>
                         <table id="example" class="table table-striped table-bordered" width="100%" cellspacing="0">
-                                <thead>
+                            <center>
+                                <select>
+                                    <option>Resolved</option>
+                                    <option>UnResolved</option>
+                                </select>
+                            </center>   
+                            <thead>
                                     <tr>
                                         <th>Complaint Id</th>
                                         <th>Traffic Number</th>
                                         <th>Number Plate</th>
                                         <th>City</th>
                                         <th>Driver Name</th>
+                                        <th>Created Time</th>
                                         <th>Complaint Reason</th>
                                         <th>Assigned To</th>
                                         <th>Customer Phone number</th>
@@ -287,6 +297,7 @@
                                         <th>Number Plate</th>
                                         <th>City</th>
                                         <th>Driver Name</th>
+                                        <th>Created Time</th>
                                         <th>Complaint Reason</th>
                                         <th>Assigned To</th>
                                         <th>Customer Phone number</th>
@@ -304,6 +315,7 @@
                                         <td>{{row.vehicle.number_plate}}</td>
                                         <td>{{row.city.city}}</td>
                                         <td>{{row.vehicle.owner.owner_name}}</td>
+                                        <td>{{row.created_time}}</td>
                                         <td>{{row.reason.reason}}</td>
                                         {% if row.assigned_to.user_number %}
                                         <td>Id: {{row.assigned_to.user_number}} | SMS: {{row.assigned_to.sms_number}}</td>
