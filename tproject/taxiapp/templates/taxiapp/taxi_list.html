@@ -455,11 +455,12 @@
                         <table id="vehicle_reg_list" class="table table-striped table-bordered" width="100%" cellspacing="0">
                                 <thead>
                                     <tr>
-                                        <th>Traffic Number</th>
-                                        <th>Number Plate</th>
-                                        <th>City</th>
-                                        <th>Auto Stand</th>
-                                        <th>Union</th>
+                                        <th>Name</th>
+                                        <th>Phone Number</th>
+                                        <th>Vehicle Type</th>
+                                        <th>Vehicle Number</th>
+                                        <th>Source</th>
+                                        <th>Created Time</th>
                                         {% if user.is_admin or user.is_staff %}
                                             <th>Action</th>
                                         {% endif %}
@@ -467,11 +468,12 @@
                                 </thead>
                                 <tfoot>
                                     <tr>
-                                        <th>Traffic Number</th>
-                                        <th>Number Plate</th>
-                                        <th>City</th>
-                                        <th>Auto Stand</th>
-                                        <th>Union</th>
+                                        <th>Name</th>
+                                        <th>Phone Number</th>
+                                        <th>Vehicle Type</th>
+                                        <th>Vehicle Number</th>
+                                        <th>Source</th>
+                                        <th>Created Time</th>
                                         {% if user.is_admin or user.is_staff %}
                                             <th>Action</th>
                                         {% endif %}
@@ -480,14 +482,16 @@
                                 <tbody>
                                     {% for row in vehicleregistrations %}
                                     <tr>
-                                        <td>{{row.traffic_number}}</td>
-                                        <td>{{row.number_plate}}</td>
-                                        <td>{{row.city.city}}</td>
-                                        <td>{{row.autostand}}</td>
-                                        <td>{{row.union}}</td>
+                                        <td>{{row.name}}</td>
+                                        <td>{{row.phone_number}}</td>
+                                        <td>{{row.vehicle_type.vehicle_type}}</td>
+                                        <td>{{row.vehicle_number}}</td>
+                                        <td>{{row.source.source_name}}</td>
+                                        <td>{{row.source.created_time}}</td>
                                         {% if user.is_admin or user.is_staff %}
                                         <td>
                                             <a href="javascript:registerVehicle('{{row.id}}')"><button>Register</button></a>
+                                            <a href="#"><button>Delete</button></a>
                                         </td>
                                     {% endif %}
                                         <!-- <td>{{row.is_owner_driver}}</td>

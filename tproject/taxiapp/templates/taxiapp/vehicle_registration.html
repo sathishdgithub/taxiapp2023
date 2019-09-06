@@ -87,8 +87,8 @@ table, th, td {
                   <td>Vehicle Type:</td>
                   <td>
                     <select name="vehicle_type" id="vehicle_type">
-                           {% for x in vehicle %}
-                           <option value={{x.vehicle_type}}>{{x.vehicle_type}}</option>
+                           {% for vehicleType in vehicle_types %}
+                           <option value={{vehicleType.vehicle_type}}>{{vehicleType.vehicle_type}}</option>
                             {% endfor %}
                     </select>
                 </td>
@@ -109,9 +109,9 @@ table, th, td {
               <tr> 
                   <td>Source</td>
                   <td>
-                      <select name="sourceName" id="sourceName">
-                             {% for y in sources %}
-                             <option value={{y.source}}>{{y.source_name}}</option>
+                      <select name="source" id="source">
+                             {% for source in sources %}
+                             <option value={{source.id}}>{{source.source_name}}</option>
                               {% endfor %}
                       </select>
                   </td>

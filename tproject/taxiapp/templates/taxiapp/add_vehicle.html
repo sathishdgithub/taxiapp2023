@@ -147,8 +147,8 @@ table, th, td {
                         <td>
                               <!-- <input type="text" placeholder="city" name="city" required>  -->
                               <select name="v_city" id="v_city">
-                                     {% for x in cities %}
-                                     <option value={{x}}>{{x}}</option>
+                                     {% for city in cities %}
+                                     <option value={{city.city_code}}>{{city.city}}</option>
                                       {% endfor %}
                               </select>
                           </td>
@@ -267,10 +267,10 @@ table, th, td {
                 {% for driver in drivers %}
                 <tr>
                     <td>  
-                        <input type="checkbox" name="record">
+                      <input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}">
+                      <input type="checkbox" name="record">
                     </td>
                     <td>
-                        <input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}">
                           <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = "{{driver.driver_name}}"> 
                       </td>
                   <td>
@@ -296,43 +296,13 @@ table, th, td {
                     </td> 
                   </tr>
                   {% endfor %}
-                  <tr>
-                      <td>  
-                          <input type="checkbox" name="record">
-                      </td> 
-                    <td>
-                        <input type="hidden" name="driverId" id="driverId" value = "">
-                          <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = ""> 
-                      </td>
-                  <td>
-                          <input type="text" placeholder="Address" name="d_address" id="d_address" required maxlength="200" value = "">    
-                      </td>
-                      <td>
-                              <input type="text" placeholder="Date Of Birth" name="d_date_of_birth" id="d_date_of_birth" value = ""> 
-                          </td>
-                  <td>
-                        <input type="text" placeholder="Son Of" name="d_son_of" id="d_son_of" required maxlength="40" value = "">
-                    </td>    
-                  <td>
-                        <input type="text" placeholder="Phone Number" name="d_phone_number" id="d_phone_number" value = ""> 
-                    </td>
-                  <td>
-                        <input type="text" placeholder="Aadhar Number" name="d_aadhar_number" id="d_aadhar_number" maxlength="22" value = ""> 
-                    </td>   
-                  <td>
-                        <input type="text" placeholder="DL Number number" name="d_dl_number" id="d_dl_number" required maxlength="22" value = "">  
-                    </td>
-                  <td>
-                        <input type="text" placeholder="DL Expiry" name="d_dl_expiry" id="d_dl_expiry" value = "">  
-                    </td>
-                  </tr>
                   {% else %}
                   <tr>
                       <td>  
+                        <input type="hidden" name="driverId" id="driverId" value = "">
                           <input type="checkbox" name="record">
                       </td> 
                     <td>
-                        <input type="hidden" name="driverId" id="driverId" value = "">
                           <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = ""> 
                       </td>
                   <td>
@@ -359,7 +329,7 @@ table, th, td {
                   </tr>
                   {% endif %}
                   
-                 
+                          <input type="hidden" name="deletedDrivers" id = "deletedDrivers" value=""/>
                           </table>
                           <!-- <tr>
                               <td></td>
@@ -380,39 +350,39 @@ table, th, td {
                         </div>
 <script>                          
 $("#add_new").click(function () { 
-
   $("#driver").each(function () {
-
-      var tds = '<tr>';
-      jQuery.each($('tr:last td', this), function () {
-          tds += '<td>' + $(this).html() + '</td>';
-      });
-      tds += '</tr>';
-      //console.log(tds);
-      if ($('tbody', this).length > 0) {
-          $('tbody', this).append(tds);
-      } else {
-          $(this).append(tds);
-      }
+    var tds = '<tr>';
+    jQuery.each($('tr:last td', this), function () {
+        var $td = $(this).html();
+        var tdValue = $(this).find('input').val();
+        $td = $td.replace(tdValue, "");
+        tds += '<td>' + $td + '</td>';
+    });
+    tds += '</tr>';
+    if ($('tbody', this).length > 0) {
+        $('tbody', this).append(tds);
+    } else {
+        $(this).append(tds);
+    }
   });
 });
 
 // Find and remove selected table rows
+var deletedDriversIds = [];
 $("#delete-row").click(function() {
-  var arr = []
   $("#driver").find('input[name="record"]').each(function(){
     if($(this).is(":checked")) {
       var driverId = $(this).parents("tr").find('input[id="driverId"]').val();
-      alert(driverId);
       if(driverId != 'undefined' && driverId != '')
       {
-        arr.push(driverId)
+        deletedDriversIds.push(driverId);
+        //$("#deletedDrivers").val(deletedDriversIds.join(", "));
+        $("#deletedDrivers").val(deletedDriversIds);
       }
-      console.log(arr)      
       $(this).parents("tr").remove();
     }
+    console.log($("#deletedDrivers").val());
   });
-  return arr;
 });
 
 </script>

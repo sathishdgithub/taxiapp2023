@@ -547,9 +547,9 @@ class Source(models.Model):
 class Vehicle_Registration(models.Model):
     name = models.CharField(max_length=50)
     vehicle_type = models.ForeignKey(Vehicle_type,null=True)
-    #vehicle_number = models.CharField(max_length=50) ## Remove this column
-    traffic_number = models.CharField(max_length = 28,default='',unique=True)
-    number_plate = models.CharField(max_length = 24)
+    vehicle_number = models.CharField(max_length=50) ## Remove this column
+    # traffic_number = models.CharField(max_length = 28,default='',unique=True)
+    # number_plate = models.CharField(max_length = 24)
     phone_number = models.CharField(max_length=50)
     source = models.ForeignKey(Source,null=True)
     receipt_number = models.CharField(max_length=20)
@@ -559,4 +559,10 @@ class Vehicle_Registration(models.Model):
     modified_time = models.DateTimeField(null = True,blank=True)
     active = models.ForeignKey(Active,null=True)
     registered = models.CharField(max_length=20)
-    city = models.ForeignKey(City_Code, blank=True)
+    # city = models.ForeignKey(City_Code, blank=True)
+    def __str__(self):
+        return self.name
+      
+    class Meta:
+        verbose_name = 'Vehicle_Registration'
+        verbose_name_plural = 'Vehicle_Registration'
