@@ -520,6 +520,7 @@ def taxi_list(request):
 
         active = Active.objects.get(active_name__iexact = 'Active')
         vehicleregistrations=Vehicle_Registration.objects.filter(active=active, registered = False)
+        drivers=Driver.objects.all()
         #print(dashboardDict)
         paginator = Paginator(rows, 10)            
         try:
@@ -533,7 +534,7 @@ def taxi_list(request):
         'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
         #'vehicleregistrations':vehicleregistrations,'rangeTo':rangeTo,'taxiIds':taxiIds,
         'rangeTo':rangeTo,'taxiIds':taxiIds,
-        'user':request.user,'message':message,'activeTab':activeTab})
+        'user':request.user,'message':message,'activeTab':activeTab,'drivers':drivers})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
 
@@ -1615,8 +1616,12 @@ def Add_Vehicle_Details(request):
         aadhar_number_list,dl_number_list,dl_expiry_list) :
             if(driverId is not None and driverId != '' and driverId != 'None'):
                 driver = Driver.objects.get(id=driverId)
+                driver.modified_by=request.user.user_number
+                driver.modified_time=datetime.now()
             else :
                 driver = Driver()
+                driver.created_by=request.user.user_number
+                driver.created_time=datetime.now() 
 
             driver.driver_name=driver_name
             driver.address=address
@@ -1633,6 +1638,8 @@ def Add_Vehicle_Details(request):
         driverIds = deletedDrivers.split(',')
         for driverId in driverIds:
             driver = Driver.objects.get(id=driverId)
+            driver.modified_by=request.user.user_number
+            driver.modified_time=datetime.now()
             driver.vehicle = None
             driver.save()
 
@@ -1644,23 +1651,31 @@ def Add_Vehicle_Details(request):
     Vehicle/Owner/Drivers Details. Please validate input fields and retry'})
 
 def Add_Driver_Details(request):
-    traffic_number=request.POST.get('traffic_number')
-    driver_name=request.POST.get('driver_name')
-    address=request.POST.get('address')
-    date_of_birth=request.POST.get('date_of_birth')
-    son_of=request.POST.get('son_of')
-    phone_number=request.POST.get('phone_number')
-    aadhar_number=request.POST.get('aadhar_number')
-    dl_number=request.POST.get('dl_number')
-    dl_expiry=request.POST.get('dl_expiry')
-    vehicle=request.POST.get('vehicles')
+    driverId = request.POST.get('driverId')
+    if(driverId is not None and driverId != '' and driverId != 'None'):
+        driver = Driver.objects.get(id=driverId)
+        activeTab = 'drivers'
+        driver.modified_by=request.user.user_number
+        driver.modified_time=datetime.now()
+    else :
+        driver = Driver()
+        activeTab = 'vehicles'
+        driver.created_by=request.user.user_number
+        driver.created_time=datetime.now()
 
-    dr=Driver(traffic_number=traffic_number,driver_name=driver_name,address=address,date_of_birth=date_of_birth,
-    son_of=son_of,phone_number=phone_number,aadhar_number=aadhar_number,dl_number=dl_number,dl_expiry=dl_expiry,
-    vehicle=vehicle)
-    dr.save()
-    #return render(request, 'taxiapp/taxi_list.html', {'message':'successfully Driver details added.'})
-    return HttpResponseRedirect("/taxi_list?message=successfully Driver details added.&activeTab=vehicles")
+    active = Active.objects.get(active_name__iexact = 'active')
+
+    driver.driver_name=request.POST.get('driver_name')
+    driver.address=request.POST.get('address')
+    driver.date_of_birth=convertToDate(request.POST.get('date_of_birth'))
+    driver.son_of=request.POST.get('son_of')
+    driver.phone_number=request.POST.get('phone_number')
+    driver.aadhar_number=request.POST.get('aadhar_number')
+    driver.dl_number=request.POST.get('dl_number')
+    driver.dl_expiry=convertToDate(request.POST.get('dl_expiry'))
+    driver.active = active
+    driver.save()
+    return HttpResponseRedirect("/taxi_list?message=Driver details added successfully.&activeTab="+activeTab)
 
 def SendSMS_Owner_Driver():
     month = date.today().month
@@ -1695,13 +1710,16 @@ def SendSMS_Owner_Driver():
         except Exception as e:
             print(e.message)
             
-# def Delete_Driver(request):
-#     driverId = request.POST.get('driverId')
-#     driver = Vehicle.objects.get(id = driverId)
-#     active = Active.objects.get(active_name__iexact = 'Inactive')
-#     driver.active = active
-#     driver.save()
-#     return HttpResponseRedirect("/taxi_list?message=successfully deleted.&activeTab=vehicles") 
+def Delete_Driver(request):
+    driverId = request.POST.get('drivertId')
+    print('driverId',driverId)
+    driver = Driver.objects.get(id = driverId)
+    active = Active.objects.get(active_name__iexact = 'Inactive')
+    driver.modified_by=request.user.user_number
+    driver.modified_time=datetime.now()
+    driver.active = active
+    driver.save()
+    return HttpResponseRedirect("/taxi_list?message=Successfully deleted.&activeTab=drivers") 
 
 def Vehicle_Register_Details(request):
     #print("Inside Vehicle Reg")
@@ -1730,8 +1748,14 @@ def Vehicle_Register_Details(request):
     elif vehicleType == 'Driver':
         receipt_number = 'DRVR-'+str(v1.id).zfill(6)
     v1.receipt_number=receipt_number
-    v1.save()   
+    v1.save()
+    message=" Thanks for registering with SafeAutoTaxi. Your Receipt # is " + str(receipt_number)+ ". Please visit our center and pay Rs.200 to register your vehicle."
+    m = send_sms(message,phone_number,'complaint')   
     return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully.'})
    
+def Edit_Driver(request):
+    driverid=request.POST.get('drivertId')
+    driver=Driver.objects.get(id=driverid)
+    return render(request,'taxiapp/add_driver.html',{'driver':driver})
 
      
