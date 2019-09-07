@@ -60,7 +60,13 @@ urlpatterns = [
         #remove later
         #url(r'^SendSMS_Owner_Driver',views.SendSMS_Owner_Driver,name='SendSMS_Owner_Driver'),
         url(r'delete_driver',views.Delete_Driver,name='Delete_Driver'),
+        url(r'disassociate_driver',views.Disassociate_Driver,name='Disassociate_Driver'),
         url(r'^edit_driver/',views.Edit_Driver,name='Edit_Driver'),
+        url(r'associate_driver',views.Associate_Driver,name='Associate_Driver'),
+        url(r'associate_vehicletodriver',views.Associate_VehicleToDriver,name='Associate_VehicleToDriver'),
+        url(r'populate_numberplate',views.Populate_Numberplate,name='Populate_Numberplate'),
+        url(r'populate_trafficnumber',views.Populate_TrafficNumber,name='Populate_TrafficNumber'),
+        url(r'allocationlist_driver',views.Allocationlist_Driver,name='Allocationlist_Driver'),
         
 ]       
 

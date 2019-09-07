@@ -34,6 +34,7 @@ from io import StringIO
 from . import constants
 import urllib,shutil,os,zipfile
 from datetime import date, tzinfo, datetime, timedelta
+from django.db.models import Q
  
 
 
@@ -520,7 +521,19 @@ def taxi_list(request):
 
         active = Active.objects.get(active_name__iexact = 'Active')
         vehicleregistrations=Vehicle_Registration.objects.filter(active=active, registered = False)
+        
         drivers=Driver.objects.all()
+        # print("**********************")
+        # print(request.POST)
+        # driver_type = request.POST.get('driverType')
+        # print(driver_type)
+        # if (driver_type == None or driver_type == 'Unallocated' ) :
+        #     driver_type = 'Unallocated'
+        #     drivers = drivers.filter(vehicle = None)
+        # else :
+        #     driverType = 'Allocated'
+        #     drivers = drivers.filter(~Q(vehicle = None))
+        
         #print(dashboardDict)
         paginator = Paginator(rows, 10)            
         try:
@@ -534,6 +547,8 @@ def taxi_list(request):
         'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
         #'vehicleregistrations':vehicleregistrations,'rangeTo':rangeTo,'taxiIds':taxiIds,
         'rangeTo':rangeTo,'taxiIds':taxiIds,
+        'vehicleregistrations': vehicleregistrations,
+        #'driverType':driver_type,
         'user':request.user,'message':message,'activeTab':activeTab,'drivers':drivers})
     else:
         return HttpResponseRedirect("/admin_login?next=taxi_list")
@@ -1499,26 +1514,30 @@ def Register_Vehicle(request):
     
     if(vrId is not None) :
         vehicleregistration = Vehicle_Registration.objects.get(id = vrId)
-        vehicle.traffic_number=vehicleregistration.traffic_number
-        vehicle.number_plate=vehicleregistration.number_plate
-        vehicle.autostand=vehicleregistration.autostand
-        vehicle.insurance=vehicleregistration.insurance
-        vehicle.union=vehicleregistration.union
-        vehicle.pollution=vehicleregistration.pollution
-        vehicle.engine_number=vehicleregistration.engine_number
-        vehicle.chasis_number=vehicleregistration.chasis_number
-        vehicle.rc_expiry=vehicleregistration.rc_expiry
-        vehicle.num_of_complaints=vehicleregistration.num_of_complaints
-        #vehicle.active = active
-        vehicle.city = vehicleregistration.city
+        #vehicle.traffic_number=vehicleregistration.traffic_number
+        vehicle.number_plate=vehicleregistration.vehicle_number
         vehicle.vehicle_type = vehicleregistration.vehicle_type
-        vehicle.capacity_of_passengers=vehicleregistration.capacity_of_passengers
+        #vehicleregistration.registered = True
+        #vehicleregistration.save()
+        vehicle.autostand=""
+        vehicle.insurance=""
+        vehicle.union=""
+        vehicle.pollution=""
+        vehicle.engine_number=""
+        vehicle.chasis_number=""
+        vehicle.rc_expiry=""
+        vehicle.num_of_complaints=""
+        active = Active.objects.get(active_name__iexact = 'Active')
+        vehicle.active = active
+        #vehicle.city = vehicleregistration.city
+        vehicle.vehicle_type = vehicleregistration.vehicle_type
+        vehicle.capacity_of_passengers=""
 
     #cities = City_Code.objects.values_list('city', flat=True).distinct()
     cities = City_Code.objects.all()
     vehice_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
     return render(request,'taxiapp/add_vehicle.html',{'cities':cities,'vehice_type':vehice_type,
-    'vehicle':vehicle,'owner':owner,'drivers':drivers})
+    'vehicle':vehicle,'owner':owner,'drivers':drivers,'regFlag':True})
 
 def Delete_Vehicle(request):
     vehicleId = request.POST.get('vehicleId')
@@ -1593,6 +1612,14 @@ def Add_Vehicle_Details(request):
     vehicle.owner = owner
     vehicle.save()
 
+    vehicle_registration = Vehicle_Registration()
+    if vehicle.id is not None :
+        if ( request.POST.get('regFlag') == True) :
+            vehicle_registration = Vehicle_Registration.objects.get(vehicle_number = vehicle.number_plate)
+            if len(vehicle_registration) > 0 :
+                vehicle_registration.registered = True
+                vehicle_registration.save()
+
     #Read Driver Details
     #traffic_number=request.POST.get('traffic_number')
     driver_Id_list=request.POST.getlist('driverId')
@@ -1645,10 +1672,11 @@ def Add_Vehicle_Details(request):
 
         # return render(request, 'taxiapp/taxi_list.html', {'message':'successfully \
         # Vehicle added.'})
-        return HttpResponseRedirect("/taxi_list?message=successfully Vehicle added.&activeTab=vehicles")
-        
-    return render(request, 'taxiapp/add_vehicle.html', {'message':'Unabled to add \
-    Vehicle/Owner/Drivers Details. Please validate input fields and retry'})
+
+    return HttpResponseRedirect("/taxi_list?message=successfully Vehicle added.&activeTab=vehicles")
+       
+    # return render(request, 'taxiapp/add_vehicle.html', {'message':'Unabled to add \
+    # Vehicle/Owner/Drivers Details. Please validate input fields and retry'})
 
 def Add_Driver_Details(request):
     driverId = request.POST.get('driverId')
@@ -1721,6 +1749,38 @@ def Delete_Driver(request):
     driver.save()
     return HttpResponseRedirect("/taxi_list?message=Successfully deleted.&activeTab=drivers") 
 
+def Disassociate_Driver(request):
+    driverId = request.POST.get('drivertId')
+    print('driverId',driverId)
+    driver = Driver.objects.get(id = driverId)
+    #active = Active.objects.get(active_name__iexact = 'Inactive')
+    driver.modified_by=request.user.user_number
+    driver.modified_time=datetime.now()
+    vehicle = driver.vehicle
+    driver.vehicle = None
+    #driver.active = active
+    driver.save()
+    msg = "Driver "+driver.driver_name+" is disassociated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
+    return HttpResponseRedirect("/taxi_list?message="+msg+".&activeTab=drivers") 
+    
+
+def Associate_Driver(request): 
+    driverid=request.POST.get('drivertId')
+    driver=Driver.objects.get(id=driverid)
+    active = Active.objects.get(active_name__iexact = 'Active')
+    vehicles = Vehicle.objects.filter(active = active )
+    return render(request,'taxiapp/associate_driver.html',{'driver':driver,'vehicles':vehicles})
+
+def Associate_VehicleToDriver(request):
+    number_plate = request.POST.get('number_plate')
+    vehicle = Vehicle.objects.get(number_plate = number_plate)
+    driverid=request.POST.get('driverId')
+    driver=Driver.objects.get(id=driverid)
+    driver.vehicle = vehicle
+    driver.save()
+    msg = "Driver "+driver.driver_name+" is associated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
+    return HttpResponseRedirect("/taxi_list?message="+msg+".&activeTab=drivers") 
+
 def Vehicle_Register_Details(request):
     #print("Inside Vehicle Reg")
     name = request.POST.get('name')
@@ -1757,5 +1817,46 @@ def Edit_Driver(request):
     driverid=request.POST.get('drivertId')
     driver=Driver.objects.get(id=driverid)
     return render(request,'taxiapp/add_driver.html',{'driver':driver})
+
+def Allocationlist_Driver(request):
+    print("Testing..")
+    print(request.POST)
+    print(request.GET)
+    return HttpResponseRedirect("/taxi_list?activeTab=drivers&")
+
+# def Allocationlist_Driver(request):
+#     driverid=request.POST.get('drivertId')
+#     driver=Driver.objects.get(id=driverid)
+#     allocation = request.POST.get('allocation')
+
+#     def Associate_VehicleToDriver(request):
+#     number_plate = request.POST.get('number_plate')
+#     vehicle = Vehicle.objects.get(number_plate = number_plate)
+#     driverid=request.POST.get('driverId')
+#     driver=Driver.objects.get(id=driverid)
+#     driver.vehicle = vehicle
+#     driver.save()
+#     msg = "Driver "+driver.driver_name+" is associated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
+#     return HttpResponseRedirect("/taxi_list?message="+msg+".&activeTab=drivers")
+
+def Populate_Numberplate(request):
+    traffic_number = request.POST.get('traffic_number')
+    print(traffic_number)
+    number_plate = Vehicle.objects.get(traffic_number = traffic_number).number_plate
+    print(number_plate)
+    driverid=request.POST.get('driverId')
+    driver=Driver.objects.get(id=driverid)
+    active = Active.objects.get(active_name__iexact = 'Active')
+    vehicles = Vehicle.objects.filter(active = active )
+    return render(request,'taxiapp/associate_driver.html',{'driver':driver,'vehicles':vehicles,'number_plate':number_plate,'traffic_number':traffic_number})
+
+def Populate_TrafficNumber(request):
+    number_plate = request.POST.get('number_plate')
+    traffic_number = Vehicle.objects.get(number_plate = number_plate).traffic_number
+    driverid=request.POST.get('driverId')
+    driver=Driver.objects.get(id=driverid)
+    active = Active.objects.get(active_name__iexact = 'Active')
+    vehicles = Vehicle.objects.filter(active = active )
+    return render(request,'taxiapp/associate_driver.html',{'driver':driver,'vehicles':vehicles,'number_plate':number_plate,'traffic_number':traffic_number})
 
      
