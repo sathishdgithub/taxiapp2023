@@ -292,3 +292,4 @@ admin.site.unregister(Site)
 admin.site.site_header = 'SafeAutoTaxi Administration'
 #admin.site.register(Admin_Detail)
 #admin.site.register(User_Complaint)
+admin.site.register(Source)

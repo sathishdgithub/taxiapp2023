@@ -543,6 +543,8 @@ class Customer_Rating(models.Model):
 class Source(models.Model):
     source_name = models.CharField(max_length=50)
     active = models.ForeignKey(Active,null=True)
+    def __str__(self):
+        return self.source_name
     
 class Vehicle_Registration(models.Model):
     name = models.CharField(max_length=50)

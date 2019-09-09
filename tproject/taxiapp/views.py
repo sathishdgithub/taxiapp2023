@@ -306,7 +306,7 @@ def complaint_resolve(request):
         print(smsMessage)
         print(complaintStatement.phone_number)
         m = send_sms(smsMessage,str(complaintStatement.phone_number),'complaint')
-        return HttpResponseRedirect("/taxi_list") 
+        return HttpResponseRedirect("/complaints_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
 
@@ -1545,21 +1545,21 @@ def Delete_Vehicle(request):
     active = Active.objects.get(active_name__iexact = 'Inactive')
     vehicle.active = active
     vehicle.save()
-    return HttpResponseRedirect("/taxi_list?message=successfully deleted.&activeTab=vehicles") 
+    return HttpResponseRedirect("/vehicle_list?message=Successfully deleted.") 
 
 def Delete_Complaint(request):
     complaintId = request.POST.get('complaintId')
     complaint = Complaint_Statement.objects.get(id = complaintId)
     complaint.active = Active.objects.get(active_name__iexact = 'Inactive')
     complaint.save()
-    return HttpResponseRedirect("/taxi_list?message=successfully deleted.&activeTab=complaints")
+    return HttpResponseRedirect("/complaints_list?message=Successfully deleted.")
 
 def Delete_Rating(request):
     ratingId = request.POST.get('ratingId')
     rating = Customer_Rating.objects.get(id = ratingId)
     rating.active = Active.objects.get(active_name__iexact = 'Inactive')
     rating.save()
-    return HttpResponseRedirect("/taxi_list?message=successfully deleted.&activeTab=customerRatings")
+    return HttpResponseRedirect("/customer_rating_list?message=Successfully deleted.")
 
 def Add_Driver(request):
     vehicle_type=Vehicle_type.objects.values_list('vehicle_type', flat=True).distinct()
@@ -1673,7 +1673,7 @@ def Add_Vehicle_Details(request):
         # return render(request, 'taxiapp/taxi_list.html', {'message':'successfully \
         # Vehicle added.'})
 
-    return HttpResponseRedirect("/taxi_list?message=successfully Vehicle added.&activeTab=vehicles")
+    return HttpResponseRedirect("/vehicle_list?message=successfully Vehicle added.")
        
     # return render(request, 'taxiapp/add_vehicle.html', {'message':'Unabled to add \
     # Vehicle/Owner/Drivers Details. Please validate input fields and retry'})
@@ -1703,7 +1703,7 @@ def Add_Driver_Details(request):
     driver.dl_expiry=convertToDate(request.POST.get('dl_expiry'))
     driver.active = active
     driver.save()
-    return HttpResponseRedirect("/taxi_list?message=Driver details added successfully.&activeTab="+activeTab)
+    return HttpResponseRedirect("/driver_list?message=Driver details added successfully.")
 
 def SendSMS_Owner_Driver():
     month = date.today().month
@@ -1747,7 +1747,7 @@ def Delete_Driver(request):
     driver.modified_time=datetime.now()
     driver.active = active
     driver.save()
-    return HttpResponseRedirect("/taxi_list?message=Successfully deleted.&activeTab=drivers") 
+    return HttpResponseRedirect("/driver_list?message=Successfully deleted.") 
 
 def Disassociate_Driver(request):
     driverId = request.POST.get('drivertId')
@@ -1761,7 +1761,7 @@ def Disassociate_Driver(request):
     #driver.active = active
     driver.save()
     msg = "Driver "+driver.driver_name+" is disassociated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
-    return HttpResponseRedirect("/taxi_list?message="+msg+".&activeTab=drivers") 
+    return HttpResponseRedirect("/driver_list?message="+msg) 
     
 
 def Associate_Driver(request): 
@@ -1779,7 +1779,7 @@ def Associate_VehicleToDriver(request):
     driver.vehicle = vehicle
     driver.save()
     msg = "Driver "+driver.driver_name+" is associated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
-    return HttpResponseRedirect("/taxi_list?message="+msg+".&activeTab=drivers") 
+    return HttpResponseRedirect("/driver_list?message="+msg) 
 
 def Vehicle_Register_Details(request):
     #print("Inside Vehicle Reg")
@@ -1818,11 +1818,11 @@ def Edit_Driver(request):
     driver=Driver.objects.get(id=driverid)
     return render(request,'taxiapp/add_driver.html',{'driver':driver})
 
-def Allocationlist_Driver(request):
-    print("Testing..")
-    print(request.POST)
-    print(request.GET)
-    return HttpResponseRedirect("/taxi_list?activeTab=drivers&")
+# def Allocationlist_Driver(request):
+#     #print("Testing..")
+#     print(request.POST)
+#     print(request.GET)
+#     return HttpResponseRedirect("/taxi_list?activeTab=drivers&")
 
 # def Allocationlist_Driver(request):
 #     driverid=request.POST.get('drivertId')
@@ -1859,4 +1859,397 @@ def Populate_TrafficNumber(request):
     vehicles = Vehicle.objects.filter(active = active )
     return render(request,'taxiapp/associate_driver.html',{'driver':driver,'vehicles':vehicles,'number_plate':number_plate,'traffic_number':traffic_number})
 
+
+
+def Dashboard(request):
+    cities = City_Code.objects.all()
+    vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
+    
+    if request.user.is_authenticated():
+        city_code = None
+        city = None
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
+        if request.user.is_admin:
+            city_code = request.POST.get('city_code')
+            if(city_code is not None and city_code != 'All'):
+                city = City_Code.objects.get(city_code = city_code)
+            else :
+                city_code = 'All'
+        else:
+           city = request.user.city
+           city_code = city.city_code
+        
+        if (city_code == 'All') :
+            rows = Vehicle.objects.select_related()
+            dashboardDict = getDashboardData(None)
+        else :
+            rows = Vehicle.objects.select_related().filter(city = city)
+            city = City_Code.objects.get(city_code = city_code)
+            dashboardDict = getDashboardData(city)
+
+
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(vehicle_type=vehicle_type)
+            dashboardDict.update(thisYearVR= thisYearVR)
+
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = rangeList)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(traffic_number__in = taxiIdsArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            rows = rows.filter(number_plate__in = numberPlatesArray)
+            todayVR = dashboardDict['todayVR']
+            todayVR = todayVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(todayVR= todayVR)
+
+            thisWeekVR = dashboardDict['thisWeekVR']
+            thisWeekVR = thisWeekVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisWeekVR= thisWeekVR)
+
+            thisMonthVR = dashboardDict['thisMonthVR']
+            thisMonthVR = thisMonthVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisMonthVR= thisMonthVR)
+
+            thisYearVR = dashboardDict['thisYearVR']
+            thisYearVR = thisYearVR.filter(number_plate__in = numberPlatesArray)
+            dashboardDict.update(thisYearVR= thisYearVR)
+        else :
+            numberPlates = ""
+
+        todayVR = dashboardDict['todayVR']
+        dashboardDict.update(todayVR= len(todayVR))
+
+        thisWeekVR = dashboardDict['thisWeekVR']
+        dashboardDict.update(thisWeekVR= len(thisWeekVR))
+
+        thisMonthVR = dashboardDict['thisMonthVR']
+        dashboardDict.update(thisMonthVR= len(thisMonthVR))
+
+        thisYearVR = dashboardDict['thisYearVR']
+        dashboardDict.update(thisYearVR= len(thisYearVR))
+
+        total = len ( Vehicle.objects.all())
+        dashboardDict.update(total = total)
+        return render(request,'taxiapp/dashboard.html',{
+        'cities':cities,'vehicletypes':vehicletypes,'dashboardDict':dashboardDict, 
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
+        'rangeTo':rangeTo,'taxiIds':taxiIds,
+        'user':request.user})
+    else:
+        return HttpResponseRedirect("/admin_login?next=dashboard")
+
+def Vehicles_List(request):
+    page = 1
+    if request.method == "GET":
+        page = request.GET.get('page', 1)
+    else:
+        page = request.POST.get('page', 1)
+    message = request.GET.get('message','')    
+    cities = City_Code.objects.all()
+    vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
+    
+    if request.user.is_authenticated():
+        city_code = None
+        city = None
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
+        if request.user.is_admin:
+            city_code = request.POST.get('city_code')
+            if(city_code is not None and city_code != 'All'):
+                city = City_Code.objects.get(city_code = city_code)
+            else :
+                city_code = 'All'
+        else:
+           city = request.user.city
+           city_code = city.city_code
+        
+        if (city_code == 'All') :
+            rows = Vehicle.objects.select_related()
+        else :
+            rows = Vehicle.objects.select_related().filter(city = city)
+
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            rows = rows.filter(vehicle_type=vehicle_type)
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            print(rangeList)
+            rows = rows.filter(traffic_number__in = rangeList)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            rows = rows.filter(traffic_number__in = taxiIdsArray)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            rows = rows.filter(number_plate__in = numberPlatesArray)            
+        else :
+            numberPlates = ""
+
+        paginator = Paginator(rows, 10)            
+        try:
+            rowPages = paginator.page(page)
+        except PageNotAnInteger:
+            rowPages = paginator.page(1)
+        except EmptyPage:
+            rowPages = paginator.page(paginator.num_pages)
+        return render(request,'taxiapp/vehicle_list.html',{'rows':rowPages,
+        'cities':cities,'vehicletypes':vehicletypes, 
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
+        'rangeTo':rangeTo,'taxiIds':taxiIds,
+        'user':request.user,'message':message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=vehicle_list")
      
+def Driver_List(request):
+    if request.method == "GET":
+        allocation_type = request.GET.get('allocation_type','Not_Allocated')
+    else:
+        allocation_type = request.POST.get('allocation_type', 'Not_Allocated')
+
+    message = request.GET.get('message','')    
+    if request.user.is_authenticated():
+        drivers=Driver.objects.all()
+        if allocation_type == 'Not_Allocated':
+            drivers=drivers.filter(vehicle__isnull=True)
+        elif allocation_type == 'Allocated':
+            drivers=drivers.filter(vehicle__isnull=False)
+
+        return render(request,'taxiapp/drivers.html',{'drivers':drivers,'message':message,'allocation_type':allocation_type})
+    else:
+        return HttpResponseRedirect("/admin_login?next=driver_list")
+
+
+def Complaints_List(request):
+
+    if request.method == "GET":
+        resolved_type = request.GET.get('resolved_type','UnResolved')
+    else:
+        resolved_type = request.POST.get('resolved_type', 'UnResolved')
+    
+    message = request.GET.get('message','')    
+    
+    if request.user.is_authenticated():
+        city_code = None
+        city = None
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
+        if request.user.is_admin:
+            city_code = request.POST.get('city_code')
+            if(city_code is not None and city_code != 'All'):
+                city = City_Code.objects.get(city_code = city_code)
+            else :
+                city_code = 'All'
+        else:
+           city = request.user.city
+           city_code = city.city_code
+        
+        if (city_code == 'All') :
+            rows_c = Complaint_Statement.objects.select_related('vehicle')
+        else :
+            rows_c = Complaint_Statement.objects.filter(city=city)
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            rows_c = rows_c.filter(vehicle__vehicle_type=vehicle_type)
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            rows_c=rows_c.filter(vehicle__traffic_number__in = rangeList)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            rows_c=rows_c.filter(vehicle__traffic_number__in = taxiIdsArray)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            rows_c=rows_c.filter(vehicle__number_plate__in = numberPlatesArray)
+        else :
+            numberPlates = ""
+
+        if resolved_type == 'UnResolved':
+            rows_c=rows_c.filter(resolved=False)
+        elif resolved_type == 'Resolved':
+            rows_c=rows_c.filter(resolved=True)
+        
+        return render(request,'taxiapp/complaints.html',{'rows_c':rows_c,
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'numberPlates':numberPlates,'resolved_type':resolved_type,
+        'user':request.user,'message':message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=complaints_list")
+
+def Customer_Rating_List(request):
+    message = request.GET.get('message','')    
+    if request.user.is_authenticated():
+        city_code = None
+        city = None
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
+        if request.user.is_admin:
+            city_code = request.POST.get('city_code')
+            if(city_code is not None and city_code != 'All'):
+                city = City_Code.objects.get(city_code = city_code)
+            else :
+                city_code = 'All'
+        else:
+           city = request.user.city
+           city_code = city.city_code
+        
+        if (city_code == 'All') :
+            ratings = Customer_Rating.objects.select_related('vehicle')
+        else :
+            ratings = Customer_Rating.objects.filter(vehicle__city = city)
+
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            ratings = ratings.filter(vehicle__vehicle_type=vehicle_type)
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+                ratings=ratings.filter(vehicle__traffic_number__in = rangeList)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            ratings=ratings.filter(vehicle__traffic_number__in = taxiIdsArray)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            ratings=ratings.filter(vehicle__number_plate__in = numberPlatesArray)
+        else :
+            numberPlates = ""
+        return render(request,'taxiapp/customer_rating_list.html',{'ratings':ratings,
+        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'numberPlates':numberPlates,
+        'rangeTo':rangeTo,'taxiIds':taxiIds,
+        'user':request.user,'message':message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=customer_rating_list")
+
+def Vehicle_Registration_List(request):
+    message = request.GET.get('message','')    
+    if request.user.is_authenticated():
+        active = Active.objects.get(active_name__iexact = 'Active')
+        vehicleregistrations=Vehicle_Registration.objects.filter(active=active, registered = False)
+        return render(request,'taxiapp/vehicle_registration_list.html',{'vehicleregistrations': vehicleregistrations,
+        'user':request.user,'message':message})
+    else:
+        return HttpResponseRedirect("/admin_login?next=vehicle_registration_list")

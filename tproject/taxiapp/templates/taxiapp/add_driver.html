@@ -107,7 +107,7 @@ table, th, td {
             <tr>
                     <td>Date Of Birth</td>
                 <td>
-                        <input type="text" placeholder="Date Of Birth" name="date_of_birth" id="date_of_birth" value = "{{driver.date_of_birth}}"> 
+                        <input type="text" placeholder="Date Of Birth" name="date_of_birth" id="date_of_birth" value = "{{driver.date_of_birth|date:'d/m/Y'}}"> 
                     </td>
             </tr>
             <tr>
@@ -137,7 +137,7 @@ table, th, td {
             <tr>
               <td>DL Expiry</td>
             <td>
-                  <input type="text" placeholder="DL Expiry" name="dl_expiry" id="dl_expiry" required value = "{{driver.dl_expiry}}"> 
+                  <input type="text" placeholder="DL Expiry" name="dl_expiry" id="dl_expiry" required value = "{{driver.dl_expiry|date:'d/m/Y'}}"> 
               </td>
             </tr>
                         <tr>
@@ -156,8 +156,8 @@ table, th, td {
 
 <script>
     $( function() {
-      $( "#date_of_birth" ).datepicker();
-      $( "#dl_expiry" ).datepicker();
+      $( "#date_of_birth" ).datepicker({dateFormat: 'dd/mm/yy'});
+      $( "#dl_expiry" ).datepicker({dateFormat: 'dd/mm/yy'});
     } );
   </script>      
 

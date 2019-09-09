@@ -66,7 +66,13 @@ urlpatterns = [
         url(r'associate_vehicletodriver',views.Associate_VehicleToDriver,name='Associate_VehicleToDriver'),
         url(r'populate_numberplate',views.Populate_Numberplate,name='Populate_Numberplate'),
         url(r'populate_trafficnumber',views.Populate_TrafficNumber,name='Populate_TrafficNumber'),
-        url(r'allocationlist_driver',views.Allocationlist_Driver,name='Allocationlist_Driver'),
+        # url(r'allocationlist_driver',views.Allocationlist_Driver,name='Allocationlist_Driver'),
+        url(r'^dashboard/',views.Dashboard,name='Dashboard'),
+        url(r'^vehicle_list/',views.Vehicles_List,name='Vehicles_List'),
+        url(r'^driver_list/',views.Driver_List,name='Driver_List'),
+        url(r'^complaints_list/',views.Complaints_List,name='Complaints_List'),
+        url(r'^customer_rating_list/',views.Customer_Rating_List,name='Customer_Rating_List'),
+        url(r'^vehicle_registration_list/',views.Vehicle_Registration_List,name='Vehicle_Registration_List'), 
         
 ]       
 

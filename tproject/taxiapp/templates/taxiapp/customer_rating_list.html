@@ -1,0 +1,156 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"/>
+
+<title>Taxi App</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+        <h4 style="text-align: center; color: green;">{{message}}</h4>
+    <div class="container">
+        <div class="row">
+            <form class="form-inline" name="customerRatingList" id="customerRatingList" action='/customer_rating_list/' method='POST'>
+                {% csrf_token %}
+                    <div class="form-group mb-2">City:
+                      
+                            <select class="form-control" name="city_code" id="city_code">
+                                    <option value="All">All</option>
+                                    {% for city in cities %}
+                                    <option value="{{city.city_code}}" {% if city.city_code == city_code %}selected="selected"{% endif %}>{{ city.city }}</option>
+                                    {% endfor %}
+                            </select>
+
+                    </div>
+
+                     <div class="form-group mb-2">Vehicle Type:
+                      
+                            <select class="form-control" name="vehicletype" id="vehicletype">
+                                    <option value="All">All</option>
+                                    {% for vcltype in vehicletypes %}
+                                    <option value="{{vcltype}}" {% if vcltype == vehicletype %}selected="selected"{% endif %}>{{ vcltype }}</option>
+                                    {% endfor %}
+                            </select>
+
+
+                    </div>
+                   
+                    <div class="form-group mb-2">
+                            Range From :
+                            <input style="width:80px;" class="form-control" type="text" name="rangeFrom" id="rangeFrom" value="{{rangeFrom}}" />
+                    </div>
+
+                    <div class="form-group mb-2">
+                            Range To :
+                            <input style="width:80px;" class="form-control" type="text" name="rangeTo" id="rangeTo" value="{{rangeTo}}" />
+                    </div>
+
+                    <div class="form-group mb-2">
+                            Traffic Number :
+                            <input style="width:80px;" class="form-control" type="text" name="taxiIds" id="taxiIds" value="{{taxiIds}}" />
+                    </div>
+
+                    <div class="form-group mb-2">
+                            Number Plate :
+                            <input style="width:80px;" class="form-control" type="text" name="numberPlates" id="numberPlates" value="{{numberPlates}}" />
+                    </div> 
+
+                    <input type="hidden" name ="page" id="page"/>
+                    <input type="hidden" name="activeTab" id="activeTab" value="{{activeTab}}"/>
+                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+
+            </form>
+      </div>
+    </div>
+    <br>
+    <br>
+   
+                <div>
+                        <center><h3>Customer Ratings</h3></center>
+                        <table id="customer_ratings" class="table table-striped table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>Traffic Number</th>
+                                        <th>Number Plate</th>
+                                        <th>City</th>
+                                        <th>Driver Name</th>
+                                        <th>Rating Type</th>
+                                        <th>Rating Reason</th>
+                                        <th>Customer Phone Number</th>
+                                        {% if user.is_admin or user.is_staff %}
+                                            <th>Action</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tfoot>
+                                    <tr>
+                                        <th>Traffic Number</th>
+                                        <th>Number Plate</th>
+                                        <th>City</th>
+                                        <th>Driver Name</th>
+                                        <th>Rating Type</th>
+                                        <th>Rating Reason</th>
+                                        <th>Customer Phone Number</th>
+                                        {% if user.is_admin or user.is_staff %}
+                                            <th>Action</th>
+                                        {% endif %}
+                                    </tr>
+                                </tfoot>
+                                <tbody>
+                                    {% for rating in ratings %}
+                                    <tr>
+                                        <td>{{rating.vehicle.traffic_number}}</td>
+                                        <td>{{rating.vehicle.number_plate}}</td>
+                                        <td>{{rating.vehicle.city.city}}</td>
+                                        <td>{{rating.driver.driver_name}}</td>
+                                        <td>{{rating.rating_type.rating_type}}</td>
+                                        <td>{{rating.reason}}</td>
+                                        <td>{{rating.phone_number}}</td>
+                                        {% if user.is_admin or user.is_staff %}
+                                        <td>
+                                            <a href="javascript:deleteRating('{{rating.id}}')"><button>Delete</button></a>
+                                        </td>
+                                    {% endif %}  
+                                       
+                                        
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                        </table>
+                        </div>
+                        <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
+                        <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
+                        <script>
+                        $(document).ready(function() {
+                            $('#customer_ratings').DataTable();
+                        } );
+
+                        function deleteRating(ratingId) {
+                            var r = confirm("Are you sure you want to delete!");
+                            if (r == true) {
+                                document.getElementById("ratingId").value = ratingId;
+                                document.getElementById("delRating").submit();
+                            } else {
+                                
+                            }
+                        }
+                        </script>
+                        <form action='/delete_rating/' method='POST' id='delRating' name ='delRating'>
+                            {% csrf_token %}
+                            <input type='hidden' id='ratingId' name='ratingId' value=''>
+                        </form>
+          
+        </div>
+       
+    </body>
+
+
+
+
+
+{% endblock %}

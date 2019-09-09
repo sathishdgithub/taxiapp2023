@@ -1,0 +1,100 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"/>
+
+<title>Taxi App</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+           <h4 style="text-align: center; color: green;">{{message}}</h4>
+           <div>
+                <center><h3>Vehicle Registration</h3></center>
+                <table id="vehicle_reg_list" class="table table-striped table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone Number</th>
+                                <th>Vehicle Type</th>
+                                <th>Vehicle Number</th>
+                                <th>Source</th>
+                                <th>Created Time</th>
+                                {% if user.is_admin or user.is_staff %}
+                                    <th>Action</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tfoot>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone Number</th>
+                                <th>Vehicle Type</th>
+                                <th>Vehicle Number</th>
+                                <th>Source</th>
+                                <th>Created Time</th>
+                                {% if user.is_admin or user.is_staff %}
+                                    <th>Action</th>
+                                {% endif %}
+                            </tr>
+                        </tfoot>
+                        <tbody>
+                            {% for row in vehicleregistrations %}
+                            <tr>
+                                <td>{{row.name}}</td>
+                                <td>{{row.phone_number}}</td>
+                                <td>{{row.vehicle_type.vehicle_type}}</td>
+                                <td>{{row.vehicle_number}}</td>
+                                <td>{{row.source.source_name}}</td>
+                                <td>{{row.created_time}}</td>
+                                {% if user.is_admin or user.is_staff %}
+                                <td>
+                                    <a href="javascript:registerVehicle('{{row.id}}')"><button>Register</button></a>
+                                    <a href="#"><button>Delete</button></a>
+                                </td>
+                            {% endif %}
+                            </tr>
+                            {% endfor %} 
+                            
+                        </tbody>
+                </table>
+
+        
+
+</div>
+            <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"/></script>
+            <script src="https://cdn.datatables.net/1.10.13/js/dataTables.bootstrap.min.js"/></script>
+            <script>
+            $(document).ready(function() {
+            $('#vehicle_reg_list').DataTable();
+            } );
+
+            function registerVehicle(vrId) {
+            document.getElementById("vrId").value = vrId;
+            document.getElementById("registerVehicle").submit();
+            }
+
+            </script>
+            <form action='/register_vehicle/' method='POST' id='registerVehicle' name ='registerVehicle'>
+            {% csrf_token %}
+            <input type='hidden' id='vrId' name='vrId' value=''>
+            </form>
+                    
+      
+    </div>
+
+
+
+
+      
+    </body>
+
+
+
+
+
+{% endblock %}
