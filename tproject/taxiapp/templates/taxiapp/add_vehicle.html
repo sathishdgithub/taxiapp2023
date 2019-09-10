@@ -1,0 +1,422 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+.container {
+    width: 800px;
+}
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO
+[type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* IMAGE STYLES */
+/* [type=radio] + img {
+  cursor: pointer;
+} */
+
+/* CHECKED STYLES */
+/* [type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+} */
+
+/* Rating Star Widgets Style */
+/* .rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+} */
+
+/* Idle State of the stars */
+/* .rating-stars ul > li.star > i.fa {
+  font-size:2.5em; /* Change the size of the stars */
+  /* color:#ccc; /* Color on idle state */
+/* } */
+
+/* Hover state of the stars */
+/* .rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+} */
+
+/* Selected state of the stars */
+/* .rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+} */ 
+
+</style>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    </head>
+    <div class="panel panel-info">
+      <div class="panel-heading">
+          <h4 style="text-align: center; color: green;">{{message}}</h4>
+        <h3 class="panel-title" style="text-align: center;">Add Vehicle</h3>
+      </div>
+      <form action="/add_vehicle_details/" method="POST" name="add_vehicle" id = "add_vehicle">
+        {%csrf_token%}
+      <table align="center" border="0">
+          <tr>
+              <td>Traffic Number:</td>
+              <td>
+                  <input type="text" placeholder="Traffic Number" name="v_traffic_number" id = "v_traffic_number" required maxlength="28" value = "{{ vehicle.traffic_number }}"> 
+              </td>
+          </tr>
+          <tr>
+                <td>Number Plate:</td>
+            <td>
+                    <input type="text" placeholder="Number Plate" name="v_number_plate" required maxlength="24" value = "{{ vehicle.number_plate }}">   
+                </td>
+            </tr>
+            <tr>
+                    <td>Auto Stand:</td>
+                <td>
+                        <input type="text" placeholder="Auto Stand" name="v_autostand" id="v_autostand"  maxlength="80" value = "{{ vehicle.autostand }}">
+                    </td>
+            </tr>
+            <tr>
+              <td>Union:</td>
+            <td>
+                  <input type="text" placeholder="Union" name="v_union" id="v_union"  maxlength="100" value = "{{ vehicle.union }}">
+              </td>
+            </tr>
+            <tr>
+              <td>Insurance: </td>
+            <td>
+                  <input type="text" placeholder="Insurance" name="v_insurance" id="v_insurance" required value = "{{ vehicle.insurance|date:'d/m/Y' }}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Pollution:</td>
+            <td>
+                  <input type="text" placeholder="pollution" name="v_pollution" id="v_pollution" required value = "{{ vehicle.pollution|date:'d/m/Y' }}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Engine Number:</td>
+            <td>
+                  <input type="text" placeholder="Engine Number" name="v_engine_number" id="v_engine_number"  maxlength="40" value = "{{ vehicle.engine_number }}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Chasis Number:</td>
+            <td>
+                  <input type="text" placeholder="Chasis Number" name="v_chasis_number" id="v_chasis_number"  maxlength="30" value = "{{ vehicle.chasis_number }}">
+              </td>
+            </tr>
+           
+            <tr>
+              <td>Rc Expiry:</td>
+            <td>
+                  <input type="text" placeholder="Rc Expiry" name="v_rc_expiry" id="v_rc_expiry" required value = "{{ vehicle.rc_expiry|date:'d/m/Y' }}">
+              </td>
+            </tr>
+            <tr>
+            <td>Capacity Of Passengers:</td>
+        <td>
+                    <input type="text" placeholder="Capacity Of Passengers" name="v_capacity_of_passengers" id="v_capacity_of_passengers"  maxlength="14" value = "{{ vehicle.capacity_of_passengers }}"> 
+                </td>
+              </tr>
+                      <tr>
+                          <td>City:</td>
+                        <td>
+                              <!-- <input type="text" placeholder="city" name="city" required>  -->
+                              <select name="v_city" id="v_city">
+                                     {% for city in cities %}
+                                     <option value={{city.city_code}}>{{city.city}}</option>
+                                      {% endfor %}
+                              </select>
+                          </td>
+                        </tr>
+                        <tr>
+                                <td>Vehicle Type:</td>
+                              <td>
+                                    <!-- <input type="text" placeholder="city" name="city" required>  -->
+                                    <select name="v_vehice_type" id="v_vehice_type">
+                                           {% for x in vehice_type %}
+                                           <option value={{x}}>{{x}}</option>
+                                            {% endfor %}
+                                    </select>
+                                </td>
+                              </tr>
+                        <!-- <tr align="center">
+                            <td accesskey="center">  
+                                <button type="submit" class="btn btn-success btn-sm">Save</button>
+                            </td>
+                        </tr> -->
+                        <tr>
+                          <td><input type="hidden" name="vehicleId" id="vehicleId" value = "{{vehicle.id}}"></td>
+                        </tr>
+                    </table>
+                    <!-- </form> -->
+                   
+
+
+      <div class="panel panel-info">
+            <div class="panel-heading">
+              <h3 class="panel-title" style="text-align: center;">Add Owner</h3>
+            </div>
+            <!-- <form action="/add_owner_details/" method="POST">
+              {%csrf_token%} -->
+            <table align="center" border="0">
+                <tr>
+                    <td>Owner Name:</td>
+                    <td>
+                        <input type="text" placeholder="Owner Name" name="o_owner_name" id="o_owner_name" required maxlength="40" value = "{{owner.owner_name}}"> 
+                    </td>
+                </tr>
+                <tr>
+                      <td>Address:</td>
+                  <td>
+                          <input type="text" placeholder="Address" name="o_address" id="o_address" required maxlength="200" value = "{{owner.address}}">   
+                      </td>
+                  </tr>
+                  <tr>
+                          <td>Date Of Birth:</td>
+                      <td>
+                              <input type="text" placeholder="Date Of Birth" name="o_date_of_birth" id="o_date_of_birth" value = "{{owner.date_of_birth|date:'d/m/Y'}}">
+                          </td>
+                  </tr>
+                  <tr>
+                    <td>Son Of:</td>
+                  <td>
+                        <input type="text" placeholder="Son Of" name="o_son_of"  id="o_son_of" maxlength="100" value = "{{owner.son_of}}"> 
+                    </td>
+                  </tr>
+                  <tr>
+                        <td>Phone Number:</td>
+                      <td>
+                            <input type="text" placeholder="Phone Number" name="o_phone_number" id="o_phone_number" value = "{{owner.phone_number}}">   
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Aadhar Number:</td>
+                      <td>
+                            <input type="text" placeholder="Aadhar Number" name="o_aadhar_number" id="o_aadhar_number" maxlength="22" value =  "{{owner.aadhar_number}}">
+                        </td>
+                      </tr>
+                    <tr>
+                        <td>DL Number:</td>
+                        <td>
+                            <input type="text" placeholder="DL Number number" name="o_dl_number" id="o_dl_number" required maxlength="22" value =  "{{owner.dl_number}}"> 
+                        </td>
+                        </tr>
+                        <tr>
+                        <td>DL Expiry:</td>
+                        <td>
+                            <input type="text" placeholder="DL Expiry" name="o_dl_expiry" id="o_dl_expiry" required value = "{{owner.dl_expiry|date:'d/m/Y'}}">
+                        </td>
+                        </tr>
+                  
+                              <!-- <tr align="center">
+                                  <td accesskey="center">  
+                                      <button type="submit" class="btn btn-success btn-sm">Save</button>
+                                  </td>
+                              </tr> -->
+                              <tr>
+                                  <td><input type="hidden" name="ownerId" id="ownerId" value = "{{owner.id}}"></td>
+                                </tr>
+                          </table>
+                        
+                         
+            </div>
+   
+            <div class="panel panel-info" >
+              <div class="panel-heading">
+                <h3 class="panel-title" style="text-align: center;">Add Driver</h3>
+              </div>
+              <div style="overflow-x: auto;">
+              <table id="driver" align="center" border="0">
+                <tr>
+                    <th>Select</th>
+                    <th>Driver Name</th>
+                    <th>Address</th>
+                    <th>Date Of Birth</th>
+                    <th>Son Of</th>
+                    <th>Phone Number</th>
+                    <th>Aadhar Number</th>
+                    <th>DL Number</th>
+                    <th>DL Expiry</th>                    
+                </tr>                
+                {% if drivers|length > 0 %}
+                {% for driver in drivers %}
+                <tr>
+                    <td>  
+                      <input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}">
+                      <input type="checkbox" name="record">
+                    </td>
+                    <td>
+                          <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = "{{driver.driver_name}}"> 
+                      </td>
+                  <td>
+                          <input type="text" placeholder="Address" name="d_address" id="d_address" required maxlength="200" value = "{{driver.address}}">    
+                      </td>
+                      <td>
+                              <input type="text" placeholder="Date Of Birth" name="d_date_of_birth" id="d_date_of_birth{{ forloop.counter }}" value = "{{driver.date_of_birth|date:'d/m/Y'}}"> 
+                          </td>
+                  <td>
+                        <input type="text" placeholder="Son Of" name="d_son_of" id="d_son_of" required maxlength="40" value = "{{driver.son_of}}">
+                    </td>    
+                  <td>
+                        <input type="text" placeholder="Phone Number" name="d_phone_number" id="d_phone_number" value = "{{driver.phone_number}}"> 
+                    </td>
+                  <td>
+                        <input type="text" placeholder="Aadhar Number" name="d_aadhar_number" id="d_aadhar_number" maxlength="22" value = "{{driver.aadhar_number}}"> 
+                    </td>   
+                  <td>
+                        <input type="text" placeholder="DL Number number" name="d_dl_number" id="d_dl_number" required maxlength="22" value = "{{driver.dl_number}}">  
+                    </td>
+                  <td>
+                        <input type="text" placeholder="DL Expiry" name="d_dl_expiry" id="d_dl_expiry{{ forloop.counter }}" value = "{{driver.dl_expiry|date:'d/m/Y'}}">  
+                    </td> 
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                      <td>  
+                        <input type="hidden" name="driverId" id="driverId" value = "">
+                          <input type="checkbox" name="record">
+                      </td> 
+                    <td>
+                          <input type="text" placeholder="Driver Name" name="d_driver_name" id="d_driver_name" required maxlength="40" value = ""> 
+                      </td>
+                  <td>
+                          <input type="text" placeholder="Address" name="d_address" id="d_address" required maxlength="200" value = "">    
+                      </td>
+                      <td>
+                              <input type="text" placeholder="Date Of Birth" name="d_date_of_birth" id="d_date_of_birth1" value = ""> 
+                          </td>
+                  <td>
+                        <input type="text" placeholder="Son Of" name="d_son_of" id="d_son_of" required maxlength="40" value = "">
+                    </td>    
+                  <td>
+                        <input type="text" placeholder="Phone Number" name="d_phone_number" id="d_phone_number" value = ""> 
+                    </td>
+                  <td>
+                        <input type="text" placeholder="Aadhar Number" name="d_aadhar_number" id="d_aadhar_number" maxlength="22" value = ""> 
+                    </td>   
+                  <td>
+                        <input type="text" placeholder="DL Number number" name="d_dl_number" id="d_dl_number" required maxlength="22" value = "">  
+                    </td>
+                  <td>
+                        <input type="text" placeholder="DL Expiry" name="d_dl_expiry" id="d_dl_expiry1" value = "">  
+                    </td>
+                  </tr>
+                  {% endif %}
+                  
+                          <input type="hidden" name="deletedDrivers" id = "deletedDrivers" value=""/>
+                          <input type="hidden" name="driversLength" id = "driversLength" value="{{drivers|length}}"/>
+                          
+                          </table>
+                          <!-- <tr>
+                              <td></td>
+                            </tr> -->
+                          <div id="add_new" class="btn btn-success btn-sm">ADD NEW
+                            </div>
+                            <button type="button" id="delete-row" class="btn btn-success btn-sm">Delete Row</button>
+                            <br>                            
+                            &nbsp;&nbsp;
+                          </div>
+                          </div>
+                
+                <div class="profile-userbuttons center-block">
+                    <button type="submit" class="btn btn-success btn-sm">Save</button>
+                </div>   
+                        &nbsp;
+                          </form>
+                        </div>
+<script>                          
+$("#add_new").click(function () { 
+  $("#driver").each(function () {
+    var row = $('#driver tr').length;
+    var prevRow = row - 1;
+    var tds = '<tr>';
+    jQuery.each($('tr:last td', this), function () {
+        var $td = $(this).html();
+        var tdValue = $(this).find('input').val();
+        $td = $td.replace(tdValue, "");
+        $td = $td.replace('d_date_of_birth'+prevRow, "d_date_of_birth"+row);
+        $td = $td.replace('d_dl_expiry'+prevRow, "d_dl_expiry"+row);
+        tds += '<td>' + $td + '</td>';
+    });
+    tds += '</tr>';
+    if ($('tbody', this).length > 0) {
+        $('tbody', this).append(tds);
+    } else {
+        $(this).append(tds);
+    }
+    //Remove date picker
+    $( "#d_date_of_birth"+row ).removeClass('hasDatepicker');
+    $( "#d_dl_expiry"+row ).removeClass('hasDatepicker');
+    //Add date picker
+    $( "#d_date_of_birth"+row ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#d_dl_expiry"+row ).datepicker({dateFormat: 'dd/mm/yy'});
+  });
+});
+
+// Find and remove selected table rows
+var deletedDriversIds = [];
+$("#delete-row").click(function() {
+  $("#driver").find('input[name="record"]').each(function(){
+    if($(this).is(":checked")) {
+      var driverId = $(this).parents("tr").find('input[id="driverId"]').val();
+      if(driverId != 'undefined' && driverId != '')
+      {
+        deletedDriversIds.push(driverId);
+        $("#deletedDrivers").val(deletedDriversIds);
+      }
+      $(this).parents("tr").remove();
+    }
+    console.log($("#deletedDrivers").val());
+  });
+});
+
+</script>
+
+<script>
+  $( function() {
+    $( "#v_insurance" ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#v_pollution" ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#v_rc_expiry" ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#o_date_of_birth" ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#o_dl_expiry" ).datepicker({dateFormat: 'dd/mm/yy'});
+  } );
+  if($('#driversLength').val() == 0 || $('#driversLength').val() == 1) {
+    $( "#d_date_of_birth1" ).datepicker({dateFormat: 'dd/mm/yy'});
+    $( "#d_dl_expiry1" ).datepicker({dateFormat: 'dd/mm/yy'});
+  } else {
+    for (var i = 1; i <= $('#driversLength').val(); i++) {
+      $( "#d_date_of_birth"+i ).datepicker({dateFormat: 'dd/mm/yy'});
+      $( "#d_dl_expiry"+i ).datepicker({dateFormat: 'dd/mm/yy'});
+    }
+  }
+
+
+</script>
+
+{% endblock %}

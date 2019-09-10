@@ -76,123 +76,61 @@ table, th, td {
       </div>
       <form action="/vehicle_register_details/" method="POST">
         {%csrf_token%}
-      <table align="center" border="0">
-          <tr>
-              <td>Traffic number</td>
-              <td>
-                  <input type="text" placeholder="Traffic number" name="traffic_number" required maxlength="28"> 
-              </td>
-          </tr>
-          <tr>
-                <td>Number plate</td>
-                  <td>
-                    <input type="text" placeholder="Number plate" name="number_plate" required maxlength="24"> 
+        <table align="center" border="0">
+            <tr>
+                <td>Name:</td>
+                <td>
+                    <input type="text" placeholder="Name" name="name" required maxlength="50"> 
                 </td>
             </tr>
             <tr>
-                    <td>Auto Stand </td>
-                    <td>
-                        <input type="text" placeholder="Auto Stand" name="autostand"  max="80"> 
-                    </td>
-            </tr>
-            <tr>
-              <td>Union</td>
+                  <td>Vehicle Type:</td>
                   <td>
-                  <input type="text" placeholder="Union" name="union"  maxlength="100"> 
-              </td>
-            </tr>
-            <tr>
-              <td>Insurance</td>
-                  <td>
-                  <input type="date" placeholder="Insurance" name="insurance" > 
-              </td>
-            </tr>
-            <tr>
-              <td>pollution</td>
-                  <td>
-                  <input type="date" placeholder="pollution" name="pollution" > 
-              </td>
-            </tr>
-            <tr>
-              <td>engine number</td>
-                  <td>
-                  <input type="text" placeholder="engine number" name="engine_number"  maxlength="40"> 
-              </td>
-            </tr>
-            <tr>
-              <td>chasis number</td>
-              <td>
-                  <input type="text" placeholder="chasis number" name="chasis_number"  maxlength="30">  
-              </td>
-            </tr>
-            <tr>
-              <td>rc_number</td>
-              <td>
-                  <input type="text" placeholder="rc_number" name="rc_number" required maxlength="28"> 
-              </td>
-            </tr>
-            <tr>
-              <td>rc_expiry</td>
-              <td>
-                  <input type="date" placeholder="rc_expiry" name="rc_expiry"> 
-              </td>
-            </tr>
-            <!-- <tr>
-            <td>created_by:
-                    <input type="text" placeholder="created_by" name="created_by" required> 
+                    <select name="vehicle_type" id="vehicle_type">
+                           {% for vehicleType in vehicle_types %}
+                           <option value={{vehicleType.vehicle_type}}>{{vehicleType.vehicle_type}}</option>
+                            {% endfor %}
+                    </select>
                 </td>
               </tr>
+              <tr>
+                      <td>Vehicle Number:</td>
+                      <td>
+                          <input type="text" placeholder="Vehicle Number" name="vehicle_number"  maxlength="25"> 
+                      </td>
+              </tr>
+              <tr>
+                <td>Phone Number:</td>
+                    <td>
+                    <input type="text" placeholder="Phone NUmber" name="phone_number"  maxlength="100"> 
+                </td>
+                </tr>
+    
+              <tr> 
+                  <td>Source</td>
+                  <td>
+                      <select name="source" id="source">
+                             {% for source in sources %}
+                             <option value={{source.id}}>{{source.source_name}}</option>
+                              {% endfor %}
+                      </select>
+                  </td>
+                </tr>
+               
+                
                 <tr>
-                    <td>modified_by:
-                        <input type="text" placeholder="modified_by" name="modified_by" required> 
+                    <td>&nbsp;</td>
+                    <td align="center">
+                        <button type="submit" class="btn btn-success btn-sm">Save</button>
                     </td>
-                   </tr>
-                        <td>active:
-                            <input type="text" placeholder="active" name="active" required> 
-                        </td>
-                      </tr> -->
-                      <tr> 
-                      
-                          <td>city</td>
-                          <td>
-                              <!-- <input type="text" placeholder="city" name="city" required>  -->
-                              <select name="city_code" id="city_code">
-                                     {% for city in cities %}
-                                     <option value={{city.city_code}}>{{city.city}}</option>
-                                      {% endfor %}
-                              </select>
-                          </td>
-                        </tr>
-                        <tr>
-                            <td>capacity_of_passengers</td>
-                            <td>
-                                <input type="number" placeholder="capacity_of_passengers" name="capacity_of_passengers"  maxlength="14"> 
-                            </td>
-                          </tr>
-                        <tr>
-                          <td>Owner_name</td>
-                          <td>
-                              <input type="text" placeholder="Owner_name" name="Owner_name" required> 
-                          </td>
-                        </tr>
-                        <tr>
-                            <td>Owner_Phone_no</td>
-                            <td>
-                                <input type="text" placeholder="Owner_Phone_no" name="Owner_Phone_no" required> 
-                            </td>
-                          </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td align="center">
-                                <button type="submit" class="btn btn-success btn-sm">Save</button>
-                            </td>
-                        </tr>
-                    </table>
-                    </form>
-                    <!-- <div class="profile-userbuttons center-block">
-                      <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
-                        style="margin:0.5em;">submit</button>
-                    </div> -->
+                </tr>
+            </table>
+
+      </form>
+      <!-- <div class="profile-userbuttons center-block">
+        <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
+          style="margin:0.5em;">submit</button>
+      </div> -->
       </div>
    
 {% endblock %}

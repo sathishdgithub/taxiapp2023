@@ -399,9 +399,9 @@ class Driver(models.Model):
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
-      created_time = models.DateTimeField(default=datetime.now, blank=True)
+      created_time = models.DateTimeField(blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
-      modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      modified_time = models.DateTimeField(blank=True)
       is_image_verified = models.BooleanField(default=False)
       
       def __str__(self):
@@ -459,6 +459,7 @@ class Complaint_Statement(models.Model):
         is_emergency_text    = models.BooleanField(default=False)
         created_time = models.DateTimeField(blank=True)
         resolved_time = models.DateTimeField(blank=True)
+        active = models.ForeignKey(Active,null=True)
         def __str__(self):
              return str(self.complaint_number)+' '+self.reason.reason
 
@@ -509,6 +510,7 @@ class Customer_Rating(models.Model):
     created_time = models.DateTimeField(default=datetime.now, blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
     modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    active = models.ForeignKey(Active,null=True)
 
     # def __str__(self):
     #     return self.vehicle.number_plate
@@ -517,23 +519,50 @@ class Customer_Rating(models.Model):
         verbose_name = 'Customer Rating'
         verbose_name_plural = 'Customer Ratings'
 
-class Vehicle_Registration(models.Model):
-    traffic_number = models.CharField(max_length = 28,default='',unique=True)
-    number_plate = models.CharField(max_length = 24)
-    vehicle_type = models.ForeignKey(Vehicle_type,null=True)
-    autostand = models.CharField(max_length=80,null=True,blank=True, verbose_name="Stand")
-    union = models.CharField(max_length=100,null=True,blank=True)
-    city = models.ForeignKey(City_Code, blank=True)
-    insurance = models.DateField(null=True,blank=True)
-    pollution = models.DateField(null=True,blank=True)
-    engine_number = models.CharField(max_length=40,null=True,blank=True)
-    chasis_number = models.CharField(max_length=30,null=True,blank=True)
-    rc_number = models.CharField(max_length = 28,default='')
-    rc_expiry = models.DateField(null=True,blank=True)
-    num_of_complaints = models.BigIntegerField(default=0)
+# class Vehicle_Registration(models.Model):
+#     traffic_number = models.CharField(max_length = 28,default='',unique=True)
+#     number_plate = models.CharField(max_length = 24)
+#     vehicle_type = models.ForeignKey(Vehicle_type,null=True)
+#     autostand = models.CharField(max_length=80,null=True,blank=True, verbose_name="Stand")
+#     union = models.CharField(max_length=100,null=True,blank=True)
+#     city = models.ForeignKey(City_Code, blank=True)
+#     insurance = models.DateField(null=True,blank=True)
+#     pollution = models.DateField(null=True,blank=True)
+#     engine_number = models.CharField(max_length=40,null=True,blank=True)
+#     chasis_number = models.CharField(max_length=30,null=True,blank=True)
+#     rc_number = models.CharField(max_length = 28,default='')
+#     rc_expiry = models.DateField(null=True,blank=True)
+#     num_of_complaints = models.BigIntegerField(default=0)
+#     active = models.ForeignKey(Active,null=True)
+#     created_by = models.CharField(max_length=50,null = True,blank= True)
+#     created_time = models.DateTimeField(default=datetime.now, blank=True)
+#     modified_by = models.CharField(max_length=50,null = True,blank= True)
+#     modified_time = models.DateTimeField(default=datetime.now, blank=True)
+#     capacity_of_passengers = models.PositiveSmallIntegerField(null = True,blank= True)
+
+class Source(models.Model):
+    source_name = models.CharField(max_length=50)
     active = models.ForeignKey(Active,null=True)
+    def __str__(self):
+        return self.source_name
+    
+class Vehicle_Registration(models.Model):
+    name = models.CharField(max_length=50)
+    vehicle_type = models.ForeignKey(Vehicle_type,null=True)
+    vehicle_number = models.CharField(max_length=50) 
+    phone_number = models.CharField(max_length=50)
+    source = models.ForeignKey(Source,null=True)
+    receipt_number = models.CharField(max_length=20)
     created_by = models.CharField(max_length=50,null = True,blank= True)
-    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    created_time = models.DateTimeField(null = True,blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
-    modified_time = models.DateTimeField(default=datetime.now, blank=True)
-    capacity_of_passengers = models.PositiveSmallIntegerField(null = True,blank= True)
+    modified_time = models.DateTimeField(null = True,blank=True)
+    active = models.ForeignKey(Active,null=True)
+    registered = models.BooleanField(default=False)
+    # city = models.ForeignKey(City_Code, blank=True)
+    def __str__(self):
+        return self.name
+      
+    class Meta:
+        verbose_name = 'Vehicle_Registration'
+        verbose_name_plural = 'Vehicle_Registration'

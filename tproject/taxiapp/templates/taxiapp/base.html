@@ -127,11 +127,12 @@
     background-color: #d9edf7;
     height: 60px;
 }
+
 </style>
 
 <body> 
-<nav class="navbar navbar-default navbar-color " role="navigation">
-  <div class="container" style="width: auto;">
+<nav class="navbar  navbar-color "  role="navigation">
+  <div class="container" style="width: auto">
     <!-- Brand and toggle get grouped for better mobile display 
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-slide-dropdown">
@@ -167,10 +168,10 @@
         </form> -->
         {%load staticfiles%}
         <ul class="nav navbar-nav">
-          <li>
-              <a>
+          <li >
+              <a href="/#" style="padding-top: 11px !important; padding-bottom: 15px !important; ">
                 <!-- <img src="{%static 'location_field/images/marker-icon-2x.png'%}" height="30" width="25"> -->
-                <img src="https://taxipublic.s3.amazonaws.com/images/logo.png" height="40" width="40">
+                <img src="https://taxipublic.s3.amazonaws.com/images/logo.png"  style="margin-top: -7px;">
               </a>
           </li>
         </ul>
@@ -181,11 +182,18 @@
               <ul class="dropdown-menu" role="menu">
               {% if user.is_authenticated %}
                 {% if user.is_admin or user.is_staff %}
+                <li><a href="/dashboard/">Dashboard</a></li>
+                <li><a href="/vehicle_list/">Vehicles</a></li>
+                <li><a href="/driver_list/">Drivers</a></li>
+                <li><a href="/complaints_list/">Complaints</a></li>
+                <li><a href="/customer_rating_list/">Customer Ratings</a></li>
+                <li><a href="/vehicle_registration_list/">Vehicle Registrations</a></li>
                 <li><a href="/admin">Access Admin Console</a></li>
 		<li><a href="/taxi_xls_upload">Bulk Upload Taxi Data</a></li>
                 <!-- <li><a href="/bulk_image_upload">Bulk Driver Photos Upload</a></li> -->
                 {% else %}
-                <li><a href="/taxi_list">Taxi List</a></li>
+                <!-- <li><a href="/taxi_list">Taxi List</a></li> -->
+                <li><a href="/dashboard/">Dashboard</a></li>
                 {% endif %}
                 <li><a href="/admin_password_change">Update Password</a></li>
                 <li><a href="/admin_logout">Logout</a></li>
@@ -212,8 +220,8 @@
     </div>
 
    <!-- footer -->
-   <nav class="navbar navbar-default navbar-color " role="navigation" style="margin-bottom: 0px !important;">
-    <div class="container" style="width: auto;">
+   <nav class="navbar navbar-default navbar-color" role="navigation" style="margin-bottom: 0px !important;">
+    <div class="container" style="width: auto;background-color: #d9edf7">
 
     <div class="footer" style="margin-top: 1px;">
     
@@ -232,10 +240,9 @@
   </div> 
   </div> 
   </nav>
-  
+    
 
 </body>
-
 
 
 <script type="text/javascript">

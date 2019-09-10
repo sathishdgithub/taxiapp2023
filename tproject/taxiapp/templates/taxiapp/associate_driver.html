@@ -1,0 +1,193 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+.container {
+    width: 800px;
+}
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO */
+/* [type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+} */
+
+/* IMAGE STYLES */
+/* [type=radio] + img {
+  cursor: pointer;
+} */
+
+/* CHECKED STYLES */
+/* [type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+} */
+
+/* Rating Star Widgets Style */
+/* .rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+} */
+
+/* Idle State of the stars */
+/* .rating-stars ul > li.star > i.fa {
+  font-size:2.5em;
+  color:#ccc;
+} */
+
+/* Hover state of the stars */
+/* .rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+} */
+
+/* Selected state of the stars */
+/* .rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+} */
+
+</style>
+    
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Associate Vehicle To Driver</h3>
+      </div>
+      <form id="vehicleAssociation" name="vehicleAssociation" action="/associate_vehicletodriver/" method="POST" enctype="multipart/form-data" >
+        {%csrf_token%}
+      <table align="center" border="0">
+          <!-- <tr>
+              <td>Traffic Number</td>
+              <td>
+                  <input type="text" placeholder="Traffic number" name="Traffic Number" maxlength="22"> 
+              </td>
+          </tr> -->
+          
+          <tr>
+              <td><input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}"></td>
+            </tr>
+
+          <tr>
+                <td>Driver Name</td>
+                <td>
+                    {{driver.driver_name}}
+                </td>
+            </tr>
+          <tr>
+                <td>Address</td>
+            <td>
+                   {{driver.address}}
+            </tr>
+            <tr>
+                    <td>Date Of Birth</td>
+                <td>
+                        {{driver.date_of_birth}} 
+                    </td>
+            </tr>
+            <tr>
+              <td>Son Of</td>
+            <td>
+                 {{driver.son_of}}
+              </td>
+            </tr>
+            <tr>
+              <td>Phone Number</td>
+            <td>
+                  {{driver.phone_number}}
+              </td>
+            </tr>
+            <tr>
+              <td>Aadhar Number</td>
+            <td>
+                 {{driver.aadhar_number}}
+              </td>
+            </tr>
+            <tr>
+              <td>DL Number</td>
+            <td>
+                 {{driver.dl_number}}
+              </td>
+            </tr>
+            <tr>
+              <td>DL Expiry</td>
+            <td>
+                  {{driver.dl_expiry}}
+              </td>
+            </tr>
+            <tr>
+              <td>Traffic Number</td>
+            <td>
+              <select class="form-control" name="traffic_number" id="traffic_number" onchange="populateNumberPlate();">
+                {% for vcl in vehicles %}
+                <option value="{{vcl.traffic_number}}" {% if vcl.traffic_number == traffic_number %}selected="selected"{% endif %}>{{ vcl.traffic_number }}</option>
+                {% endfor %}
+              </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Number Plate</td>
+            <td>
+              <select class="form-control" name="number_plate" id="number_plate" onchange="populateTrafficNumber();">
+                {% for vcl in vehicles %}
+                <option value="{{vcl.number_plate}}" {% if vcl.number_plate == number_plate %}selected="selected"{% endif %}>{{ vcl.number_plate }}</option>
+                {% endfor %}
+              </select>
+              </td>
+            </tr>
+
+                        <tr>
+                          <td></td>
+                            <td accesskey="center">  
+                                <button type="submit" class="btn btn-success btn-sm" >Save</button>
+                            </td>
+                        </tr>
+                        <tr>
+                          <td></td>
+                        </tr>
+                    </table>
+                    </form>
+                    <!-- <div class="profile-userbuttons center-block">
+                      <button type="button" class="btn btn-success btn-sm" onclick="saveCustomerDetails()"
+                        style="margin:0.5em;">submit</button>
+                    </div> -->
+      </div>
+<script>
+  function populateNumberPlate() {
+    var traffic_number = document.getElementById("traffic_number").value;
+    document.getElementById("vehicleAssociation").action = '/populate_numberplate/';
+    document.getElementById("vehicleAssociation").submit();
+  }
+
+    function populateTrafficNumber() {
+    var number_plate = document.getElementById("number_plate").value;
+    document.getElementById("vehicleAssociation").action = '/populate_trafficnumber/';
+    document.getElementById("vehicleAssociation").submit();
+
+  }
+</script>
+{% endblock %}

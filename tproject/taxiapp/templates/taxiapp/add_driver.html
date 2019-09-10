@@ -1,0 +1,164 @@
+{% extends "taxiapp/base.html" %}
+{% block main %}
+<style type="text/css">
+.container {
+    width: 800px;
+}
+
+table, th, td {
+    padding: 5px;
+  }
+
+  table {
+    border-spacing: 15px;
+  }
+
+  .profile-userbuttons {
+    text-align: center;
+    margin-top: 10px;
+  }
+
+/* HIDE RADIO */
+/* [type=radio] { 
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+} */
+
+/* IMAGE STYLES */
+/* [type=radio] + img {
+  cursor: pointer;
+} */
+
+/* CHECKED STYLES */
+/* [type=radio]:checked + img.green {
+  outline: 2px solid green;
+}
+[type=radio]:checked + img.red {
+  outline: 2px solid red;
+} */
+
+/* Rating Star Widgets Style */
+/* .rating-stars ul {
+  list-style-type:none;
+  padding:0;
+  
+  -moz-user-select:none;
+  -webkit-user-select:none;
+}
+.rating-stars ul > li.star {
+  display:inline-block;
+  
+} */
+
+/* Idle State of the stars */
+/* .rating-stars ul > li.star > i.fa {
+  font-size:2.5em;
+  color:#ccc;
+} */
+
+/* Hover state of the stars */
+/* .rating-stars ul > li.star.hover > i.fa {
+  color:#FFCC36;
+} */
+
+/* Selected state of the stars */
+/* .rating-stars ul > li.star.selected > i.fa {
+  color:#FF912C;
+} */
+
+</style>
+    
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title" style="text-align: center;">Add Driver</h3>
+      </div>
+      <form action="/add_driver_details/" method="POST" enctype="multipart/form-data" >
+        {%csrf_token%}
+      <table align="center" border="0">
+          <!-- <tr>
+              <td>Traffic Number</td>
+              <td>
+                  <input type="text" placeholder="Traffic number" name="Traffic Number" maxlength="22"> 
+              </td>
+          </tr> -->
+          
+          <tr>
+              <td><input type="hidden" name="driverId" id="driverId" value = "{{driver.id}}"></td>
+            </tr>
+
+          <tr>
+                <td>Driver Name</td>
+                <td>
+                    <input type="text" placeholder="Driver Name" name="driver_name" required maxlength="40" value = "{{driver.driver_name}}">   
+                </td>
+            </tr>
+          <tr>
+                <td>Address</td>
+            <td>
+                    <input type="text" placeholder="address" name="address" required maxlength="200" value = "{{driver.address}}">   
+                </td>
+            </tr>
+            <tr>
+                    <td>Date Of Birth</td>
+                <td>
+                        <input type="text" placeholder="Date Of Birth" name="date_of_birth" id="date_of_birth" value = "{{driver.date_of_birth|date:'d/m/Y'}}"> 
+                    </td>
+            </tr>
+            <tr>
+              <td>Son Of</td>
+            <td>
+                  <input type="text" placeholder="Son Of" name="son_of" required maxlength="40" value = "{{driver.son_of}}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>Phone Number</td>
+            <td>
+                  <input type="text" placeholder="Phone Number" name="phone_number" value = "{{driver.phone_number}}" >  
+              </td>
+            </tr>
+            <tr>
+              <td>Aadhar Number</td>
+            <td>
+                  <input type="text" placeholder="Aadhar Number" name="aadhar_number" maxlength="22" value = "{{driver.aadhar_number}}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>DL Number</td>
+            <td>
+                  <input type="text" placeholder="DL Number" name="dl_number" required maxlength="22" value = "{{driver.dl_number}}"> 
+              </td>
+            </tr>
+            <tr>
+              <td>DL Expiry</td>
+            <td>
+                  <input type="text" placeholder="DL Expiry" name="dl_expiry" id="dl_expiry" required value = "{{driver.dl_expiry|date:'d/m/Y'}}"> 
+              </td>
+            </tr>
+                        <tr>
+                          <td></td>
+                            <td accesskey="center">  
+                                <button type="submit" class="btn btn-success btn-sm" >Save</button>
+                            </td>
+                        </tr>
+                        <tr>
+                          <td></td>
+                        </tr>
+                    </table>
+                    </form>
+                   
+      </div>
+
+<script>
+    $( function() {
+      $( "#date_of_birth" ).datepicker({dateFormat: 'dd/mm/yy'});
+      $( "#dl_expiry" ).datepicker({dateFormat: 'dd/mm/yy'});
+    } );
+  </script>      
+
+{% endblock %}

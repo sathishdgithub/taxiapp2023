@@ -48,7 +48,32 @@ urlpatterns = [
         url(r'^privacy_policy/',views.Privacy_Policy,name='Privacy_Policy'),
         url(r'^about_us/',views.About_Us,name='About_Us'),
         url(r'^vehice_registrations/',views.Vehice_Registration,name='Vehice_Registration'),
-        url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details')
+        url(r'^vehicle_register_details/',views.Vehicle_Register_Details,name='Vehicle_Register_Details'),
+        url(r'^add_vehicle/',views.Add_Vehicle,name='Add_Vehicle'),
+        url(r'^register_vehicle/',views.Register_Vehicle,name='Register_Vehicle'),
+        url(r'^delete_vehicle/',views.Delete_Vehicle,name='Delete_Vehicle'),
+        url(r'^delete_complaint/',views.Delete_Complaint,name='Delete_Complaint'),
+        url(r'^delete_rating/',views.Delete_Rating,name='Delete_Rating'),
+        url(r'^add_driver/',views.Add_Driver,name='Add_Driver'),
+        url(r'^add_vehicle_details',views.Add_Vehicle_Details,name='Add_Vehicle_Details'),
+        url(r'^add_driver_details',views.Add_Driver_Details,name='Add_Driver_Details'),
+        #remove later
+        #url(r'^SendSMS_Owner_Driver',views.SendSMS_Owner_Driver,name='SendSMS_Owner_Driver'),
+        url(r'delete_driver',views.Delete_Driver,name='Delete_Driver'),
+        url(r'disassociate_driver',views.Disassociate_Driver,name='Disassociate_Driver'),
+        url(r'^edit_driver/',views.Edit_Driver,name='Edit_Driver'),
+        url(r'associate_driver',views.Associate_Driver,name='Associate_Driver'),
+        url(r'associate_vehicletodriver',views.Associate_VehicleToDriver,name='Associate_VehicleToDriver'),
+        url(r'populate_numberplate',views.Populate_Numberplate,name='Populate_Numberplate'),
+        url(r'populate_trafficnumber',views.Populate_TrafficNumber,name='Populate_TrafficNumber'),
+        # url(r'allocationlist_driver',views.Allocationlist_Driver,name='Allocationlist_Driver'),
+        url(r'^dashboard/',views.Dashboard,name='Dashboard'),
+        url(r'^vehicle_list/',views.Vehicles_List,name='Vehicles_List'),
+        url(r'^driver_list/',views.Driver_List,name='Driver_List'),
+        url(r'^complaints_list/',views.Complaints_List,name='Complaints_List'),
+        url(r'^customer_rating_list/',views.Customer_Rating_List,name='Customer_Rating_List'),
+        url(r'^vehicle_registration_list/',views.Vehicle_Registration_List,name='Vehicle_Registration_List'), 
+        
 ]       
 
 handler404 = views.handler404
