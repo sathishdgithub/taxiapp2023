@@ -25,7 +25,12 @@
                                         <option value="Not_Allocated" {% if allocation_type == 'Not_Allocated' %}selected="selected"{% endif %}>Not Allocated</option>
                                     </select>
                             </form>
-                            </center>  
+                            </center>                             
+                            <!-- <div style="float: right; padding-bottom: 10px;"> -->
+                                <a href="javascript:exportToCSV()" style="float: right;padding-bottom: 2px;" >
+                                    <button class="btn btn-primary btn-sm">Export To Csv</button>
+                                </a>
+                            <!-- </div> -->
                         <thead>
                                 <tr>
                                     <th>Driver Id</th>
@@ -93,7 +98,13 @@
                         $('#example1').DataTable();
                     } );
                     
+                    function exportToCSV() {
+                        document.getElementById("driverList").action = '/drivers_export_To_csv/';
+                        document.getElementById("driverList").submit();
+                    }
+
                     function submitForm() {
+                        document.getElementById("driverList").action = '/driver_list/';
                         document.getElementById("driverList").submit();
                     }
                     function editDriver(driverId) {

@@ -15,7 +15,7 @@ urlpatterns = [
 	url(r'^admin_login/', views.admin_login, name = "admin_login"),
         url(r'^admin_logout/', views.admin_logout, name = "admin_logout"),
 	url(r'^taxi_xls_upload/$', views.taxi_csv_upload, name='taxi_csv_upload'),
-        #url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
+        url(r'^bulk_image_upload/$', views.bulk_image_upload, name='bulk_image_upload'),
 #	url(r'^taxi/(?P<pk>[\w\-]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^taxi/(?P<pk>[\w|\W]+)/$', views.taxi_detail, name='taxi_detail'),
         url(r'^complaint/', views.complaint_form, name='complaint_form'),
@@ -73,6 +73,9 @@ urlpatterns = [
         url(r'^complaints_list/',views.Complaints_List,name='Complaints_List'),
         url(r'^customer_rating_list/',views.Customer_Rating_List,name='Customer_Rating_List'),
         url(r'^vehicle_registration_list/',views.Vehicle_Registration_List,name='Vehicle_Registration_List'), 
+        url(r'^vehicle_export_To_csv/',views.Vehicle_Export_To_Csv,name='Vehicle_Export_To_Csv'),
+        url(r'^drivers_export_To_csv/',views.Drivers_Export_To_Csv,name='Drivers_Export_To_Csv'),
+        url(r'^upload_images/',views.Upload_Images,name='Upload_Images'),
         
 ]       
 

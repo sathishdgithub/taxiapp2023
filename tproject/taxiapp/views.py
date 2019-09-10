@@ -35,7 +35,8 @@ from . import constants
 import urllib,shutil,os,zipfile
 from datetime import date, tzinfo, datetime, timedelta
 from django.db.models import Q
- 
+import csv
+from django.utils.encoding import smart_str 
 
 
 
@@ -892,24 +893,31 @@ def taxi_csv_upload(request):
         return HttpResponseRedirect("/admin_login?next=taxi_csv_upload")
 
 
+# def bulk_image_upload(request):
+#     message = 'Please Upload the Bulk Image ZIP here'
+#     secondary_message = 'The images in the zip should be named according to their traffic numbers'
+#     if request.user.is_authenticated():
+#         if request.user.is_admin or request.user.is_staff:
+#             if request.method == "POST":
+#                 form = BulkImageUpload(request.POST, request.FILES)
+#                 if form.is_valid():
+#                     errors = handle_bulk_image_zip(request.FILES['bulk_image_zip'])
+#                     if len(errors)==0:
+#                         return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
+#                     elif errors[0] == "network_error":
+#                         return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})  
+
+#                     return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors))+' were NOT UPLOADED because of invalid filename.'})
+#             else:
+#                 form = BulkImageUpload()
+#             return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+#     else:
+#         return HttpResponseRedirect("/admin_login?next=bulk_image_upload")
+
 def bulk_image_upload(request):
-    message = 'Please Upload the Bulk Image ZIP here'
-    secondary_message = 'The images in the zip should be named according to their traffic numbers'
     if request.user.is_authenticated():
         if request.user.is_admin or request.user.is_staff:
-            if request.method == "POST":
-                form = BulkImageUpload(request.POST, request.FILES)
-                if form.is_valid():
-                    errors = handle_bulk_image_zip(request.FILES['bulk_image_zip'])
-                    if len(errors)==0:
-                        return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully\n','message2':''})
-                    elif errors[0] == "network_error":
-                        return render(request, 'taxiapp/taxi_csv_upload.html', {'form': form, 'message1':'Network error during file upload. Please try again.\n','message2':secondary_message})  
-
-                    return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':'Files Uploaded Successfully','message2':str(len(errors))+' were NOT UPLOADED because of invalid filename.'})
-            else:
-                form = BulkImageUpload()
-            return render(request, 'taxiapp/bulk_image_upload.html', {'form': form, 'message1':message, 'message2':secondary_message})
+            return render(request, 'taxiapp/bulk_image_upload.html')
     else:
         return HttpResponseRedirect("/admin_login?next=bulk_image_upload")
 
@@ -2253,3 +2261,256 @@ def Vehicle_Registration_List(request):
         'user':request.user,'message':message})
     else:
         return HttpResponseRedirect("/admin_login?next=vehicle_registration_list")
+
+def Drivers_Export_To_Csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Drivers.csv"'
+    writer = csv.writer(response, csv.excel)
+    response.write(u'\ufeff'.encode('utf8'))
+    writer.writerow([
+        smart_str(u"Traffic Number"),
+        smart_str(u"Number Plate"),
+        smart_str(u"Driver Name"),
+        smart_str(u"Address"),
+        smart_str(u"Date Of Birth"),
+        smart_str(u"Son Of"),
+        smart_str(u"Phone Number"),
+        smart_str(u"Aadhar Number"),
+        smart_str(u"DL Number"),
+        smart_str(u"DL Expiry"),
+        smart_str(u"Driver Image"),
+        smart_str(u"Driver Image Name"),
+        smart_str(u"Created By"),
+        smart_str(u"Created Time"),
+        smart_str(u"Modified By"),
+        smart_str(u"Modified Time"),
+        smart_str(u"Active Name"),
+        smart_str(u"Trafic Number"),
+        smart_str(u"Blood Group"),
+        smart_str(u"Is Image Verified"),
+        # smart_str(u"vehicle_make"),  
+    ])
+
+    allocation_type = request.POST.get('allocation_type')
+    if request.user.is_authenticated():        
+        if allocation_type == 'Not_Allocated':
+            drivers = Driver.objects.filter(vehicle__isnull=True)
+        elif allocation_type == 'Allocated':
+            drivers = Driver.objects.filter(vehicle__isnull=False)
+        else:
+            drivers = Driver.objects.all()
+
+        for driver in drivers:
+
+            writer.writerow([
+                # smart_str(driver.vehicle.traffic_number),
+                # smart_str(driver.vehicle.number_plate),
+                smart_str(''),
+                smart_str(''),
+                smart_str(driver.driver_name),
+                smart_str(driver.address),
+                smart_str(driver.date_of_birth),
+                smart_str(driver.son_of),
+                smart_str(driver.phone_number),
+                smart_str(driver.aadhar_number),
+                smart_str(driver.dl_number),
+                smart_str(driver.dl_expiry),
+                smart_str(driver.driver_image),
+                smart_str(driver.driver_image_name),
+                smart_str(driver.created_by),
+                smart_str(driver.created_time),
+                smart_str(driver.modified_by),
+                smart_str(driver.modified_time),
+                smart_str(driver.active),
+                 smart_str(driver.traffic_number),
+                smart_str(driver.blood_group),
+                smart_str(driver.is_image_verified),
+            ])
+        return response
+
+    return HttpResponseRedirect("/admin_login?next=driver_list")
+
+
+def Vehicle_Export_To_Csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Vehicles.csv"'
+    writer = csv.writer(response, csv.excel)
+    response.write(u'\ufeff'.encode('utf8'))
+    writer.writerow([
+            smart_str(u"Traffic Number"),
+            smart_str(u"Number Plate"),
+            smart_str(u"Autostand"),
+            smart_str(u"Union"),
+            smart_str(u"Insurance"),
+            smart_str(u"Capacity Of Passengers"),
+            smart_str(u"Pollution"),
+            smart_str(u"Engine Number"),
+            smart_str(u"Chasis Number"),
+            smart_str(u"Is Owner Driver"),
+            smart_str(u"Created By"),
+            smart_str(u"Created Time"),
+            smart_str(u"Modified By"),
+            smart_str(u"Modified Time"),
+            smart_str(u"Active"),
+            smart_str(u"City"),
+            smart_str(u"Owner Name"),
+            smart_str(u"Vehicle Type"),
+            smart_str(u"Num Of Complaints"),
+            smart_str(u"Vehicle Make"),
+            smart_str(u"Vehicle Model"),
+            smart_str(u"Mfg Date"),
+            smart_str(u"Insurance Provider"),
+            smart_str(u"Insurance Number"),
+    ])
+    
+    if request.user.is_authenticated():
+        city_code = None
+        city = None
+        vehicletype = request.POST.get('vehicletype')
+        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+        numberPlates = request.POST.get('numberPlates') # Number Plates
+        if request.user.is_admin:
+            city_code = request.POST.get('city_code')
+            if(city_code is not None and city_code != 'All'):
+                city = City_Code.objects.get(city_code = city_code)
+            else :
+                city_code = 'All'
+        else:
+           city = request.user.city
+           city_code = city.city_code
+        
+        if (city_code == 'All') :
+            rows = Vehicle.objects.select_related()
+        else :
+            rows = Vehicle.objects.select_related().filter(city = city)
+
+        if(vehicletype is not None and vehicletype != 'All'):
+            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            rows = rows.filter(vehicle_type=vehicle_type)
+        else :
+            vehicletype = 'All'   
+        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+            rangeFromList = rangeFrom.split('-')
+            print(rangeFromList)
+            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+            rangeLen = len(rangeFromList[2])
+            rangeFromValue = int(rangeFromList[2])
+            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+            rangeList = []            
+            for i in range(rangeDiff):
+                rangFromValuelen = len(str(rangeFromValue))
+                leadingZero = rangeLen - rangFromValuelen
+                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+                rangeFromValue =  rangeFromValue + 1
+            print(rangeList)
+            rows = rows.filter(traffic_number__in = rangeList)
+        else :
+            rangeFrom = ""
+            rangeTo = ""
+        if (taxiIds is not None and taxiIds != ''):
+            taxiIdsArray = taxiIds.split(',')
+            rows = rows.filter(traffic_number__in = taxiIdsArray)
+        else :
+            taxiIds = ""
+        if (numberPlates is not None and numberPlates != ''):
+            numberPlatesArray = numberPlates.split(',')
+            rows = rows.filter(number_plate__in = numberPlatesArray)            
+        else :
+            numberPlates = ""
+
+        for vehicle in rows:
+            # owner_name = vehicle.owner.owner_name
+            writer.writerow([
+                smart_str(vehicle.traffic_number),
+                smart_str(vehicle.number_plate),
+                smart_str(vehicle.autostand),
+                smart_str(vehicle.union),
+                smart_str(vehicle.insurance),
+                smart_str(vehicle.capacity_of_passengers),
+                smart_str(vehicle.pollution),
+                smart_str(vehicle.engine_number),
+                smart_str(vehicle.chasis_number),
+                smart_str(vehicle.is_owner_driver),
+                smart_str(vehicle.created_by),
+                smart_str(vehicle.created_time),
+                smart_str(vehicle.modified_by),
+                smart_str(vehicle.modified_time),
+                smart_str(vehicle.active),
+                smart_str(vehicle.city),
+                smart_str(vehicle.owner),
+                smart_str(vehicle.vehicle_type),
+                smart_str(vehicle.num_of_complaints),
+                smart_str(vehicle.vehicle_make),
+                smart_str(vehicle.vehicle_model),
+                smart_str(vehicle.mfg_date),
+                smart_str(vehicle.insurance_provider),
+                smart_str(vehicle.insurance_number),
+            
+            ])
+        return response
+
+    return HttpResponseRedirect("/admin_login?next=vehicle_list")
+
+def Upload_Images(request):
+    message = 'Successfully moved images. '
+    all_errors = []
+    if request.user.is_authenticated():
+        bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+        s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        bucket = s3.Bucket(bucketName)
+        for key in bucket.objects.filter(Prefix='ImagesDump'):
+            filePath = key.key
+            object_acl = s3.ObjectAcl(bucketName, filePath)
+            response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+            fileName = filePath.split('/')[1]
+            if fileName is not None and fileName != '':
+                try:                    
+                    owner = Owner.objects.get(owner_image_name = fileName)
+                    # print('owner: '+owner.owner_image_name)
+                    # dest = s3.Bucket(bucketName)
+                    source= { 'Bucket' : bucketName, 'Key': str(filePath)}
+                    destination = 'images/owners/' + fileName
+                    bucket.copy(source, destination)
+                    #Grant public Permisions
+                    object_acl = s3.ObjectAcl(bucketName, destination)
+                    response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+                    #Delete Source
+                    key.delete()
+
+                    owner.owner_image = destination
+                    owner.is_image_verified = True
+                    owner.save()
+                except Exception as e:
+                    print(e.message)
+                    try:
+                        driver = Driver.objects.get(driver_image_name = fileName) 
+                        # print('driver: '+ driver.driver_image_name)
+                        source= { 'Bucket' : bucketName, 'Key': str(filePath)}
+                        destination = 'images/drivers/' + fileName
+                        bucket.copy(source, destination)
+                        #Grant public Permisions
+                        object_acl = s3.ObjectAcl(bucketName, destination)
+                        response = object_acl.put(ACL = settings.AWS_DEFAULT_ACL)
+                        #Delete Source
+                        key.delete()
+
+                        driver.driver_image = destination
+                        driver.is_image_verified = True
+                        driver.save()
+                    except Exception as e:
+                        print(e.message)
+                        all_errors.append(fileName)
+                
+        if len(all_errors) > 0:
+            message = message + str((all_errors)) + ' Not found.'
+
+        return render(request,'taxiapp/bulk_image_upload.html',{'message':message})
+        
+    else:
+        return HttpResponseRedirect("/admin_login?next=bulk_image_upload")
+
+
+
