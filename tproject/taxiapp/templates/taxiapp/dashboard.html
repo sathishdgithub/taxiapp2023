@@ -26,6 +26,7 @@
                             </select>
 
                     </div>
+                    &nbsp;
 
                      <div class="form-group mb-2">Vehicle Type:
                       
@@ -38,8 +39,10 @@
 
 
                     </div>
+                    &nbsp;
+                    
                    
-                    <div class="form-group mb-2">
+                    <!-- <div class="form-group mb-2">
                             Range From :
                             <input style="width:80px;" class="form-control" type="text" name="rangeFrom" id="rangeFrom" value="{{rangeFrom}}" />
                     </div>
@@ -57,7 +60,7 @@
                     <div class="form-group mb-2">
                             Number Plate :
                             <input style="width:80px;" class="form-control" type="text" name="numberPlates" id="numberPlates" value="{{numberPlates}}" />
-                    </div> 
+                    </div>  -->
 
                     <input type="hidden" name ="page" id="page"/>
                     <input type="hidden" name="activeTab" id="activeTab" value="{{activeTab}}"/>
@@ -83,10 +86,11 @@
         {% endif %} -->
                 <div style="padding-bottom: 55px;">
                          <center><h3>Dashboard</h3></center>
+                         <div align="left"><h4>City : {{city_code}}</h4></div>
                          <table id="taxi-list" class="table table-striped table-bordered" width="100%" cellspacing="0">
                                  <thead>
                                      <tr>
-                                         <th>City </th>
+                                         <th>Vehicle Type </th>
                                          <th>Today </th>
                                          <th>This Week</th>
                                          <th>This Month</th>
@@ -97,21 +101,61 @@
                                  </thead>
                                  <tbody>
                      
-                                     
+                                    {% for i in dashboardList %}
                                      <tr>
-                                         <td>{{city_code}}</td>
-                                         <td>{{dashboardDict.todayVR}}</td>
-                                         <td>{{dashboardDict.thisWeekVR}}</td>
-                                         <td>{{dashboardDict.thisMonthVR}}</td>
-                                         <td>{{dashboardDict.thisYearVR}}</td>
-                                         <td>{{dashboardDict.total}}</td>
+                                         <td>{{i.vehicletype}}</td>
+                                         <td>{{i.todayVR}}</td>
+                                         <td>{{i.thisWeekVR}}</td>
+                                         <td>{{i.thisMonthVR}}</td>
+                                         <td>{{i.thisYearVR}}</td>
+                                         <td>{{i.total}}</td>
                                          
                                      </tr>
+                                     {% endfor %}
                                      
                                  </tbody>
                          </table>
                          
                          </div>
+         
+        </div>
+
+                         <div style="padding-bottom: 55px;">
+                            <center><h3>This Week Data</h3></center>
+                            <table id="taxi-list_week" class="table table-striped table-bordered" width="100%" cellspacing="0">
+                                    <thead>
+                                            <tr>
+                                                <th>Vehicle Type </th>
+                                                {% for i in dateList %}
+                                                <th>{{i}} </th>
+                                                {% endfor %}
+                                                <th>Total </th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                            
+                                                {% for i in weeklydashboardList %}
+                                            <tr>
+                                                    <td>{{i.vehicletype}}</td>
+                                                    <td>{{i.day0}}</td>
+                                                    <td>{{i.day1}}</td>
+                                                    <td>{{i.day2}}</td>
+                                                    <td>{{i.day3}}</td>
+                                                    <td>{{i.day4}}</td>
+                                                    <td>{{i.day5}}</td>
+                                                    <td>{{i.day6}}</td>
+                                                    <td>{{i.total}}</td>
+                                                
+                                            </tr>
+                                            {% endfor %}
+                                            
+                                        </tbody>  
+                                          
+                                   
+                            </table>
+                            
+                            </div>
          
         </div>
        

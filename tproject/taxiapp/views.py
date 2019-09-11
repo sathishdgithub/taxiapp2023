@@ -581,6 +581,8 @@ def getDashboardData(city):
         # To get total count of records
         # total = len ( Vehicle.objects.all())
         # dashboardDict.update(total = total)
+        total = Vehicle.objects.filter(city = city)
+        dashboardDict.update(total = total)
     else:
         # To get today registration count
          #timestamp_from = datetime.now().date() - timedelta(days=1)
@@ -604,9 +606,211 @@ def getDashboardData(city):
         thisYearVR = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
         dashboardDict.update(thisYearVR = thisYearVR)
         # To get total count of records
+        total =  Vehicle.objects.all()
+        dashboardDict.update(total = total)
+    return dashboardDict
+
+
+def getDashboardDataWeekly(city):
+    dashboardDict = {}
+    if(city is not None):
+        # To get today registration count
+        #timestamp_from = datetime.now().date() - timedelta(days=1)
+        currentDate = datetime.now().date()
+        day0 = Vehicle.objects.filter(city = city, created_time__date = currentDate ).distinct() 
+        dashboardDict.update(day0 = day0)
+       
+        timestamp_from = currentDate - timedelta(days=1)
+        day1 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day1 = day1)
+       
+        timestamp_from = currentDate - timedelta(days=2)
+        day2 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day2 = day2)
+       
+        timestamp_from = currentDate - timedelta(days=3)
+        day3 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day3 = day3)
+
+        timestamp_from = currentDate - timedelta(days=4)
+        day4 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day4 = day4)
+
+        timestamp_from = currentDate - timedelta(days=5)
+        day5 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day5 = day5)
+
+        timestamp_from = currentDate - timedelta(days=6)
+        day6 = Vehicle.objects.filter(city = city, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day6 = day6)
+        # To get total count of records
         # total = len ( Vehicle.objects.all())
         # dashboardDict.update(total = total)
+        total = Vehicle.objects.filter(city = city)
+        dashboardDict.update(total = total)
+    else:
+        currentDate = datetime.now().date()
+        day0 = Vehicle.objects.filter(created_time__date = currentDate ).distinct() 
+        dashboardDict.update(day0 = day0)
+       
+        timestamp_from = currentDate - timedelta(days=1)
+        day1 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day1 = day1)
+       
+        timestamp_from = currentDate - timedelta(days=2)
+        day2 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day2 = day2)
+       
+        timestamp_from = currentDate - timedelta(days=3)
+        day3 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day3 = day3)
+
+        timestamp_from = currentDate - timedelta(days=4)
+        day4 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day4 = day4)
+
+        timestamp_from = currentDate - timedelta(days=5)
+        day5 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day5 = day5)
+
+        timestamp_from = currentDate - timedelta(days=5)
+        day6 = Vehicle.objects.filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDict.update(day6 = day6)
+
+        total =  Vehicle.objects.all()
+        dashboardDict.update(total = total)
     return dashboardDict
+
+def getDashboardDataVehicleType(dashboardDict,vehicleType):
+   
+    dashboardDictvehicle = {}
+
+    if(vehicleType is not None):
+        
+        currentDate = datetime.now().date()
+        todayVR = dashboardDict['todayVR'].filter(vehicle_type = vehicleType, created_time__date = currentDate ).distinct()
+        dashboardDictvehicle.update(todayVR = todayVR)
+        
+        timestamp_from = currentDate - timedelta(days=7)
+        
+        thisWeekVR = dashboardDict['thisWeekVR'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(thisWeekVR = thisWeekVR)
+        
+        timestamp_from = currentDate - timedelta(days=30)
+        
+        thisMonthVR = dashboardDict['thisMonthVR'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(thisMonthVR = thisMonthVR)
+        
+        timestamp_from = currentDate - timedelta(days=365)
+        
+        thisYearVR = dashboardDict['thisYearVR'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(thisYearVR = thisYearVR)
+
+        total = dashboardDict['total'].filter(vehicle_type = vehicleType).distinct() 
+        dashboardDictvehicle.update(total = total)
+        
+    else:
+        
+        currentDate = datetime.now().date()
+        
+        todayVR = dashboardDict['todayVR'].filter(created_time__date = currentDate ).distinct() 
+        dashboardDictvehicle.update(todayVR = todayVR)
+        
+        timestamp_from = currentDate - timedelta(days=7)
+        
+        thisWeekVR = dashboardDict['thisWeekVR'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(thisWeekVR = thisWeekVR)
+        
+        timestamp_from = currentDate - timedelta(days=30)
+        
+        thisMonthVR = dashboardDict['thisMonthVR'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(thisMonthVR = thisMonthVR)
+        
+        timestamp_from = currentDate - timedelta(days=365)
+        
+        thisYearVR = dashboardDict['thisYearVR'].filter(created_time__date__gte = timestamp_from,created_time__date__lte = currentDate).distinct() 
+        dashboardDictvehicle.update(thisYearVR = thisYearVR)
+
+        total = dashboardDict['total']
+        dashboardDictvehicle.update(total = total)
+        
+        
+    return dashboardDictvehicle
+
+def getWeeklyDashboardDataVehicleType(dashboardDict,vehicleType):
+   
+    dashboardDictvehicle = {}
+
+    if(vehicleType is not None):
+        
+        currentDate = datetime.now().date()
+        day0 = dashboardDict['day0'].filter(vehicle_type = vehicleType, created_time__date = currentDate ).distinct()
+        dashboardDictvehicle.update(day0 = day0)
+        
+        timestamp_from = currentDate - timedelta(days=1)
+        day1 = dashboardDict['day1'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day1 = day1)
+        
+        timestamp_from = currentDate - timedelta(days=2)
+        day2 = dashboardDict['day2'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day2 = day2)
+
+        timestamp_from = currentDate - timedelta(days=3)
+        day3 = dashboardDict['day3'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day3 = day3)
+
+        timestamp_from = currentDate - timedelta(days=4)
+        day4 = dashboardDict['day4'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day4 = day4)
+
+        timestamp_from = currentDate - timedelta(days=5)
+        day5 = dashboardDict['day5'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day5 = day5)
+
+        timestamp_from = currentDate - timedelta(days=6)
+        day6 = dashboardDict['day6'].filter(vehicle_type = vehicleType, created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day6 = day6)
+
+        total = dashboardDict['total'].filter(vehicle_type = vehicleType).distinct() 
+        dashboardDictvehicle.update(total = total)
+        
+    else:
+        
+        currentDate = datetime.now().date()
+        day0 = dashboardDict['day0'].filter(created_time__date = currentDate ).distinct()
+        dashboardDictvehicle.update(day0 = day0)
+        
+        timestamp_from = currentDate - timedelta(days=1)
+        day1 = dashboardDict['day1'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day1 = day1)
+        
+        timestamp_from = currentDate - timedelta(days=2)
+        day2 = dashboardDict['day2'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day2 = day2)
+
+        timestamp_from = currentDate - timedelta(days=3)
+        day3 = dashboardDict['day3'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day3 = day3)
+
+        timestamp_from = currentDate - timedelta(days=4)
+        day4 = dashboardDict['day4'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day4 = day4)
+
+        timestamp_from = currentDate - timedelta(days=5)
+        day5 = dashboardDict['day5'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day5 = day5)
+
+        timestamp_from = currentDate - timedelta(days=6)
+        day6 = dashboardDict['day6'].filter(created_time__date__gte = timestamp_from,created_time__date__lt = currentDate).distinct() 
+        dashboardDictvehicle.update(day6 = day6)
+
+        total = dashboardDict['total']
+        dashboardDictvehicle.update(total = total)
+        
+        
+    return dashboardDictvehicle
+
+
 
 def get_distance(lat,lon,x,y):
     return (lat-x)**2+(lon-y)**2
@@ -1877,10 +2081,7 @@ def Dashboard(request):
         city_code = None
         city = None
         vehicletype = request.POST.get('vehicletype')
-        rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
-        rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
-        taxiIds = request.POST.get('taxiIds') # Traffic Numbers
-        numberPlates = request.POST.get('numberPlates') # Number Plates
+  
         if request.user.is_admin:
             city_code = request.POST.get('city_code')
             if(city_code is not None and city_code != 'All'):
@@ -1894,124 +2095,100 @@ def Dashboard(request):
         if (city_code == 'All') :
             rows = Vehicle.objects.select_related()
             dashboardDict = getDashboardData(None)
+            weeklyDashboardDict = getDashboardDataWeekly(None)
         else :
             rows = Vehicle.objects.select_related().filter(city = city)
             city = City_Code.objects.get(city_code = city_code)
             dashboardDict = getDashboardData(city)
-
+            weeklyDashboardDict = getDashboardDataWeekly(city)
+        
+        dashboardList = []
+        weeklydashboardList = []
 
         if(vehicletype is not None and vehicletype != 'All'):
-            vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
-            todayVR = dashboardDict['todayVR']
-            todayVR = todayVR.filter(vehicle_type=vehicle_type)
-            dashboardDict.update(todayVR= todayVR)
-
-            thisWeekVR = dashboardDict['thisWeekVR']
-            thisWeekVR = thisWeekVR.filter(vehicle_type=vehicle_type)
-            dashboardDict.update(thisWeekVR= thisWeekVR)
-
-            thisMonthVR = dashboardDict['thisMonthVR']
-            thisMonthVR = thisMonthVR.filter(vehicle_type=vehicle_type)
-            dashboardDict.update(thisMonthVR= thisMonthVR)
-
-            thisYearVR = dashboardDict['thisYearVR']
-            thisYearVR = thisYearVR.filter(vehicle_type=vehicle_type)
-            dashboardDict.update(thisYearVR= thisYearVR)
+            vcltype = Vehicle_type.objects.get(vehicle_type = vehicletype)
+            dashboardList.append(setDashboardsCounts(dashboardDict,vcltype))
+            weeklydashboardList.append(setweeklyDashboardsCounts(weeklyDashboardDict,vcltype))
 
         else :
-            vehicletype = 'All'   
-        if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
-            rangeFromList = rangeFrom.split('-')
-            print(rangeFromList)
-            commonStr = rangeFromList[0]+"-"+rangeFromList[1]
-            rangeLen = len(rangeFromList[2])
-            rangeFromValue = int(rangeFromList[2])
-            rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
-            rangeList = []            
-            for i in range(rangeDiff):
-                rangFromValuelen = len(str(rangeFromValue))
-                leadingZero = rangeLen - rangFromValuelen
-                rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
-                rangeFromValue =  rangeFromValue + 1
-            todayVR = dashboardDict['todayVR']
-            todayVR = todayVR.filter(traffic_number__in = rangeList)
-            dashboardDict.update(todayVR= todayVR)
+            vehicletype = 'All'
+            vehicleTypes = Vehicle_type.objects.all()
+           
+            for vcltype in vehicleTypes :
+                dashboardList.append(setDashboardsCounts(dashboardDict,vcltype))
+                weeklydashboardList.append(setweeklyDashboardsCounts(weeklyDashboardDict,vcltype))
+            dashboardList.append(setDashboardsCounts(dashboardDict,'All'))
+            weeklydashboardList.append(setweeklyDashboardsCounts(weeklyDashboardDict,'All'))
 
-            thisWeekVR = dashboardDict['thisWeekVR']
-            thisWeekVR = thisWeekVR.filter(traffic_number__in = rangeList)
-            dashboardDict.update(thisWeekVR= thisWeekVR)
+        currentDate = datetime.now().date()
+        dateList = [currentDate,currentDate-timedelta(days=1),currentDate-timedelta(days=2),currentDate-timedelta(days=3),currentDate-timedelta(days=4),currentDate-timedelta(days=5),currentDate-timedelta(days=6)]
 
-            thisMonthVR = dashboardDict['thisMonthVR']
-            thisMonthVR = thisMonthVR.filter(traffic_number__in = rangeList)
-            dashboardDict.update(thisMonthVR= thisMonthVR)
-
-            thisYearVR = dashboardDict['thisYearVR']
-            thisYearVR = thisYearVR.filter(traffic_number__in = rangeList)
-            dashboardDict.update(thisYearVR= thisYearVR)
-        else :
-            rangeFrom = ""
-            rangeTo = ""
-        if (taxiIds is not None and taxiIds != ''):
-            taxiIdsArray = taxiIds.split(',')
-            todayVR = dashboardDict['todayVR']
-            todayVR = todayVR.filter(traffic_number__in = taxiIdsArray)
-            dashboardDict.update(todayVR= todayVR)
-
-            thisWeekVR = dashboardDict['thisWeekVR']
-            thisWeekVR = thisWeekVR.filter(traffic_number__in = taxiIdsArray)
-            dashboardDict.update(thisWeekVR= thisWeekVR)
-
-            thisMonthVR = dashboardDict['thisMonthVR']
-            thisMonthVR = thisMonthVR.filter(traffic_number__in = taxiIdsArray)
-            dashboardDict.update(thisMonthVR= thisMonthVR)
-
-            thisYearVR = dashboardDict['thisYearVR']
-            thisYearVR = thisYearVR.filter(traffic_number__in = taxiIdsArray)
-            dashboardDict.update(thisYearVR= thisYearVR)
-        else :
-            taxiIds = ""
-        if (numberPlates is not None and numberPlates != ''):
-            numberPlatesArray = numberPlates.split(',')
-            rows = rows.filter(number_plate__in = numberPlatesArray)
-            todayVR = dashboardDict['todayVR']
-            todayVR = todayVR.filter(number_plate__in = numberPlatesArray)
-            dashboardDict.update(todayVR= todayVR)
-
-            thisWeekVR = dashboardDict['thisWeekVR']
-            thisWeekVR = thisWeekVR.filter(number_plate__in = numberPlatesArray)
-            dashboardDict.update(thisWeekVR= thisWeekVR)
-
-            thisMonthVR = dashboardDict['thisMonthVR']
-            thisMonthVR = thisMonthVR.filter(number_plate__in = numberPlatesArray)
-            dashboardDict.update(thisMonthVR= thisMonthVR)
-
-            thisYearVR = dashboardDict['thisYearVR']
-            thisYearVR = thisYearVR.filter(number_plate__in = numberPlatesArray)
-            dashboardDict.update(thisYearVR= thisYearVR)
-        else :
-            numberPlates = ""
-
-        todayVR = dashboardDict['todayVR']
-        dashboardDict.update(todayVR= len(todayVR))
-
-        thisWeekVR = dashboardDict['thisWeekVR']
-        dashboardDict.update(thisWeekVR= len(thisWeekVR))
-
-        thisMonthVR = dashboardDict['thisMonthVR']
-        dashboardDict.update(thisMonthVR= len(thisMonthVR))
-
-        thisYearVR = dashboardDict['thisYearVR']
-        dashboardDict.update(thisYearVR= len(thisYearVR))
-
-        total = len ( Vehicle.objects.all())
-        dashboardDict.update(total = total)
         return render(request,'taxiapp/dashboard.html',{
-        'cities':cities,'vehicletypes':vehicletypes,'dashboardDict':dashboardDict, 
-        'vehicletype':vehicletype,'rangeFrom':rangeFrom,'city_code':city_code,'numberPlates':numberPlates,
-        'rangeTo':rangeTo,'taxiIds':taxiIds,
-        'user':request.user})
+        'cities':cities,'vehicletypes':vehicletypes,'dashboardList':dashboardList, 
+        'vehicletype':vehicletype,'city_code':city_code,
+        'user':request.user,'weeklydashboardList':weeklydashboardList,'dateList':dateList})
+        #'weeklyDataListHeders':weeklyDataListHeders,
     else:
         return HttpResponseRedirect("/admin_login?next=dashboard")
+
+def setDashboardsCounts(dashboardDict,vcltype) :
+    vclDashboardDict = {}
+    if vcltype == 'All':
+        newDashboardDict = getDashboardDataVehicleType(dashboardDict,None)
+        vclDashboardDict.update(vehicletype = 'All')
+    else :
+        newDashboardDict = getDashboardDataVehicleType(dashboardDict,vcltype)
+        vclDashboardDict.update(vehicletype = vcltype.vehicle_type)
+
+    todayVR = newDashboardDict['todayVR']
+    vclDashboardDict.update(todayVR= len(todayVR))
+
+    thisWeekVR = newDashboardDict['thisWeekVR']
+    vclDashboardDict.update(thisWeekVR= len(thisWeekVR))
+
+    thisMonthVR = newDashboardDict['thisMonthVR']
+    vclDashboardDict.update(thisMonthVR= len(thisMonthVR))
+
+    thisYearVR = newDashboardDict['thisYearVR']
+    vclDashboardDict.update(thisYearVR= len(thisYearVR))
+
+    total = newDashboardDict['total']
+    vclDashboardDict.update(total= len(total))
+    return vclDashboardDict
+
+def setweeklyDashboardsCounts(dashboardDict,vcltype) :
+    vclDashboardDict = {}
+    if vcltype == 'All':
+        newDashboardDict = getWeeklyDashboardDataVehicleType(dashboardDict,None)
+        vclDashboardDict.update(vehicletype = 'All')
+    else :
+        newDashboardDict = getWeeklyDashboardDataVehicleType(dashboardDict,vcltype)
+        vclDashboardDict.update(vehicletype = vcltype.vehicle_type)
+
+    day0 = newDashboardDict['day0']
+    vclDashboardDict.update(day0= len(day0))
+
+    day1 = newDashboardDict['day1']
+    vclDashboardDict.update(day1= len(day1))
+    
+    day2 = newDashboardDict['day2']
+    vclDashboardDict.update(day2= len(day2))
+
+    day3 = newDashboardDict['day3']
+    vclDashboardDict.update(day3= len(day3))
+
+    day4 = newDashboardDict['day4']
+    vclDashboardDict.update(day4= len(day4))
+
+    day5 = newDashboardDict['day5']
+    vclDashboardDict.update(day5= len(day5))
+
+    day6 = newDashboardDict['day6']
+    vclDashboardDict.update(day6= len(day6))
+
+    total = newDashboardDict['total']
+    vclDashboardDict.update(total= len(total))
+    return vclDashboardDict
 
 def Vehicles_List(request):
     page = 1
@@ -2262,6 +2439,76 @@ def Vehicle_Registration_List(request):
     else:
         return HttpResponseRedirect("/admin_login?next=vehicle_registration_list")
 
+# def Drivers_Export_To_Csv(request):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="Drivers.csv"'
+#     writer = csv.writer(response, csv.excel)
+#     response.write(u'\ufeff'.encode('utf8'))
+#     writer.writerow([
+#         smart_str(u"Traffic Number"),
+#         smart_str(u"Number Plate"),
+#         smart_str(u"Driver Name"),
+#         smart_str(u"Address"),
+#         smart_str(u"Date Of Birth"),
+#         smart_str(u"Son Of"),
+#         smart_str(u"Phone Number"),
+#         smart_str(u"Aadhar Number"),
+#         smart_str(u"DL Number"),
+#         smart_str(u"DL Expiry"),
+#         smart_str(u"Driver Image"),
+#         smart_str(u"Driver Image Name"),
+#         smart_str(u"Created By"),
+#         smart_str(u"Created Time"),
+#         smart_str(u"Modified By"),
+#         smart_str(u"Modified Time"),
+#         smart_str(u"Active Name"),
+#         smart_str(u"Trafic Number"),
+#         smart_str(u"Blood Group"),
+#         smart_str(u"Is Image Verified"),
+#         # smart_str(u"vehicle_make"),  
+#     ])
+
+#     allocation_type = request.POST.get('allocation_type')
+#     if request.user.is_authenticated():        
+#         if allocation_type == 'Not_Allocated':
+#             drivers = Driver.objects.filter(vehicle__isnull=True)
+#         elif allocation_type == 'Allocated':
+#             drivers = Driver.objects.filter(vehicle__isnull=False)
+#         else:
+#             drivers = Driver.objects.all()
+
+#         for driver in drivers:
+#             if Vehicle is not None:
+#                 print(driver)
+#                 writer.writerow([
+#                     # smart_str(driver.vehicle.traffic_number),
+#                     # smart_str(driver.vehicle.number_plate),
+#                     smart_str(driver.vehicle.traffic_number),
+#                     smart_str(''),
+#                     smart_str(driver.driver_name),
+#                     smart_str(driver.address),
+#                     smart_str(driver.date_of_birth),
+#                     smart_str(driver.son_of),
+#                     smart_str(driver.phone_number),
+#                     smart_str(driver.aadhar_number),
+#                     smart_str(driver.dl_number),
+#                     smart_str(driver.dl_expiry),
+#                     smart_str(driver.driver_image),
+#                     smart_str(driver.driver_image_name),
+#                     smart_str(driver.created_by),
+#                     smart_str(driver.created_time),
+#                     smart_str(driver.modified_by),
+#                     smart_str(driver.modified_time),
+#                     smart_str(driver.active),
+#                     smart_str(driver.traffic_number),
+#                     smart_str(driver.blood_group),
+#                     smart_str(driver.is_image_verified),
+#                 ])
+#         return response
+
+#     return HttpResponseRedirect("/admin_login?next=driver_list")
+
+
 def Drivers_Export_To_Csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="Drivers.csv"'
@@ -2292,8 +2539,10 @@ def Drivers_Export_To_Csv(request):
     ])
 
     allocation_type = request.POST.get('allocation_type')
-    if request.user.is_authenticated():        
+    if request.user.is_authenticated():  
+        print(allocation_type)      
         if allocation_type == 'Not_Allocated':
+        
             drivers = Driver.objects.filter(vehicle__isnull=True)
         elif allocation_type == 'Allocated':
             drivers = Driver.objects.filter(vehicle__isnull=False)
@@ -2301,34 +2550,183 @@ def Drivers_Export_To_Csv(request):
             drivers = Driver.objects.all()
 
         for driver in drivers:
-
-            writer.writerow([
-                # smart_str(driver.vehicle.traffic_number),
-                # smart_str(driver.vehicle.number_plate),
-                smart_str(''),
-                smart_str(''),
-                smart_str(driver.driver_name),
-                smart_str(driver.address),
-                smart_str(driver.date_of_birth),
-                smart_str(driver.son_of),
-                smart_str(driver.phone_number),
-                smart_str(driver.aadhar_number),
-                smart_str(driver.dl_number),
-                smart_str(driver.dl_expiry),
-                smart_str(driver.driver_image),
-                smart_str(driver.driver_image_name),
-                smart_str(driver.created_by),
-                smart_str(driver.created_time),
-                smart_str(driver.modified_by),
-                smart_str(driver.modified_time),
-                smart_str(driver.active),
-                 smart_str(driver.traffic_number),
-                smart_str(driver.blood_group),
-                smart_str(driver.is_image_verified),
-            ])
+            vehicle=driver.vehicle
+            if vehicle is not None:
+                writer.writerow([
+                    smart_str(vehicle.traffic_number),
+                    smart_str(vehicle.number_plate),
+                    # smart_str(''),
+                    # smart_str(''),
+                    smart_str(driver.driver_name),
+                    smart_str(driver.address),
+                    smart_str(driver.date_of_birth),
+                    smart_str(driver.son_of),
+                    smart_str(driver.phone_number),
+                    smart_str(driver.aadhar_number),
+                    smart_str(driver.dl_number),
+                    smart_str(driver.dl_expiry),
+                    smart_str(driver.driver_image),
+                    smart_str(driver.driver_image_name),
+                    smart_str(driver.created_by),
+                    smart_str(driver.created_time),
+                    smart_str(driver.modified_by),
+                    smart_str(driver.modified_time),
+                    smart_str(driver.active),
+                    smart_str(driver.traffic_number),
+                    smart_str(driver.blood_group),
+                    smart_str(driver.is_image_verified),
+                ])
+            else :
+                writer.writerow([
+                    # smart_str(vehicle.traffic_number),
+                    # smart_str(vehicle.number_plate),
+                    smart_str('None'),
+                    smart_str('None'),
+                    smart_str(driver.driver_name),
+                    smart_str(driver.address),
+                    smart_str(driver.date_of_birth),
+                    smart_str(driver.son_of),
+                    smart_str(driver.phone_number),
+                    smart_str(driver.aadhar_number),
+                    smart_str(driver.dl_number),
+                    smart_str(driver.dl_expiry),
+                    smart_str(driver.driver_image),
+                    smart_str(driver.driver_image_name),
+                    smart_str(driver.created_by),
+                    smart_str(driver.created_time),
+                    smart_str(driver.modified_by),
+                    smart_str(driver.modified_time),
+                    smart_str(driver.active),
+                    smart_str(driver.traffic_number),
+                    smart_str(driver.blood_group),
+                    smart_str(driver.is_image_verified),
+                ])
         return response
 
     return HttpResponseRedirect("/admin_login?next=driver_list")
+
+
+# def Vehicle_Export_To_Csv(request):
+#     response = HttpResponse(content_type='text/csv')
+#     response['Content-Disposition'] = 'attachment; filename="Vehicles.csv"'
+#     writer = csv.writer(response, csv.excel)
+#     response.write(u'\ufeff'.encode('utf8'))
+#     writer.writerow([
+#             smart_str(u"Traffic Number"),
+#             smart_str(u"Number Plate"),
+#             smart_str(u"Autostand"),
+#             smart_str(u"Union"),
+#             smart_str(u"Insurance"),
+#             smart_str(u"Capacity Of Passengers"),
+#             smart_str(u"Pollution"),
+#             smart_str(u"Engine Number"),
+#             smart_str(u"Chasis Number"),
+#             smart_str(u"Is Owner Driver"),
+#             smart_str(u"Created By"),
+#             smart_str(u"Created Time"),
+#             smart_str(u"Modified By"),
+#             smart_str(u"Modified Time"),
+#             smart_str(u"Active"),
+#             smart_str(u"City"),
+#             smart_str(u"Owner Name"),
+#             smart_str(u"Vehicle Type"),
+#             smart_str(u"Num Of Complaints"),
+#             smart_str(u"Vehicle Make"),
+#             smart_str(u"Vehicle Model"),
+#             smart_str(u"Mfg Date"),
+#             smart_str(u"Insurance Provider"),
+#             smart_str(u"Insurance Number"),
+#     ])
+    
+#     if request.user.is_authenticated():
+#         city_code = None
+#         city = None
+#         vehicletype = request.POST.get('vehicletype')
+#         rangeFrom = request.POST.get('rangeFrom')# Last five digits of Traffic Number
+#         rangeTo = request.POST.get('rangeTo') # Last five digits of Traffic Number
+#         taxiIds = request.POST.get('taxiIds') # Traffic Numbers
+#         numberPlates = request.POST.get('numberPlates') # Number Plates
+#         if request.user.is_admin:
+#             city_code = request.POST.get('city_code')
+#             if(city_code is not None and city_code != 'All'):
+#                 city = City_Code.objects.get(city_code = city_code)
+#             else :
+#                 city_code = 'All'
+#         else:
+#            city = request.user.city
+#            city_code = city.city_code
+        
+#         if (city_code == 'All') :
+#             rows = Vehicle.objects.select_related()
+#         else :
+#             rows = Vehicle.objects.select_related().filter(city = city)
+
+#         if(vehicletype is not None and vehicletype != 'All'):
+#             vehicle_type = Vehicle_type.objects.get(vehicle_type = vehicletype)
+#             rows = rows.filter(vehicle_type=vehicle_type)
+#         else :
+#             vehicletype = 'All'   
+#         if (rangeFrom is not None and  rangeFrom != '' and rangeTo is not None and rangeTo != ''):
+#             rangeFromList = rangeFrom.split('-')
+#             print(rangeFromList)
+#             commonStr = rangeFromList[0]+"-"+rangeFromList[1]
+#             rangeLen = len(rangeFromList[2])
+#             rangeFromValue = int(rangeFromList[2])
+#             rangeDiff = ( int(rangeTo.split('-')[2]) - rangeFromValue ) + 1
+#             rangeList = []            
+#             for i in range(rangeDiff):
+#                 rangFromValuelen = len(str(rangeFromValue))
+#                 leadingZero = rangeLen - rangFromValuelen
+#                 rangeList.append(commonStr+"-"+str(rangeFromValue).zfill(leadingZero + rangFromValuelen))
+#                 rangeFromValue =  rangeFromValue + 1
+#             print(rangeList)
+#             rows = rows.filter(traffic_number__in = rangeList)
+#         else :
+#             rangeFrom = ""
+#             rangeTo = ""
+#         if (taxiIds is not None and taxiIds != ''):
+#             taxiIdsArray = taxiIds.split(',')
+#             rows = rows.filter(traffic_number__in = taxiIdsArray)
+#         else :
+#             taxiIds = ""
+#         if (numberPlates is not None and numberPlates != ''):
+#             numberPlatesArray = numberPlates.split(',')
+#             rows = rows.filter(number_plate__in = numberPlatesArray)            
+#         else :
+#             numberPlates = ""
+
+#         for vehicle in rows:
+#             # owner_name = vehicle.owner.owner_name
+#             writer.writerow([
+#                 smart_str(vehicle.traffic_number),
+#                 smart_str(vehicle.number_plate),
+#                 smart_str(vehicle.autostand),
+#                 smart_str(vehicle.union),
+#                 smart_str(vehicle.insurance),
+#                 smart_str(vehicle.capacity_of_passengers),
+#                 smart_str(vehicle.pollution),
+#                 smart_str(vehicle.engine_number),
+#                 smart_str(vehicle.chasis_number),
+#                 smart_str(vehicle.is_owner_driver),
+#                 smart_str(vehicle.created_by),
+#                 smart_str(vehicle.created_time),
+#                 smart_str(vehicle.modified_by),
+#                 smart_str(vehicle.modified_time),
+#                 smart_str(vehicle.active),
+#                 smart_str(vehicle.city),
+#                 smart_str(vehicle.owner),
+#                 smart_str(vehicle.vehicle_type),
+#                 smart_str(vehicle.num_of_complaints),
+#                 smart_str(vehicle.vehicle_make),
+#                 smart_str(vehicle.vehicle_model),
+#                 smart_str(vehicle.mfg_date),
+#                 smart_str(vehicle.insurance_provider),
+#                 smart_str(vehicle.insurance_number),
+            
+#             ])
+#         return response
+
+#     return HttpResponseRedirect("/admin_login?next=vehicle_list")
 
 
 def Vehicle_Export_To_Csv(request):
@@ -2353,14 +2751,30 @@ def Vehicle_Export_To_Csv(request):
             smart_str(u"Modified Time"),
             smart_str(u"Active"),
             smart_str(u"City"),
-            smart_str(u"Owner Name"),
             smart_str(u"Vehicle Type"),
             smart_str(u"Num Of Complaints"),
             smart_str(u"Vehicle Make"),
             smart_str(u"Vehicle Model"),
-            smart_str(u"Mfg Date"),
+            smart_str(u"MFG Date"),
             smart_str(u"Insurance Provider"),
             smart_str(u"Insurance Number"),
+            smart_str(u"Owner Name"),
+            smart_str(u"Address"),
+            smart_str(u"Date Of Birth"),
+            smart_str(u"Son Of"),
+            smart_str(u"Phone Number"),
+            smart_str(u"Aadhar Number"),
+            smart_str(u"Owner Image"),
+            smart_str(u"Owner Image Name"),
+            smart_str(u"Blood Group"),
+            smart_str(u"DL Number"),
+            smart_str(u"DL Expiry"),
+            # smart_str(u"Active Name"),
+            smart_str(u"Created By"),
+            smart_str(u"created_time"),
+            smart_str(u"Modified By"),
+            smart_str(u"Modified Time"),
+            smart_str(u"Is IMage Verified"),
     ])
     
     if request.user.is_authenticated():
@@ -2422,36 +2836,57 @@ def Vehicle_Export_To_Csv(request):
 
         for vehicle in rows:
             # owner_name = vehicle.owner.owner_name
-            writer.writerow([
-                smart_str(vehicle.traffic_number),
-                smart_str(vehicle.number_plate),
-                smart_str(vehicle.autostand),
-                smart_str(vehicle.union),
-                smart_str(vehicle.insurance),
-                smart_str(vehicle.capacity_of_passengers),
-                smart_str(vehicle.pollution),
-                smart_str(vehicle.engine_number),
-                smart_str(vehicle.chasis_number),
-                smart_str(vehicle.is_owner_driver),
-                smart_str(vehicle.created_by),
-                smart_str(vehicle.created_time),
-                smart_str(vehicle.modified_by),
-                smart_str(vehicle.modified_time),
-                smart_str(vehicle.active),
-                smart_str(vehicle.city),
-                smart_str(vehicle.owner),
-                smart_str(vehicle.vehicle_type),
-                smart_str(vehicle.num_of_complaints),
-                smart_str(vehicle.vehicle_make),
-                smart_str(vehicle.vehicle_model),
-                smart_str(vehicle.mfg_date),
-                smart_str(vehicle.insurance_provider),
-                smart_str(vehicle.insurance_number),
-            
-            ])
+            owner=vehicle.owner
+            # active=owner.active
+            if owner is not None:
+                # if active is not None:
+                    writer.writerow([
+                        smart_str(vehicle.traffic_number),
+                        smart_str(vehicle.number_plate),
+                        smart_str(vehicle.autostand),
+                        smart_str(vehicle.union),
+                        smart_str(vehicle.insurance),
+                        smart_str(vehicle.capacity_of_passengers),
+                        smart_str(vehicle.pollution),
+                        smart_str(vehicle.engine_number),
+                        smart_str(vehicle.chasis_number),
+                        smart_str(vehicle.is_owner_driver),
+                        smart_str(vehicle.created_by),
+                        smart_str(vehicle.created_time),
+                        smart_str(vehicle.modified_by),
+                        smart_str(vehicle.modified_time),
+                        smart_str(vehicle.active),
+                        smart_str(vehicle.city),
+                        smart_str(vehicle.vehicle_type),
+                        smart_str(vehicle.num_of_complaints),
+                        smart_str(vehicle.vehicle_make),
+                        smart_str(vehicle.vehicle_model),
+                        smart_str(vehicle.mfg_date),
+                        smart_str(vehicle.insurance_provider),
+                        smart_str(vehicle.insurance_number),
+                        smart_str(owner.owner_name),
+                        smart_str(owner.address),
+                        smart_str(owner.date_of_birth),
+                        smart_str(owner.son_of),
+                        smart_str(owner.phone_number),
+                        smart_str(owner.aadhar_number),
+                        smart_str(owner.owner_image),
+                        smart_str(owner.owner_image_name),
+                        smart_str(owner.blood_group),
+                        smart_str(owner.dl_number),
+                        smart_str(owner.dl_expiry),
+                        # smart_str(active.active_name),
+                        smart_str(owner.created_by),
+                        smart_str(owner.created_time),
+                        smart_str(owner.modified_by),
+                        smart_str(owner.modified_time),
+                        smart_str(owner.is_image_verified),
+
+                ])
         return response
 
     return HttpResponseRedirect("/admin_login?next=vehicle_list")
+
 
 def Upload_Images(request):
     message = 'Successfully moved images. '
