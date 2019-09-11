@@ -2122,6 +2122,25 @@ def Dashboard(request):
 
         currentDate = datetime.now().date()
         dateList = [currentDate,currentDate-timedelta(days=1),currentDate-timedelta(days=2),currentDate-timedelta(days=3),currentDate-timedelta(days=4),currentDate-timedelta(days=5),currentDate-timedelta(days=6)]
+        
+        for j in weeklydashboardList :
+            if ( j['day0'] == 0 ) :
+                j['day0'] = '-'
+            if ( j['day1'] == 0 ) :
+                j['day1'] = '-'
+            if ( j['day2'] == 0 ) :
+                j['day2'] = '-'
+            if ( j['day3'] == 0 ) :
+                j['day3'] = '-'
+            if ( j['day4'] == 0 ) :
+                j['day4'] = '-'
+            if ( j['day5'] == 0 ) :
+                j['day5'] = '-'
+            if ( j['day6'] == 0 ) :
+                j['day6'] = '-'
+            if ( j['total'] == 0 ) :
+                j['total'] = '-'
+
 
         return render(request,'taxiapp/dashboard.html',{
         'cities':cities,'vehicletypes':vehicletypes,'dashboardList':dashboardList, 
