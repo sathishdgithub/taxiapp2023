@@ -76,7 +76,8 @@ urlpatterns = [
         url(r'^vehicle_export_To_csv/',views.Vehicle_Export_To_Csv,name='Vehicle_Export_To_Csv'),
         url(r'^drivers_export_To_csv/',views.Drivers_Export_To_Csv,name='Drivers_Export_To_Csv'),
         url(r'^upload_images/',views.Upload_Images,name='Upload_Images'),
-        
+        url(r'^delete_vehicle_registration/',views.Delete_Vehicle_Registration,name='Delete_Vehicle_Registration'),
+       
 ]       
 
 handler404 = views.handler404

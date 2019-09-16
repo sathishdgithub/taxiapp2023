@@ -54,7 +54,7 @@
                                 {% if user.is_admin or user.is_staff %}
                                 <td>
                                     <a href="javascript:registerVehicle('{{row.id}}')"><button>Register</button></a>
-                                    <a href="#"><button>Delete</button></a>
+                                    <a href="javascript:deleteVehicle('{{row.id}}')"><button>Delete</button></a>
                                 </td>
                             {% endif %}
                             </tr>
@@ -77,6 +77,18 @@
             document.getElementById("vrId").value = vrId;
             document.getElementById("registerVehicle").submit();
             }
+
+            function deleteVehicle(vrId) {
+                var r = confirm("Are you sure you want to delete!");
+                if (r == true) {
+                    document.getElementById("vrId").value = vrId;
+                    document.getElementById("registerVehicle").action = '/delete_vehicle_registration/';
+                    document.getElementById("registerVehicle").submit();
+                } else {
+                    
+                }                           
+            }
+            
 
             </script>
             <form action='/register_vehicle/' method='POST' id='registerVehicle' name ='registerVehicle'>

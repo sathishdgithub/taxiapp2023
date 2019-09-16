@@ -270,9 +270,9 @@ class Owner(models.Model):
       dl_expiry = models.DateField(null=True,blank=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
-      created_time = models.DateTimeField(default=datetime.now, blank=True)
+      created_time = models.DateTimeField(blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
-      modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      modified_time = models.DateTimeField(blank=True)
       is_image_verified = models.BooleanField(default=False)
       def __str__(self):
         return self.owner_name
@@ -305,9 +305,9 @@ class Vehicle(models.Model):
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
-      created_time = models.DateTimeField(default=datetime.now, blank=True)
+      created_time = models.DateTimeField(blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
-      modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      modified_time = models.DateTimeField(blank=True)
       vehicle_make = models.CharField(max_length=20,null = True,blank= True)
       vehicle_model = models.CharField(max_length=20,null = True,blank= True)
       mfg_date = models.DateField(blank=True, null=True)
@@ -507,9 +507,9 @@ class Customer_Rating(models.Model):
     destination_area = models.CharField(max_length=200,null=True,blank=True)
     origin_area  = models.CharField(max_length=200,null=True,blank=True)
     created_by = models.CharField(max_length=50,null = True,blank= True)
-    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    created_time = models.DateTimeField(blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
-    modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_time = models.DateTimeField(blank=True)
     active = models.ForeignKey(Active,null=True)
 
     # def __str__(self):

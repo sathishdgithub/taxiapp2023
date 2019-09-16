@@ -931,6 +931,7 @@ def handle_taxi_xlsx(file_path,city, user_number):
 
     """code to insert First Sheet named - Vehicle_Owner  into Vehicle and Owner Tables"""
     rowNumber = 1
+    # vehicleQrCodeList = []
     for index,row in owner_vehicle_data.iterrows():
         rowNumber+=1
         try:                                                                          
@@ -944,13 +945,14 @@ def handle_taxi_xlsx(file_path,city, user_number):
                 owner.save()   
                 vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner, created_by = user_number, modified_by = user_number)
                 vehicle.save()
+                # vehicleQrCodeList.append(vehicle.qr_code)
                 
         except Exception as e:
             print('Owner and Vehicle save: ',e.message)
             all_errors.append(rowNumber)
             #s3_object.delete()
             #return all_errors
-
+    # downloadVehicleQrcodes(vehicleQrCodeList)
     """code to insert Second Sheet named - Driver  into Driver Table"""
     rowNumber = 1
     for index,row in driver_data.iterrows(): 
@@ -1374,9 +1376,9 @@ def customer_rating (request) :
     customerRating.phone_number = passenger_phone
     customerRating.destination_area = passenger_destination
     customerRating.origin_area = passenger_origin
-    # Who's name we have to keep as created by and modified by
-    #customerRating.created_by = passenger_phone
-    #customerRating.modified_by = passenger_phone
+    # customerRating.created_by = request.user.user_number
+    customerRating.created_by =passenger_phone
+    customerRating.modified_by = datetime.now()
 
     customerRating.save()
     return render(request,'taxiapp/rating.html',{'msg':'Thank you for your rating.'})
@@ -1754,6 +1756,8 @@ def Register_Vehicle(request):
 def Delete_Vehicle(request):
     vehicleId = request.POST.get('vehicleId')
     vehicle = Vehicle.objects.get(id = vehicleId)
+    vehicle.modified_by = request.user.user_number
+    vehicle.modified_time = datetime.now()
     active = Active.objects.get(active_name__iexact = 'Inactive')
     vehicle.active = active
     vehicle.save()
@@ -1770,6 +1774,8 @@ def Delete_Rating(request):
     ratingId = request.POST.get('ratingId')
     rating = Customer_Rating.objects.get(id = ratingId)
     rating.active = Active.objects.get(active_name__iexact = 'Inactive')
+    rating.modified_by = request.user.user_number
+    rating.modified_time = datetime.now()
     rating.save()
     return HttpResponseRedirect("/customer_rating_list?message=Successfully deleted.")
 
@@ -1784,8 +1790,12 @@ def Add_Vehicle_Details(request):
     ownerId = request.POST.get('ownerId')
     if(ownerId is not None and ownerId != '' and ownerId != 'None'):
         owner = Owner.objects.get(id=ownerId)
+        owner.modified_by = request.user.user_number
+        owner.modified_time = datetime.now()
     else :
         owner = Owner()
+        owner.created_by = request.user.user_number
+        owner.created_time = datetime.now()
     #Read Owner Details
     owner.owner_name = request.POST.get('o_owner_name')
     owner.address = request.POST.get('o_address')
@@ -1801,8 +1811,12 @@ def Add_Vehicle_Details(request):
     vehicleId = request.POST.get('vehicleId')
     if(vehicleId is not None and vehicleId != '' and vehicleId != 'None'):
         vehicle = Vehicle.objects.get(id=vehicleId)
+        vehicle.modified_by = request.user.user_number
+        vehicle.modified_time = datetime.now()
     else :
         vehicle = Vehicle()
+        vehicle.created_by = request.user.user_number
+        vehicle.created_time = datetime.now()
     #Read Vehicle Details
     vehicle.traffic_number=request.POST.get('v_traffic_number')
     vehicle.number_plate=request.POST.get('v_number_plate')
@@ -1989,6 +2003,8 @@ def Associate_VehicleToDriver(request):
     driverid=request.POST.get('driverId')
     driver=Driver.objects.get(id=driverid)
     driver.vehicle = vehicle
+    driver.modified_by=request.user.user_number
+    driver.modified_time=datetime.now()
     driver.save()
     msg = "Driver "+driver.driver_name+" is associated with the vehicle "+vehicle.number_plate+" and Traffic ID "+vehicle.traffic_number
     return HttpResponseRedirect("/driver_list?message="+msg) 
@@ -2013,17 +2029,19 @@ def Vehicle_Register_Details(request):
     active=active,registered=registered)
     v1.save()
 
-    if vehicleType=='Auto':
+    if vehicleType.upper() =='AUTO':
         receipt_number = 'AUTO-'+str(v1.id).zfill(6)
-    elif vehicleType== 'Taxi':
+    elif vehicleType.upper() == 'TAXI':
         receipt_number= 'TAXI-'+str(v1.id).zfill(6)
-    elif vehicleType == 'Driver':
+    elif vehicleType.upper() == 'DRIVER':
         receipt_number = 'DRVR-'+str(v1.id).zfill(6)
+    else:
+        receipt_number = ''
     v1.receipt_number=receipt_number
     v1.save()
     message=" Thanks for registering with SafeAutoTaxi. Your Receipt # is " + str(receipt_number)+ ". Please visit our center and pay Rs.200 to register your vehicle."
     m = send_sms(message,phone_number,'complaint')   
-    return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully.'})
+    return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully with Receipt # is '+str(receipt_number)})
    
 def Edit_Driver(request):
     driverid=request.POST.get('drivertId')
@@ -2053,9 +2071,7 @@ def Edit_Driver(request):
 
 def Populate_Numberplate(request):
     traffic_number = request.POST.get('traffic_number')
-    print(traffic_number)
     number_plate = Vehicle.objects.get(traffic_number = traffic_number).number_plate
-    print(number_plate)
     driverid=request.POST.get('driverId')
     driver=Driver.objects.get(id=driverid)
     active = Active.objects.get(active_name__iexact = 'Active')
@@ -2299,11 +2315,12 @@ def Driver_List(request):
 
     message = request.GET.get('message','')    
     if request.user.is_authenticated():
-        drivers=Driver.objects.all()
         if allocation_type == 'Not_Allocated':
-            drivers=drivers.filter(vehicle__isnull=True)
+            drivers = Driver.objects.filter(vehicle__isnull=True)
         elif allocation_type == 'Allocated':
-            drivers=drivers.filter(vehicle__isnull=False)
+            drivers = Driver.objects.filter(vehicle__isnull=False)
+        else:
+            drivers = Driver.objects.all()
 
         return render(request,'taxiapp/drivers.html',{'drivers':drivers,'message':message,'allocation_type':allocation_type})
     else:
@@ -2966,5 +2983,15 @@ def Upload_Images(request):
     else:
         return HttpResponseRedirect("/admin_login?next=bulk_image_upload")
 
+
+def Delete_Vehicle_Registration(request):
+    vrId = request.POST.get('vrId')
+    vehicle_register = Vehicle_Registration.objects.get(id = vrId)
+    vehicle_register.modified_by = request.user.user_number
+    vehicle_register.modified_time = datetime.now()
+    active = Active.objects.get(active_name__iexact = 'Inactive')
+    vehicle_register.active = active
+    vehicle_register.save()
+    return HttpResponseRedirect("/vehicle_registration_list?message=Successfully deleted.") 
 
 
