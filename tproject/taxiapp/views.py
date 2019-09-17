@@ -77,7 +77,7 @@ def home(request):
 
 
 def admin_login(request):
-    nex = request.GET.get('next', 'taxi_list')
+    nex = request.GET.get('next', 'dashboard')
     if request.user.is_authenticated():
         return HttpResponseRedirect("/"+nex)
     if request.method == 'POST':
@@ -1965,7 +1965,7 @@ def SendSMS_Owner_Driver():
             print(e.message)
             
 def Delete_Driver(request):
-    driverId = request.POST.get('drivertId')
+    driverId = request.POST.get('driverId')
     print('driverId',driverId)
     driver = Driver.objects.get(id = driverId)
     active = Active.objects.get(active_name__iexact = 'Inactive')
@@ -1976,7 +1976,7 @@ def Delete_Driver(request):
     return HttpResponseRedirect("/driver_list?message=Successfully deleted.") 
 
 def Disassociate_Driver(request):
-    driverId = request.POST.get('drivertId')
+    driverId = request.POST.get('driverId')
     print('driverId',driverId)
     driver = Driver.objects.get(id = driverId)
     #active = Active.objects.get(active_name__iexact = 'Inactive')
@@ -1991,7 +1991,7 @@ def Disassociate_Driver(request):
     
 
 def Associate_Driver(request): 
-    driverid=request.POST.get('drivertId')
+    driverid=request.POST.get('driverId')
     driver=Driver.objects.get(id=driverid)
     active = Active.objects.get(active_name__iexact = 'Active')
     vehicles = Vehicle.objects.filter(active = active )
@@ -2231,8 +2231,13 @@ def Vehicles_List(request):
         page = request.GET.get('page', 1)
     else:
         page = request.POST.get('page', 1)
-    message = request.GET.get('message','')    
-    cities = City_Code.objects.all()
+    message = request.GET.get('message','')  
+    cities = []
+    if request.user.is_admin or request.user.is_staff:
+        cities = City_Code.objects.all()
+    else:
+        cities.append(request.user.city)
+
     vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
     
     if request.user.is_authenticated():
@@ -2335,7 +2340,12 @@ def Complaints_List(request):
         resolved_type = request.POST.get('resolved_type', 'UnResolved')
     
     message = request.GET.get('message','')    
-    
+    cities = []
+    if request.user.is_admin or request.user.is_staff:
+        cities = City_Code.objects.all()
+    else:
+        cities.append(request.user.city)
+    vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
     if request.user.is_authenticated():
         city_code = None
         city = None
@@ -2395,13 +2405,19 @@ def Complaints_List(request):
         elif resolved_type == 'Resolved':
             rows_c=rows_c.filter(resolved=True)
         
-        return render(request,'taxiapp/complaints.html',{'rows_c':rows_c,
+        return render(request,'taxiapp/complaints.html',{'rows_c':rows_c,'cities':cities,'vehicletypes':vehicletypes,
         'vehicletype':vehicletype,'rangeFrom':rangeFrom,'numberPlates':numberPlates,'resolved_type':resolved_type,
         'user':request.user,'message':message})
     else:
         return HttpResponseRedirect("/admin_login?next=complaints_list")
 
 def Customer_Rating_List(request):
+    cities = []
+    if request.user.is_admin or request.user.is_staff:
+        cities = City_Code.objects.all()
+    else:
+        cities.append(request.user.city)
+    vehicletypes = Vehicle_type.objects.order_by('vehicle_type').values_list('vehicle_type',flat=True).distinct()
     message = request.GET.get('message','')    
     if request.user.is_authenticated():
         city_code = None
@@ -2458,9 +2474,9 @@ def Customer_Rating_List(request):
             ratings=ratings.filter(vehicle__number_plate__in = numberPlatesArray)
         else :
             numberPlates = ""
-        return render(request,'taxiapp/customer_rating_list.html',{'ratings':ratings,
+        return render(request,'taxiapp/customer_rating_list.html',{'ratings':ratings,'cities':cities,
         'vehicletype':vehicletype,'rangeFrom':rangeFrom,'numberPlates':numberPlates,
-        'rangeTo':rangeTo,'taxiIds':taxiIds,
+        'rangeTo':rangeTo,'taxiIds':taxiIds,'vehicletypes':vehicletypes,
         'user':request.user,'message':message})
     else:
         return HttpResponseRedirect("/admin_login?next=customer_rating_list")
@@ -2994,4 +3010,44 @@ def Delete_Vehicle_Registration(request):
     vehicle_register.save()
     return HttpResponseRedirect("/vehicle_registration_list?message=Successfully deleted.") 
 
+
+def Driver_Detail(request, pk):
+    if ' ' in pk:
+        pk = pk.replace(' ','')
+    driver = Driver()
+    try:
+        driver=Driver.objects.get(id=pk)
+        if (driver is not None):
+            bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+            s3 = boto3.resource('s3', aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+            bucket = s3.Bucket(bucketName)   
+            try:                                
+                fileName = str(driver.driver_image)
+                objs = list(bucket.objects.filter(Prefix=fileName))
+                if(len(objs) == 0):
+                    driver.driver_image = 'images/profile.png'
+            except Exception as e:
+                driver.driver_image = 'images/profile.png'
+                #print(e)
+            # We have setted images/profile.png to avoid erros where qr coeds are not there.
+            # Need to modify.
+            try:                                
+                fileName = str(driver.qr_code)
+                if(fileName is not None and fileName != ''):
+                    objs = list(bucket.objects.filter(Prefix=fileName))
+                    if(len(objs) == 0):
+                        driver.qr_code = 'images/profile.png'
+                else:
+                    driver.qr_code = 'images/profile.png'    
+            except Exception as e:
+                driver.qr_code = 'images/profile.png'
+
+    except Exception as e:    
+        print(e)   
+    if(driver.id is not None) :
+        print('driver',driver)
+        return render(request, 'taxiapp/driver_details.html', {'driver':driver}) 
+    else:
+        return render(request, 'taxiapp/driver_details_fail.html', {'message':"No driver found with the given Driver Id."})
 

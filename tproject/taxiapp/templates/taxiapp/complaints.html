@@ -20,7 +20,9 @@
                     <div class="form-group mb-2">City:
                       
                             <select class="form-control" name="city_code" id="city_code">
-                                    <option value="All">All</option>
+                                    {% if user.is_admin or user.is_staff %}
+                                        <option value="All">All</option>
+                                    {% endif %}
                                     {% for city in cities %}
                                     <option value="{{city.city_code}}" {% if city.city_code == city_code %}selected="selected"{% endif %}>{{ city.city }}</option>
                                     {% endfor %}
@@ -133,7 +135,11 @@
                                         {% endif %}
                                         <td>{{row.phone_number}}</td>
                                         {% if row.resolved == False %}
-                                        <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}"><button>Resolve</button></a></td>
+                                            {% if user.is_admin or user.is_staff %}                                        
+                                                <td><a href="{% url 'taxiapp:complaint_view' pk=row.complaint_number %}"><button>Resolve</button></a></td>
+                                            {%else%}
+                                                <td>{{'Not Resolved'}}</td>
+                                            {% endif %} 
                                         {% else %}
                                         <td>{{'Resolved'}}</td>
                                         {% endif %} 

@@ -393,8 +393,8 @@ class Driver(models.Model):
                                       format='JPEG',
                                       options={'quality': 60})
       driver_image_name = models.CharField(max_length = 100, null=True, blank = True)
-      #qr_code = models.ImageField(upload_to='qr_codes/drivers', blank=True, null=True)
-      qr_code = models.ImageField(blank=True, null=True)
+      qr_code = models.ImageField(upload_to='qr_codes/drivers', blank=True, null=True)
+    #   qr_code = models.ImageField(blank=True, null=True)
       blood_group = models.CharField(max_length=3,null=True,blank=True)
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
@@ -407,33 +407,33 @@ class Driver(models.Model):
       def __str__(self):
         return self.driver_name
 
-    #   def generate_qrcode(self):
-    #     qr = qrcode.QRCode(
-    #         version=1,
-    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
-    #         box_size=6,
-    #         border=0,
-    #     )
-    #     weburl = "https://taxiapp.safeautotaxi.com/taxi"
-    #     qr.add_data("%s/%s" % (weburl, str(self.id)))
-    #     qr.make(fit=True)
+      def generate_qrcode(self):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=6,
+            border=0,
+        )
+        weburl = "https://taxiapp.safeautotaxi.com/driver"
+        qr.add_data("%s/%s" % (weburl, str(self.id)))
+        qr.make(fit=True)
 
-    #     img = qr.make_image()
+        img = qr.make_image()
         
-    #     buffer = StringIO.StringIO()
-    #     img.save(buffer)
-    #     file_name = secure_filename('%s.png' % self.id)
-    #     file_buffer = InMemoryUploadedFile(
-    #         buffer, None, file_name, 'image/png', buffer.len, None)
-    #     self.qr_code.save(file_name, file_buffer)
+        buffer = StringIO.StringIO()
+        img.save(buffer)
+        file_name = secure_filename('%s.png' % self.id)
+        file_buffer = InMemoryUploadedFile(
+            buffer, None, file_name, 'image/png', buffer.len, None)
+        self.qr_code.save(file_name, file_buffer)
 
-    #   def save(self, *args, **kwargs):
-    #     add = not self.pk
-    #     super(Driver, self).save(*args, **kwargs)
-    #     if add:
-	# 		self.generate_qrcode()
-	# 		kwargs['force_insert'] = False # create() uses this, which causes error.
- 	# 	        super(Driver, self).save(*args, **kwargs)
+      def save(self, *args, **kwargs):
+        add = not self.pk
+        super(Driver, self).save(*args, **kwargs)
+        if add:
+			self.generate_qrcode()
+			kwargs['force_insert'] = False # create() uses this, which causes error.
+ 		        super(Driver, self).save(*args, **kwargs)
 
       class Meta:
             verbose_name = 'Driver'

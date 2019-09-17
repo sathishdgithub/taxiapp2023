@@ -21,7 +21,9 @@
                     <div class="form-group mb-2">City:
                       
                             <select class="form-control" name="city_code" id="city_code">
-                                    <option value="All">All</option>
+                                    {% if user.is_admin or user.is_staff %}
+                                        <option value="All">All</option>
+                                    {% endif %}
                                     {% for city in cities %}
                                     <option value="{{city.city_code}}" {% if city.city_code == city_code %}selected="selected"{% endif %}>{{ city.city }}</option>
                                     {% endfor %}
