@@ -270,9 +270,9 @@ class Owner(models.Model):
       dl_expiry = models.DateField(null=True,blank=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
-      created_time = models.DateTimeField(default=datetime.now, blank=True)
+      created_time = models.DateTimeField(blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
-      modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      modified_time = models.DateTimeField(blank=True)
       is_image_verified = models.BooleanField(default=False)
       def __str__(self):
         return self.owner_name
@@ -305,9 +305,9 @@ class Vehicle(models.Model):
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
       created_by = models.CharField(max_length=50,null = True,blank= True)
-      created_time = models.DateTimeField(default=datetime.now, blank=True)
+      created_time = models.DateTimeField(blank=True)
       modified_by = models.CharField(max_length=50,null = True,blank= True)
-      modified_time = models.DateTimeField(default=datetime.now, blank=True)
+      modified_time = models.DateTimeField(blank=True)
       vehicle_make = models.CharField(max_length=20,null = True,blank= True)
       vehicle_model = models.CharField(max_length=20,null = True,blank= True)
       mfg_date = models.DateField(blank=True, null=True)
@@ -393,8 +393,8 @@ class Driver(models.Model):
                                       format='JPEG',
                                       options={'quality': 60})
       driver_image_name = models.CharField(max_length = 100, null=True, blank = True)
-      #qr_code = models.ImageField(upload_to='qr_codes/drivers', blank=True, null=True)
-      qr_code = models.ImageField(blank=True, null=True)
+      qr_code = models.ImageField(upload_to='qr_codes/drivers', blank=True, null=True)
+    #   qr_code = models.ImageField(blank=True, null=True)
       blood_group = models.CharField(max_length=3,null=True,blank=True)
       #active_id_fk = models.ForeignKey(Active,null=True)
       active = models.ForeignKey(Active,null=True)
@@ -407,33 +407,33 @@ class Driver(models.Model):
       def __str__(self):
         return self.driver_name
 
-    #   def generate_qrcode(self):
-    #     qr = qrcode.QRCode(
-    #         version=1,
-    #         error_correction=qrcode.constants.ERROR_CORRECT_L,
-    #         box_size=6,
-    #         border=0,
-    #     )
-    #     weburl = "https://taxiapp.safeautotaxi.com/taxi"
-    #     qr.add_data("%s/%s" % (weburl, str(self.id)))
-    #     qr.make(fit=True)
+      def generate_qrcode(self):
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=6,
+            border=0,
+        )
+        weburl = "https://taxiapp.safeautotaxi.com/driver"
+        qr.add_data("%s/%s" % (weburl, str(self.id)))
+        qr.make(fit=True)
 
-    #     img = qr.make_image()
+        img = qr.make_image()
         
-    #     buffer = StringIO.StringIO()
-    #     img.save(buffer)
-    #     file_name = secure_filename('%s.png' % self.id)
-    #     file_buffer = InMemoryUploadedFile(
-    #         buffer, None, file_name, 'image/png', buffer.len, None)
-    #     self.qr_code.save(file_name, file_buffer)
+        buffer = StringIO.StringIO()
+        img.save(buffer)
+        file_name = secure_filename('%s.png' % self.id)
+        file_buffer = InMemoryUploadedFile(
+            buffer, None, file_name, 'image/png', buffer.len, None)
+        self.qr_code.save(file_name, file_buffer)
 
-    #   def save(self, *args, **kwargs):
-    #     add = not self.pk
-    #     super(Driver, self).save(*args, **kwargs)
-    #     if add:
-	# 		self.generate_qrcode()
-	# 		kwargs['force_insert'] = False # create() uses this, which causes error.
- 	# 	        super(Driver, self).save(*args, **kwargs)
+      def save(self, *args, **kwargs):
+        add = not self.pk
+        super(Driver, self).save(*args, **kwargs)
+        if add:
+			self.generate_qrcode()
+			kwargs['force_insert'] = False # create() uses this, which causes error.
+ 		        super(Driver, self).save(*args, **kwargs)
 
       class Meta:
             verbose_name = 'Driver'
@@ -507,9 +507,9 @@ class Customer_Rating(models.Model):
     destination_area = models.CharField(max_length=200,null=True,blank=True)
     origin_area  = models.CharField(max_length=200,null=True,blank=True)
     created_by = models.CharField(max_length=50,null = True,blank= True)
-    created_time = models.DateTimeField(default=datetime.now, blank=True)
+    created_time = models.DateTimeField(blank=True)
     modified_by = models.CharField(max_length=50,null = True,blank= True)
-    modified_time = models.DateTimeField(default=datetime.now, blank=True)
+    modified_time = models.DateTimeField(blank=True)
     active = models.ForeignKey(Active,null=True)
 
     # def __str__(self):

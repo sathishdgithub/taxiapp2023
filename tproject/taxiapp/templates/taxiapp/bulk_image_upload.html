@@ -1,18 +1,38 @@
 {% extends "taxiapp/base.html" %}
 {% block main %}
-{{message1}}<br>
-</p>
-<p>
-{{message2}}<br>
-</p>
 
-{% load bootstrap3 %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.13/css/dataTables.bootstrap.min.css"/>
 
-<form enctype="multipart/form-data" action="{% url 'taxiapp:bulk_image_upload' %}" method="post">
-	{% csrf_token %}
-        
-	       {% bootstrap_form form %}
+<title>Taxi App</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-<button class="btn btn-primary" type="submit">Upload ZIP</button>
-</form>
+</head>
+
+<body>
+	<h4 style="text-align: center; color: green;">{{message}}</h4>
+    <div class="container">
+        <div class="row">
+            <form class="form-inline" name="bulkimages" id="bulkimages" action='/upload_images/' method='POST'>
+                {% csrf_token %}
+				{% if message %}
+					<button type="button" class="btn btn-primary btn-sm" onclick="goToHome()" style="margin:0.5em;">Home</button>
+				{% else %}
+					<button type="submit" class="btn btn-primary mb-2">Upload Images</button>
+				{% endif %}
+
+            </form>
+      </div>
+	</div>
+	
+</body>
+<script type="text/javascript">
+function goToHome() {
+	location.href = '/';
+}
+</script>
 {% endblock %}
+

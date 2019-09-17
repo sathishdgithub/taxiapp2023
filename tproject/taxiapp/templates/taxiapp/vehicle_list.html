@@ -21,7 +21,9 @@
                     <div class="form-group mb-2">City:
                       
                             <select class="form-control" name="city_code" id="city_code">
-                                    <option value="All">All</option>
+                                    {% if user.is_admin or user.is_staff %}
+                                        <option value="All">All</option>
+                                    {% endif %}
                                     {% for city in cities %}
                                     <option value="{{city.city_code}}" {% if city.city_code == city_code %}selected="selected"{% endif %}>{{ city.city }}</option>
                                     {% endfor %}
@@ -63,7 +65,7 @@
 
                     <input type="hidden" name ="page" id="page"/>
                     <!-- <input type="hidden" name="activeTab" id="activeTab" value="{{activeTab}}"/> -->
-                    <button type="submit" class="btn btn-primary mb-2">Search</button>
+                    <button type="button" onclick="submitForm()" class="btn btn-primary mb-2">Search</button>
 
             </form>
       </div>
@@ -131,6 +133,9 @@
                         <!-- <a href="/download_vehicle/" >
                             <button class="btn btn-primary btn-sm">Download</button>
                         </a> -->
+                        <a href="javascript:exportToCSV()" >
+                            <button class="btn btn-primary btn-sm">Export To Csv</button>
+                        </a>
                         <a href="/add_vehicle" >
                             <button class="btn btn-primary btn-sm">Add Vehicle</button>
                         </a>
@@ -236,12 +241,21 @@
                         // $(document).ready(function() {
                         //     $('#taxi-list').DataTable();
                         // } );
+                        function submitForm() {
+                            document.getElementById("vehicleList").action = '/vehicle_list/';
+                            document.getElementById("vehicleList").submit();
+                            
+                        }
                         function getPaginationData(page) {
                             document.getElementById("page").value = page;
                             // document.getElementById("activeTab").value = 'vehicles';
                             document.getElementById("vehicleList").submit();
                         }
 
+                        function exportToCSV() {
+                            document.getElementById("vehicleList").action = '/vehicle_export_To_csv/';
+                            document.getElementById("vehicleList").submit();
+                        }
                         function addVehicle(vehicleId) {
                             document.getElementById("vehicleId").value = vehicleId;
                             document.getElementById("addVehicle").submit();

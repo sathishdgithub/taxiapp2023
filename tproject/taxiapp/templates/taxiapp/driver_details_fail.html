@@ -1,0 +1,10 @@
+{% extends "taxiapp/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block main %}
+
+<center><h3>{{message}}</h3></center>
+
+<center><a href="{% url 'taxiapp:home' %}"><button type="button" class="btn btn-primary">Home</button></a></center>
+{% endblock %}
