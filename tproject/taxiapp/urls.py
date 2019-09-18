@@ -78,6 +78,7 @@ urlpatterns = [
         url(r'^upload_images/',views.Upload_Images,name='Upload_Images'),
         url(r'^delete_vehicle_registration/',views.Delete_Vehicle_Registration,name='Delete_Vehicle_Registration'),
         url(r'^driver/(?P<pk>[\w|\W]+)/$', views.Driver_Detail, name='Driver_Detail'),
+        url(r'^generate_driver_qrcodes/',views.Generate_Driver_Qrcodes,name='Generate_Driver_Qrcodes'),
 ]       
 
 handler404 = views.handler404

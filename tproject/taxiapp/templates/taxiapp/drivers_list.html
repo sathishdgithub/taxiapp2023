@@ -132,8 +132,10 @@ img{
     right: 0px; 
 }
 
-
-
+p {
+    margin-left: -4px;
+}
+p {display:inline}
 </style>
 {% load static %}
 
@@ -174,29 +176,20 @@ img{
         </table>
 
         </div>
-
-
-    <div class="row">
-        <h1 class="text-center login-title">Search Vehicle</h1>
         <div class="text-center">
-
-        <form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
+        <form style='margin-left: -15px;padding-top: 20px;' method="POST" class="post-form">{% csrf_token %}
+        Search Vehicle:{{ form.as_p }}
         <button type="submit" class="btn btn-primary btn-sm">Submit</button>
         </form>
 
         </div>
-    </div><br>
-    <!-- <div class="row"> -->
-    <!-- <h1 class="text-center login-title">Search Driver</h1> -->
+        <br>
     <div class="text-center">
     <form method="POST"  action="/driver/" id='taxi'>{% csrf_token %}
-        Search Driver:<input type="text" placeholder="" name="driverId" id='driverId' required>
+        Search Driver:<input type="text" placeholder="" name="driverId" id='driverId' required style="margin-left: 0px;">
     <button type="button" class="btn btn-primary btn-sm" onclick="submitForm()">Submit</button>
     </form>
-
     </div>
-    <!-- </div> -->
 
     <br>
     <div class="text-center login-title">
@@ -206,8 +199,6 @@ img{
         </div> 
 
 </div>
-
-
 
 <canvas id="qr-canvas" width="800" height="600"></canvas>
 <script type="text/javascript">
