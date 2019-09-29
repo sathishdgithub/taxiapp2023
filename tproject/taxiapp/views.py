@@ -31,6 +31,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import boto3
 from botocore.exceptions import NoCredentialsError
 from io import StringIO
+import StringIO
 from . import constants
 import urllib,shutil,os,zipfile
 from datetime import date, tzinfo, datetime, timedelta
@@ -3051,3 +3052,31 @@ def Driver_Detail(request, pk):
     else:
         return render(request, 'taxiapp/driver_details_fail.html', {'message':"No driver found with the given Driver Id."})
 
+def Generate_Driver_Qrcodes(request):
+    if request.user.is_authenticated():
+        drivers=Driver.objects.filter(qr_code ='')
+        for driver in drivers:
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=6,
+                border=0,
+            )
+            weburl = "https://taxiapp.safeautotaxi.com/driver"
+            qr.add_data("%s/%s" % (weburl, str(driver.id)))
+            qr.make(fit=True)
+            img = qr.make_image()
+            buffer = StringIO.StringIO()
+            img.save(buffer)
+            file_name = secure_filename('%s.png' % driver.id)
+            file_buffer = InMemoryUploadedFile(
+                buffer, None, file_name, 'image/png', buffer.len, None)
+            driver.qr_code.save(file_name, file_buffer)
+
+            driver.modified_by=request.user.user_number
+            driver.modified_time=datetime.now()
+
+            driver.save()
+        return render(request,'taxiapp/migration.html')
+    else:
+        return HttpResponseRedirect("/admin_login")
