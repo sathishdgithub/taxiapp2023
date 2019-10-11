@@ -193,6 +193,7 @@
                                             <td>
                                                 <a href="javascript:addVehicle('{{row.id}}')"><button>Edit</button></a> &nbsp;
                                                 <a href="javascript:deleteVehicle('{{row.id}}')"><button>Delete</button></a>
+                                                <!-- <a href="javascript:download_qrcode('{{row.id}}')"><button>Download Qrcode</button></a> -->
                                             </td>
                                         {% endif %}
                                     </tr>
@@ -269,6 +270,13 @@
                             } else {
                                 
                             }                           
+                        }
+                        
+                        function download_qrcode(vehicleId) {
+                            document.getElementById("vehicleId").value = vehicleId;
+                            document.getElementById("addVehicle").action = '/download_vehicle_qrcode/';
+                            document.getElementById("addVehicle").submit();
+                            
                         }
                         </script>
 
