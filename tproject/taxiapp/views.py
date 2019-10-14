@@ -270,7 +270,7 @@ def complaint_success(request,pk):
         phone_number = police.sms_number
         whatsapp_number = police.whatsapp_number
         complaint.assigned_to = police
-        complaint.created_time = datetime.now().date()
+        complaint.created_time = datetime.now()
         complaint.save()
         #taxi = Taxi_Detail.objects.get(id=complaint.taxi.id)
         vehicleObj = Vehicle.objects.get(id=complaint.vehicle.id)
@@ -296,15 +296,18 @@ def complaint_resolve(request):
         complaintStatement = Complaint_Statement.objects.get(id=complaintId)
         complaintStatement.message = message
         complaintStatement.resolved = True
-        complaintStatement.resolved_time = datetime.now().date()
+        complaintStatement.resolved_time = datetime.now()
         complaintStatement.save()
         
         resolved_date = complaintStatement.resolved_time
         resolved_date.strftime('%m-%d-%y %H:%M:%S')
+        reason = ""
+        if(complaintStatement.reason != None):
+            reason = str(complaintStatement.reason.reason)
         
         print(resolved_date)
-        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+str(complaintStatement.reason.reason)+'\nResolution: '+str(message)
-
+        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+reason+'\nResolution: '+str(message)
+        
         print(smsMessage)
         print(complaintStatement.phone_number)
         m = send_sms(smsMessage,str(complaintStatement.phone_number),'complaint')
@@ -861,6 +864,9 @@ def taxi_emergency(request):
             cs.resolved = False
             cs.is_emergency_text = True 
             cs.complaint_number = city.city_code+'-CN-'+str(city.complaint_no+1).zfill(7)
+            cs.reason = Reasons.objects.get(reason__iexact = 'Emergency text')
+            cs.created_by = p_phone
+            cs.created_time = datetime.now()
             cs.save()
 
             city.complaint_no = city.complaint_no+1
@@ -1378,8 +1384,9 @@ def customer_rating (request) :
     customerRating.destination_area = passenger_destination
     customerRating.origin_area = passenger_origin
     # customerRating.created_by = request.user.user_number
+    customerRating.active = Active.objects.get(active_name__iexact = 'active')
     customerRating.created_by =passenger_phone
-    customerRating.modified_by = datetime.now()
+    customerRating.created_time = datetime.now()
 
     customerRating.save()
     return render(request,'taxiapp/rating.html',{'msg':'Thank you for your rating.'})
@@ -3080,3 +3087,39 @@ def Generate_Driver_Qrcodes(request):
         return render(request,'taxiapp/migration.html')
     else:
         return HttpResponseRedirect("/admin_login")
+
+def Download_Vehicle_QRcode(request):
+    vehicleId = request.POST.get('vehicleId')
+    vehicle = Vehicle.objects.get(id = vehicleId)
+    if (vehicle.qr_code is not None and vehicle.qr_code !=''):
+        try:
+            bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+            qrCode= str(vehicle.qr_code)
+            qrCodeName=qrCode.split('/')[2]
+            file_Name = "https://"+bucketName+".s3.amazonaws.com/"+qrCode
+            r = requests.get(file_Name)
+            response= HttpResponse(r.content, content_type='image/png')
+            response['Content-Disposition'] = 'attachment; filename="%s"'% qrCodeName
+            return response
+        except IOError as e:
+            print(e)
+            return HttpResponseRedirect("/vehicle_list")            
+    return HttpResponseRedirect("/vehicle_list")
+
+def Download_Driver_Qrcode(request):
+    driverid=request.POST.get('driverId')
+    driver=Driver.objects.get(id=driverid)
+    if (driver.qr_code is not None and driver.qr_code !=''):
+        try:
+            bucketName = constants.BULK_UPLOAD_S3_BUCKETNAME
+            qrCode= str(driver.qr_code)
+            qrCodeName=qrCode.split('/')[2]
+            file_Name = "https://"+bucketName+".s3.amazonaws.com/"+qrCode
+            r = requests.get(file_Name)
+            response= HttpResponse(r.content, content_type='image/png')
+            response['Content-Disposition'] = 'attachment; filename="%s"'% qrCodeName
+            return response
+        except IOError as e:
+            print(e)
+            return HttpResponseRedirect("/driver_list")            
+    return HttpResponseRedirect("/driver_list")
