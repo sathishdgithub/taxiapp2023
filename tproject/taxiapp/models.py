@@ -22,6 +22,7 @@ class City_Code(models.Model):
       sms = models.BooleanField(default=True)
       distress = models.BooleanField(default=False)
       distress_contact = models.CharField(max_length=13,null=True,blank=True)
+      messaging_number = models.CharField(max_length=13,null=True,blank=True)
       taxi_no = models.BigIntegerField(default=0)
       police_no = models.BigIntegerField(default=0)
       complaint_no = models.BigIntegerField(default=0)
