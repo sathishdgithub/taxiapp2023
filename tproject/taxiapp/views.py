@@ -878,6 +878,9 @@ def taxi_emergency(request):
             if vehicle.city.sms:
                 m = send_sms(message,phone_number,'emergency')
                 n = send_sms(message1,p_phone,'emergency')
+                # Added new column messaging_number in City_Code and send message. 
+                if(city.messaging_number is not None and city.messaging_number != ''):
+                    l = send_sms(message,city.messaging_number,'emergency')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})

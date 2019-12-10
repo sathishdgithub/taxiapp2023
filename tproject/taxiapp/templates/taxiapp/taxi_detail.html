@@ -149,7 +149,7 @@ word-wrap:break-word;
                 <div class="profile-userbuttons center-block">
                     <button type="button" onclick="sendSOS()" class="btn btn-danger btn-sm" style="margin:0.5em;">Emergency text</button>
                     {% if vehicle.city.distress %}
-                    <a class="btn btn-warning btn-xlg" href="tel:+91-{{ vehicle.city.distress_contact }}" style="margin:0.5em;">
+                    <a class="btn btn-warning btn-xlg" href="tel:{{ vehicle.city.distress_contact }}" style="margin:0.5em;">
                         <span class="glyphicon glyphicon-earphone" style="padding-right:10px;"></span>Emergency Call
                     </a>
                     {% endif %}
