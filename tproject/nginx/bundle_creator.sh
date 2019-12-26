@@ -1,2 +1,3 @@
-mv private.key valv_private.key
-awk '{print}' certificate.crt ca_bundle.crt > valv_bundle.crt
+#!/usr/bin/env bash
+mv ./ssl/private.key ./ssl/valv_private.key
+awk '{print}' ./ssl/certificate.crt ./ssl/ca_bundle.crt > ./ssl/valv_bundle.crt
