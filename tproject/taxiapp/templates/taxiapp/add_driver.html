@@ -101,7 +101,7 @@ table, th, td {
           <tr>
                 <td>Address</td>
             <td>
-                    <input type="text" placeholder="address" name="address" required maxlength="200" value = "{{driver.address}}">   
+                    <input type="text" placeholder="address" name="address" maxlength="200" value = "{{driver.address}}">   
                 </td>
             </tr>
             <tr>
@@ -113,7 +113,7 @@ table, th, td {
             <tr>
               <td>Son Of</td>
             <td>
-                  <input type="text" placeholder="Son Of" name="son_of" required maxlength="40" value = "{{driver.son_of}}"> 
+                  <input type="text" placeholder="Son Of" name="son_of" maxlength="40" value = "{{driver.son_of}}"> 
               </td>
             </tr>
             <tr>
@@ -131,13 +131,13 @@ table, th, td {
             <tr>
               <td>DL Number</td>
             <td>
-                  <input type="text" placeholder="DL Number" name="dl_number" required maxlength="22" value = "{{driver.dl_number}}"> 
+                  <input type="text" placeholder="DL Number" name="dl_number" maxlength="22" value = "{{driver.dl_number}}"> 
               </td>
             </tr>
             <tr>
               <td>DL Expiry</td>
             <td>
-                  <input type="text" placeholder="DL Expiry" name="dl_expiry" id="dl_expiry" required value = "{{driver.dl_expiry|date:'d/m/Y'}}"> 
+                  <input type="text" placeholder="DL Expiry" name="dl_expiry" id="dl_expiry" value = "{{driver.dl_expiry|date:'d/m/Y'}}"> 
               </td>
             </tr>
                         <tr>
