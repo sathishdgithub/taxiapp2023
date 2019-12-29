@@ -1845,7 +1845,9 @@ def Add_Vehicle_Details(request):
     city_code =request.POST.get('v_city')
     vehicle.city = City_Code.objects.get(city_code=city_code)
     vehicle.vehicle_type = Vehicle_type.objects.get(vehicle_type__iexact = 'auto')
-    vehicle.capacity_of_passengers=request.POST.get('v_capacity_of_passengers')
+    cop = request.POST.get('v_capacity_of_passengers')
+    if(cop is not None and cop != '' and cop != 'None'):
+        vehicle.capacity_of_passengers = cop
     vehicle.owner = owner
     vehicle.save()
 
@@ -2055,8 +2057,8 @@ def Vehicle_Register_Details(request):
     return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully with Receipt # is '+str(receipt_number)})
    
 def Edit_Driver(request):
-    driverid=request.POST.get('drivertId')
-    driver=Driver.objects.get(id=driverid)
+    driverId=request.POST.get('driverId')
+    driver=Driver.objects.get(id=driverId)
     return render(request,'taxiapp/add_driver.html',{'driver':driver})
 
 # def Allocationlist_Driver(request):
