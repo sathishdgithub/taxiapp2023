@@ -87,9 +87,9 @@ DATABASES = {
     'default': {
         # Local Configuration
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'taxapp_dev',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'HOST': 'localhost',
+        'HOST': 'host.docker.internal',
         'PASSWORD': 'postgres',
         'PORT': 5432,
     }
