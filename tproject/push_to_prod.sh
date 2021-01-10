@@ -10,7 +10,7 @@ echo "switching to valv prod context ..."
 export AWS_PROFILE=valv-ecr
 
 echo "Logging in to ECR ..."
-$(aws ecr get-login --no-include-email --region ap-south-1)
+/usr/local/bin/aws ecr get-login-password --region ap-south-1 | docker login -u AWS 145084937341.dkr.ecr.ap-south-1.amazonaws.com --password-stdin
 
 echo "Building Docker Image 'taxiapp' ..."
 docker build -t taxiapp:latest .
