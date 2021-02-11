@@ -56,13 +56,25 @@ def strip_scheme(url):
     return parsed.geturl().replace(scheme, '', 1)
 
 def googl(url):
-    """ Code : Using Cutly Acccess Token """
-    req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url)
+    # """ Code : Using Cutly Acccess Token """
+    # req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url)
+    # f = urllib2.urlopen(req)
+    # resJson = (simplejson.loads(f.read())['url'])
+    # return resJson['shortLink']
+    # """ Code : Using Cutly Acccess Token """
+    
+# """ Code : Using Cutly Acccess Token """
+    hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Encoding': 'none',
+       'Accept-Language': 'en-US,en;q=0.8',
+       'Connection': 'keep-alive'}
+    req = urllib2.Request(constants.CUTLY_API+'?key='+constants.CUTLY_ACCESS_TOKEN+'&short='+url,headers=hdr)
     f = urllib2.urlopen(req)
     resJson = (simplejson.loads(f.read())['url'])
     return resJson['shortLink']
-    """ Code : Using Cutly Acccess Token """
-
+# """ Code : Using Cutly Acccess Token """
 
 def home(request):
     if request.method == "POST":
@@ -232,11 +244,11 @@ def complaint_form(request):
 
 def send_sms(message,phone_number,kind):
     if kind == 'emergency':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_EMERGENCY,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE}) 
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE}) 
     elif kind == 'complaint':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_COMPLAINT,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     elif kind == 'otp':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_FROM_FOR_OTP,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
     return r
 
 def send_whatsapp(message,phone_number):
