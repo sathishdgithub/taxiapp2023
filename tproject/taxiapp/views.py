@@ -296,8 +296,8 @@ def complaint_success(request,pk):
         except Exception as e:
             print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
-        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
+        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area) +'\n'+ 'VALVDATA PRIVATE LIMITED'
+        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
             n = send_sms(message1,complaint.phone_number,'ack')
@@ -322,7 +322,7 @@ def complaint_resolve(request):
             reason = str(complaintStatement.reason.reason)
         
         print(resolved_date)
-        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+reason+'\nResolution: '+str(message)
+        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+reason+'\nResolution: '+str(message +'\n'+ 'VALVDATA')
         
         print(smsMessage)
         print(complaintStatement.phone_number)
@@ -889,8 +889,8 @@ def taxi_emergency(request):
             city.save()
 
             
-            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
-            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
+            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination +'\n'+ 'VALVDATA PRIVATE LIMITED')
+            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
             if vehicle.city.sms:
                 m = send_sms(message,phone_number,'complaint')
                 n = send_sms(message1,p_phone,'ack')
@@ -1182,7 +1182,7 @@ def admin_forgot_password(request):
                  otp_code = random.randint(100000,999999)
                  code = Otp_Codes(user=retrieve_user[0],otp=str(otp_code))
                  code.save()
-                 m = send_sms(str(otp_code)+" is your OTP for resetting password",phone_number,'otp') 
+                 m = send_sms(str(otp_code)+" is your OTP for resetting password",phone_number,'otp'  +'\n'+ 'VALVDATA') 
                  return HttpResponseRedirect("/enter_otp?number="+str(retrieve_user[0].id))
     else:
         form = EnterPhoneNumber()         
