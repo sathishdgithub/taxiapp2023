@@ -243,12 +243,16 @@ def complaint_form(request):
 
 
 def send_sms(message,phone_number,kind):
-    if kind == 'emergency':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE}) 
-    elif kind == 'complaint':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
+    if kind == 'complaint':
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161285412488281}) 
+    elif kind == 'ack':
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161285411264466})
     elif kind == 'otp':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161347685466404})
+    elif kind == 'register':
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161347690371861})
+    elif kind == 'resolved':
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161347681335353})
     return r
 
 def send_whatsapp(message,phone_number):
@@ -292,11 +296,11 @@ def complaint_success(request,pk):
         except Exception as e:
             print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area)
-        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
+        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area) +'\n'+ 'VALVDATA PRIVATE LIMITED'
+        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
-            n = send_sms(message1,complaint.phone_number,'complaint')
+            n = send_sms(message1,complaint.phone_number,'ack')
         if vehicleObj.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
@@ -318,11 +322,11 @@ def complaint_resolve(request):
             reason = str(complaintStatement.reason.reason)
         
         print(resolved_date)
-        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+reason+'\nResolution: '+str(message)
+        smsMessage = 'Complaint Resolved.\n'+'Taxi Number: '+str(complaintStatement.vehicle.number_plate)+'\nDate: '+str(resolved_date)+'\nComplaint Reason: '+reason+'\nResolution: '+str(message +'\n'+ 'VALVDATA')
         
         print(smsMessage)
         print(complaintStatement.phone_number)
-        m = send_sms(smsMessage,str(complaintStatement.phone_number),'complaint')
+        m = send_sms(smsMessage,str(complaintStatement.phone_number),'resolved')
         return HttpResponseRedirect("/complaints_list") 
     else:
         return HttpResponseRedirect("/admin_login?next=complaint_resolve")
@@ -885,14 +889,14 @@ def taxi_emergency(request):
             city.save()
 
             
-            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination)
-            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)
+            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination +'\n'+ 'VALVDATA PRIVATE LIMITED')
+            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
             if vehicle.city.sms:
-                m = send_sms(message,phone_number,'emergency')
-                n = send_sms(message1,p_phone,'emergency')
+                m = send_sms(message,phone_number,'complaint')
+                n = send_sms(message1,p_phone,'ack')
                 # Added new column messaging_number in City_Code and send message. 
                 if(city.messaging_number is not None and city.messaging_number != ''):
-                    l = send_sms(message,city.messaging_number,'emergency')
+                    l = send_sms(message,city.messaging_number,'complaint')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
@@ -965,7 +969,8 @@ def handle_taxi_xlsx(file_path,city, user_number):
                 if(owner.owner_image_name is not None and owner.owner_image_name != ''):
                     owner.owner_image = 'images/owners/'+owner.owner_image_name
                 owner.save()   
-                vehicle = Vehicle(number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner, created_by = user_number, modified_by = user_number)
+                import datetime  
+                vehicle = Vehicle(created_time=datetime.datetime.now(),number_plate=row["Vehicle Number (12)"],traffic_number=row["Traffic Number (13)"],vehicle_make=row["Vehicle Make (20)"],vehicle_model=row["Vehicle Model (20)"],insurance = convertToDate(row["Insurance Date (DD/MM/YYYY)"]),insurance_provider=row["Insurance provider (20)"], insurance_number=row["Insurance number (30)"],autostand=row["Auto Stand (40)"],union=row["Union (40)"],capacity_of_passengers=row["Capacity (2)"],pollution=convertToDate(row["Pollution (DD/MM/YYYY)"]),engine_number=row["Engine Number (20)"],chasis_number=row["Chassis Number (25)"],mfg_date=convertToDate(row["Mfg Date (DD/MM/YYYY)"]),rc_expiry=convertToDate(row["RC Expiry (DD/MM/YYYY)"]),city=c,owner = owner, created_by = user_number, modified_by = user_number)
                 vehicle.save()
                 # vehicleQrCodeList.append(vehicle.qr_code)
                 
@@ -1177,7 +1182,7 @@ def admin_forgot_password(request):
                  otp_code = random.randint(100000,999999)
                  code = Otp_Codes(user=retrieve_user[0],otp=str(otp_code))
                  code.save()
-                 m = send_sms(str(otp_code)+" is your OTP for resetting password",phone_number,'otp') 
+                 m = send_sms(str(otp_code)+" is your OTP for resetting password",phone_number,'otp'  +'\n'+ 'VALVDATA') 
                  return HttpResponseRedirect("/enter_otp?number="+str(retrieve_user[0].id))
     else:
         form = EnterPhoneNumber()         
@@ -2065,7 +2070,7 @@ def Vehicle_Register_Details(request):
     v1.receipt_number=receipt_number
     v1.save()
     message=" Thanks for registering with SafeAutoTaxi. Your Receipt # is " + str(receipt_number)+ ". Please visit our center and pay Rs.200 to register your vehicle."
-    m = send_sms(message,phone_number,'complaint')   
+    m = send_sms(message,phone_number,'register')   
     return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully with Receipt # is '+str(receipt_number)})
    
 def Edit_Driver(request):
