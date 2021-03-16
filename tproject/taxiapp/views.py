@@ -244,9 +244,11 @@ def complaint_form(request):
 
 def send_sms(message,phone_number,kind):
     if kind == 'complaint':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161285412488281}) 
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161522289414352}) 
     elif kind == 'ack':
-        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161285411264466})
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161522368108689})
+    elif kind == 'sos':
+        r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161522364569729})
     elif kind == 'otp':
         r = requests.get(constants.SMS_API_URL, params={'username':constants.SMS_USERNAME,'password':constants.SMS_PASSWORD,'from':constants.SMS_HEADER,'to':str(phone_number),'msg':str(message),'type':constants.SMS_TYPE, 'template_id':1707161347685466404})
     elif kind == 'register':
@@ -296,8 +298,8 @@ def complaint_success(request,pk):
         except Exception as e:
             print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area) +'\n'+ 'VALVDATA PRIVATE LIMITED'
-        message1 = 'Your Complaint has been registered.\n'+'Taxi Number: '+str(vehicleObj.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
+        message = 'Complaint Name: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicleObj.number_plate)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area) + '\nVALVDATA'
+        message1 = 'Your Complaint has been registered.\nTaxi Number: '+str(vehicleObj.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\nVALVDATA')
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
             n = send_sms(message1,complaint.phone_number,'ack')
@@ -889,14 +891,14 @@ def taxi_emergency(request):
             city.save()
 
             
-            message = 'SOS\n'+'Name: '+str(driver.driver_name)+'\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Phone Number:'+str(driver.phone_number)+'\nEmergency SOS\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination +'\n'+ 'VALVDATA PRIVATE LIMITED')
-            message1 = 'Your SOS has been registered.\n'+'Taxi Number: '+str(vehicle.number_plate)+'\n'+'Driver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\n'+ 'VALVDATA PRIVATE LIMITED')
+            message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
+            message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number) +'\nVALVDATA'
             if vehicle.city.sms:
-                m = send_sms(message,phone_number,'complaint')
+                m = send_sms(message,phone_number,'sos')
                 n = send_sms(message1,p_phone,'ack')
                 # Added new column messaging_number in City_Code and send message. 
                 if(city.messaging_number is not None and city.messaging_number != ''):
-                    l = send_sms(message,city.messaging_number,'complaint')
+                    l = send_sms(message,city.messaging_number,'sos')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
             return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
@@ -2069,7 +2071,7 @@ def Vehicle_Register_Details(request):
         receipt_number = ''
     v1.receipt_number=receipt_number
     v1.save()
-    message=" Thanks for registering with SafeAutoTaxi. Your Receipt # is " + str(receipt_number)+ ". Please visit our center and pay Rs.200 to register your vehicle."
+    message=" Thanks for registering with SafeAutoTaxi. Your Receipt # is " + str(receipt_number)+ ". Please visit our center and pay Rs.200 to register your vehicle." +'\n'+ 'VALVDATA PRIVATE LIMITED'
     m = send_sms(message,phone_number,'register')   
     return render(request, 'taxiapp/drivers_list.html', {'message':'Vehicle registered successfully with Receipt # is '+str(receipt_number)})
    
