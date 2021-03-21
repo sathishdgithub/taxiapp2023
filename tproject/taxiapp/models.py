@@ -461,8 +461,9 @@ class Complaint_Statement(models.Model):
         created_time = models.DateTimeField(blank=True)
         resolved_time = models.DateTimeField(blank=True)
         active = models.ForeignKey(Active,null=True)
+
         def __str__(self):
-             return str(self.complaint_number)+' '+self.reason.reason
+            return str(self.complaint_number)+' ' + str(self.reason)
 
         class Meta:
             verbose_name = 'Customer Complaint'
