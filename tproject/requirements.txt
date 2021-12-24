@@ -78,7 +78,7 @@ qrcode==5.3
 requests==2.13.0
 rsa==3.4.2
 s3transfer==0.2.0
-scandir==1.5
+scandir==1.10.0
 setuptools==41.0.1
 short-url==1.2.2
 simplegeneric==0.8.1
