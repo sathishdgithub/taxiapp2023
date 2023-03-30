@@ -107,8 +107,8 @@ USE_TZ = True
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_STORAGE_BUCKET_NAME = 'taxipublic'
-AWS_ACCESS_KEY_ID = 'AKIAJXIBCZNZCKK4S6JQ'
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_ACCESS_KEY_ID = 'AKIATPNX7JZHIFFMJV7L'
+AWS_SECRET_ACCESS_KEY = '+U2HO78PUfNrYWVUIsKqm43BN3lrnS/QFjPHqJjw'
 AWS_DEFAULT_ACL = "public-read" # to make sure all your files gives read only access to the files
 # Tell django-storages that when coming up with the URL for an item in S3 storage, keep
 # it simple - just use this domain plus the path. (If this isn't set, things get complicated).
