@@ -10,16 +10,16 @@ echo "switching to valv prod context ..."
 export AWS_PROFILE=valv-ecr
 
 echo "Logging in to ECR ..."
-/usr/local/bin/aws ecr get-login-password --region ap-south-1 | docker login -u AWS 145084937341.dkr.ecr.ap-south-1.amazonaws.com --password-stdin
+/usr/local/bin/aws ecr get-login-password --region ap-south-1 | docker login -u AWS 239293386318.dkr.ecr.ap-south-1.amazonaws.com --password-stdin
 
 echo "Building Docker Image 'taxiapp' ..."
-docker build -t taxiapp:latest .
+docker build --no-cache -t taxiapp:latest .
 
 echo "Tagging current build to 'taxiapp:latest' ..."
-docker tag taxiapp:latest 145084937341.dkr.ecr.ap-south-1.amazonaws.com/taxiapp:latest
+docker tag taxiapp:latest 239293386318.dkr.ecr.ap-south-1.amazonaws.com/taxiapp:latest
 
 echo "Pushing Image to ECR repository ..."
-docker push 145084937341.dkr.ecr.ap-south-1.amazonaws.com/taxiapp:latest
+docker push 239293386318.dkr.ecr.ap-south-1.amazonaws.com/taxiapp:latest
 
 echo "Restoring local env values ..."
 git checkout -- tproject/settings.py
