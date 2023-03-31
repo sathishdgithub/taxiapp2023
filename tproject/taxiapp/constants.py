@@ -1,7 +1,7 @@
 """ SMS Constant Parameters """
 SMS_API_URL ='https://www.smsstriker.com/API/sms.php'
 SMS_USERNAME = 'ValvDataPvtLtd'
-SMS_PASSWORD = 'T@*1App123'
+SMS_PASSWORD = 'Abhi@321'
 SMS_TYPE = '1'
 SMS_HEADER = 'VALVDA'
 
