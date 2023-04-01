@@ -155,7 +155,7 @@ class Taxi_Detail(models.Model):
 			box_size=6,
 			border=0,
 		)
-                weburl = "https://taxiapp.safeautotaxi.com/taxi"
+                weburl = "https://mytaxisafe.com/taxi"
 		qr.add_data("%s/%s" % (weburl, str(self.traffic_number)))
 		qr.make(fit=True)
 
@@ -326,7 +326,7 @@ class Vehicle(models.Model):
             box_size=6,
             border=0,
         )
-        weburl = "https://taxiapp.safeautotaxi.com/taxi"
+        weburl = "https://mytaxisafe.com/taxi"
         qr.add_data("%s/%s" % (weburl, str(self.traffic_number)))
         qr.make(fit=True)
 
@@ -415,7 +415,7 @@ class Driver(models.Model):
             box_size=6,
             border=0,
         )
-        weburl = "https://taxiapp.safeautotaxi.com/driver"
+        weburl = "https://mytaxisafe.com/driver"
         qr.add_data("%s/%s" % (weburl, str(self.id)))
         qr.make(fit=True)
 
