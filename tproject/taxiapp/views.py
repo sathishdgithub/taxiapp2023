@@ -3093,7 +3093,7 @@ def Generate_Driver_Qrcodes(request):
                 box_size=6,
                 border=0,
             )
-            weburl = "https://taxiapp.safeautotaxi.com/driver"
+            weburl = "https://mytaxisafe.com/driver"
             qr.add_data("%s/%s" % (weburl, str(driver.id)))
             qr.make(fit=True)
             img = qr.make_image()
