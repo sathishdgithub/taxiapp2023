@@ -31,6 +31,8 @@
     var longitude = position.coords.longitude;
     document.getElementById('id_area').value='https://www.google.co.in/maps/place/'+latitude+','+longitude+'';
     document.getElementById('id_area').readOnly = true;
+    document.getElementById('id_origin_area').value='https://www.google.co.in/maps/place/'+latitude+','+longitude+'';
+    document.getElementById('id_origin_area').readOnly = true;
 
     //output.innerHTML = '<p>Latitude is ' + latitude + '° <br>Longitude is ' + longitude + '°</p>';
 
