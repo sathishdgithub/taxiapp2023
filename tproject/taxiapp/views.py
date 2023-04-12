@@ -233,13 +233,15 @@ def complaint_form(request):
             return HttpResponseRedirect("/complaint_success/"+str(form.instance.complaint_number))
     else:
         vehicle_id = request.GET.get('id', '')
+        number_plate = request.GET.get('number_plate', '')
         passenger_phone = request.GET.get('passenger_phone','')
         passenger_origin = request.GET.get('passenger_origin','')
         passenger_destination = request.GET.get('passenger_destination','')
-        form = ComplaintUserForm(initial={'vehicle':vehicle_id,'phone_number':passenger_phone,\
+        form = ComplaintUserForm(initial={'vehicle':vehicle_id, 'number_plate':number_plate,'phone_number':passenger_phone,\
                'origin_area':passenger_origin,'destination_area':passenger_destination})
         form.fields['vehicle'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
-    	return render(request, 'taxiapp/complaint.html', {'form': form})
+        form.fields['number_plate'].widget = forms.TextInput(attrs={'size':'30','readonly':"True"})
+        return render(request, 'taxiapp/complaint.html', {'form': form})
 
 
 def send_sms(message,phone_number,kind):
@@ -2371,7 +2373,7 @@ def Complaints_List(request):
     else:
         resolved_type = request.POST.get('resolved_type', 'UnResolved')
     
-    message = request.GET.get('message','')    
+    message = request.GET.get('message','')
     cities = []
     if request.user.is_admin or request.user.is_staff:
         cities = City_Code.objects.all()
@@ -2436,6 +2438,7 @@ def Complaints_List(request):
             rows_c=rows_c.filter(resolved=False)
         elif resolved_type == 'Resolved':
             rows_c=rows_c.filter(resolved=True)
+        rows_c=rows_c.exclude(active_id=2)
         
         return render(request,'taxiapp/complaints.html',{'rows_c':rows_c,'cities':cities,'vehicletypes':vehicletypes,
         'vehicletype':vehicletype,'rangeFrom':rangeFrom,'numberPlates':numberPlates,'resolved_type':resolved_type,

@@ -403,15 +403,32 @@ word-wrap:break-word;
     <input id="point" type="text" name="point" value="">
     <input id="passenger_phone_sos" type="text" name="passenger_phone_sos" placeholder="Your Phone Number" required>
     <input id="passenger_origin_sos" type="text" name="passenger_origin_sos" placeholder="Origin of the trip">
-    <input id="passenger_destination_sos" type="text" name="passenger_destination_sos" placeholder="Destination of the trip">
+    <input id="passenger_destination_sos" type="text" name="passenger_destination_sos" placeholder="Destination of the trip" required>
     <input type="submit" value="submit">
 </form>
 </div>
 <script type="text/javascript">
+const inputField = document.getElementById('passenger_origin');
+
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    inputField.value = 'https://www.google.co.in/maps/place/'+`${position.coords.latitude},${position.coords.longitude}`;
+    document.getElementById('passenger_origin').readOnly = true;
+  },
+  (error) => {
+	console.log("Geolocation is not supported by your browser");
+  }
+);
+
     function sendSOS() {
     var x = document.getElementById("passenger_phone").value;
 	if (x.length < 10) {
             alert("Please fill in your correct Phone Number");
+            return false;
+        }
+    var x = document.getElementById("passenger_destination").value;
+	if (x.length < 1) {
+            alert("Please Enter Destination");
             return false;
         }
 
