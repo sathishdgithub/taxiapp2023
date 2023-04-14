@@ -1,0 +1,1 @@
+ALTER TABLE taxiapp_complaint_statement ADD COLUMN number_plate varchar(200);
