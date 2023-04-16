@@ -1,0 +1,60 @@
+{% extends "taxiapp/base.html" %}
+
+{% load bootstrap3 %}
+
+{% block main %}
+<h1>Live Location</h1>
+
+<iframe id="map" width="600" height="450" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?q={{ location.latitute }},{{ location.longitude }}&hl=es;z=14&amp;output=embed"></iframe>
+
+<!-- <div id="map"></div> -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function sendLocation() {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+                var user_id = "{{ location.id }}";
+                var csrf_token = "{{ csrf_token }}";
+                $.ajax({
+                    url: '/update_location/',
+                    method: 'POST',
+                    headers: {
+                                'X-CSRFToken': csrf_token // include the CSRF token in the header
+                            },
+                    data: {'id': user_id,'latitude': latitude, 'longitude': longitude},
+                    success: function(data) {
+                        console.log(data);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            });
+        }
+        // setInterval(sendLocation, 25000);
+        var intervalId = setInterval(sendLocation, 25000);
+        localStorage.setItem('intervalId', intervalId);
+
+        // set up the page refresh interval
+        var pageRefreshInterval = setInterval(function() {
+            location.reload();
+        }, 30000);
+
+        // retrieve the interval ID from localStorage after a page refresh
+        var storedIntervalId = localStorage.getItem('intervalId');
+        if (storedIntervalId) {
+            clearInterval(storedIntervalId); // clear any existing interval with this ID
+            setInterval(sendLocation, 25000); // set up a new interval
+        }
+
+        // handle the page refresh event to clear the intervals and remove the stored ID
+        window.onbeforeunload = function() {
+            clearInterval(intervalId);
+            clearInterval(pageRefreshInterval);
+            localStorage.removeItem('intervalId');
+        };
+    </script>
+
+{% endblock %}

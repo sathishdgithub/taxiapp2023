@@ -848,6 +848,7 @@ def taxi_emergency(request):
         p_origin = request.POST.get('passenger_origin_sos','')       
         p_destination = request.POST.get('passenger_destination_sos','')       
         lat,lon = map(float,point.split(','))
+        print(point)
         if len(rows) > 0:
             if rows[0].location and (not rows[0].is_admin):
                 x,y = map(float,rows[0].location.strip().split(','))
@@ -874,7 +875,9 @@ def taxi_emergency(request):
             area = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)
             city = City_Code.objects.get(pk=police.city.id)
             cs = Complaint_Statement()
-            cs.vehicle = vehicle 
+            cs.vehicle = vehicle
+            cs.latitute = str(lat)
+            cs.longitude = str(lon) 
             cs.city = city
             cs.area = area
             cs.origin_area = p_origin
@@ -889,12 +892,16 @@ def taxi_emergency(request):
             cs.created_time = datetime.now()
             cs.save()
 
+            cs_id = cs.id
+
             city.complaint_no = city.complaint_no+1
             city.save()
 
             
-            message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
-            message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number) +'\nVALVDATA'
+            # message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
+            message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.mytaxisafe.com/get_taxi_location/'+str(cs_id)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
+            message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nVALVDATA'
+            # message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nLocation: http://localhost:8001/get_taxi_location/'+str(cs_id)+'/ \nVALVDATA'
             if vehicle.city.sms:
                 m = send_sms(message,phone_number,'sos')
                 n = send_sms(message1,p_phone,'ack')
@@ -903,11 +910,52 @@ def taxi_emergency(request):
                     l = send_sms(message,city.messaging_number,'sos')
             if vehicle.city.whatsapp:
                 m = send_whatsapp(message,whatsapp_number)
-            return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police})
+            return render(request,'taxiapp/taxi_emergency.html',{'message':'', 'distance':min_distance,'police':police, 'cs_id':str(cs_id)})
         else:
             return render(request,'taxiapp/taxi_emergency.html',{'message':'There is no police station nearby.'})
     else:
             return render(request,'taxiapp/error.html')
+
+def taxi_emergency_location(request, pk):
+    location = Complaint_Statement.objects.get(id=pk)
+    csrf_token = request.COOKIES.get('csrftoken')
+    return render(request, 'taxiapp/taxi_emergency_location.html', {'location': location, 'csrf_token':csrf_token})
+    # return render(request,'taxiapp/taxi_emergency_location.html')
+    # if request:
+    #     latitude = request.POST.get('latitude')
+    #     longitude = request.POST.get('longitude')
+        
+    #     location_url= 'https://www.google.co.in/maps/place/'+latitude+','+longitude+''
+    #     # Save the location data to your database or perform any other necessary actions
+    #     # ...
+
+    #     return render(request,'taxiapp/taxi_emergency_location.html', {'location_url':location_url, 'pk':pk})
+    # else:
+    #     return HttpResponse(status=400)get_taxi_location
+
+
+def update_location(request):
+    user_id = request.POST.get('id')
+    latitude = request.POST.get('latitude')
+    longitude = request.POST.get('longitude')
+    location = Complaint_Statement.objects.get(id=user_id)
+    location.latitute = latitude
+    location.longitude = longitude
+    # location = Complaint_Statement(id=user_id, latitute=latitude, longitude=longitude)
+    location.save()
+    return JsonResponse({'status': 'success'})
+
+
+    # location = Complaint_Statement.objects.get(id=pk)
+    # location.latitute = request.POST.get('latitude')
+    # location.longitude = request.POST.get('longitude')
+    # location.save()
+    # return render(request, 'taxiapp/empty.html')
+
+def get_taxi_location(request, pk):
+    location = Complaint_Statement.objects.get(id=pk)
+    return render(request, 'taxiapp/get_taxi_location.html', {'location': location})
+
 
 def date_form(date):                                   
     t = str(date).strip().split('/')                                              

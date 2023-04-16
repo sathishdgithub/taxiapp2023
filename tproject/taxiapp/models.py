@@ -448,6 +448,8 @@ class Complaint_Statement(models.Model):
         #vehicle_id_fk               = models.ForeignKey(Vehicle,null=True,blank=True,verbose_name="Vehicle ID")
         vehicle               = models.ForeignKey(Vehicle,null=True,blank=True,verbose_name="Vehicle ID")
         number_plate                = models.CharField(max_length=200,default='')
+        latitute                = models.CharField(max_length=200,default='')
+        longitude                = models.CharField(max_length=200,default='')
         reason			     = models.ForeignKey(Reasons, null=True,blank=True)
         area                         = models.CharField(max_length=200,default='')
         city                         = models.ForeignKey(City_Code,default=1)
@@ -461,6 +463,7 @@ class Complaint_Statement(models.Model):
         is_emergency_text    = models.BooleanField(default=False)
         created_time = models.DateTimeField(blank=True)
         resolved_time = models.DateTimeField(blank=True)
+        updated_time = models.DateTimeField(auto_now=True)
         active = models.ForeignKey(Active,null=True)
 
         def __str__(self):
