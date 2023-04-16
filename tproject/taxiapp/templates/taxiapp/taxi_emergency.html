@@ -15,4 +15,17 @@ Location: {{police.location}}(latitude,longitude)<br>
 {{message}}
 {% endifequal %}<br>
 <a href="{% url 'taxiapp:home' %}"><button>Home</button></a>
+
+{% if cs_id %}
+    {% with redirect_url="/taxi_emergency_location/"|add:cs_id %}
+        {% autoescape off %}
+            <script>
+                setTimeout(function() {
+                    window.location.href="{{ redirect_url }}";
+                }, 3000);
+            </script>
+            <!-- <script>window.location.href="{{ redirect_url }}";</script> -->
+        {% endautoescape %}
+    {% endwith %}
+{% endif %}
 {% endblock %}
