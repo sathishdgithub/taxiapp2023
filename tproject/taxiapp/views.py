@@ -300,11 +300,24 @@ def complaint_success(request,pk):
         except Exception as e:
             print(e.message)
         map_url = 'https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''
-        message = 'Complaint Name: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicleObj.number_plate)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nComplaint Reason: '+str(complaint.complaint)+'\nLocation: '+googl(map_url)+'\nPassenger Phone Number: '+str(complaint.phone_number)+'\nOrigin: '+str(complaint.origin_area)+'\nDestination: '+str(complaint.destination_area) + '\nVALVDATA'
-        message1 = 'Your Complaint has been registered.\nTaxi Number: '+str(vehicleObj.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number +'\nVALVDATA')
+        number_plate = vehicleObj.number_plate if vehicleObj and vehicleObj.number_plate else ''
+        driver_name = driver.driver_name if driver and driver.driver_name else ''
+        driver_phone_number = driver.phone_number if driver and driver.phone_number else ''
+        complaint_complaint = complaint.complaint if complaint and complaint.complaint else ''
+        complaint_phone_number = complaint.phone_number if complaint and complaint.phone_number else ''
+        destination_area = complaint.destination_area if complaint and  complaint.destination_area else ''
+        message = 'Complaint Name: ' + str(driver_name) + '\nTaxi Number: ' + str(
+            number_plate) + '\nDriver Phone Number: ' + str(
+            driver_phone_number) + '\nComplaint Reason: ' + str(
+            complaint_complaint) + '\nLocation: ' + googl(map_url) + '\nPassenger Phone Number: ' + str(
+            complaint_phone_number) + '\nOrigin: ' + str(complaint.origin_area) + '\nDestination: ' + str(
+            destination_area) + '\nVALVDATA'
+        message1 = 'Your Complaint has been registered.\nTaxi Number: ' + str(
+            number_plate) + '\nDriver Name: ' + str(
+            driver_name) + '\nDriver Phone Number: ' + str(driver_phone_number + '\nVALVDATA')
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
-            n = send_sms(message1,complaint.phone_number,'ack')
+            n = send_sms(message1, complaint_phone_number, 'ack')
         if vehicleObj.city.whatsapp:
             m = send_whatsapp(message,whatsapp_number)
     return render(request,'taxiapp/complaint_success.html',{'message1':'Your complaint for Taxi has been successfully registered.','message2':'Complaint Number: '+str(pk)})
