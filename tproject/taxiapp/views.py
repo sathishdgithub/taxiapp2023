@@ -306,15 +306,13 @@ def complaint_success(request,pk):
         complaint_complaint = complaint.complaint if complaint and complaint.complaint else ''
         complaint_phone_number = complaint.phone_number if complaint and complaint.phone_number else ''
         destination_area = complaint.destination_area if complaint and  complaint.destination_area else ''
-        message = 'Complaint Name: ' + str(driver_name) + '\nTaxi Number: ' + str(
-            number_plate) + '\nDriver Phone Number: ' + str(
-            driver_phone_number) + '\nComplaint Reason: ' + str(
-            complaint_complaint) + '\nLocation: ' + googl(map_url) + '\nPassenger Phone Number: ' + str(
-            complaint_phone_number) + '\nOrigin: ' + str(complaint.origin_area) + '\nDestination: ' + str(
-            destination_area) + '\nVALVDATA'
-        message1 = 'Your Complaint has been registered.\nTaxi Number: ' + str(
-            number_plate) + '\nDriver Name: ' + str(
-            driver_name) + '\nDriver Phone Number: ' + str(driver_phone_number + '\nVALVDATA')
+        message = 'Complaint Name: ' + str(driver_name) + '\nTaxi Number: ' + str(number_plate) \
+                  + '\nDriver Phone Number: ' + str(driver_phone_number) + '\nComplaint Reason: ' \
+                  + str(complaint_complaint) + '\nLocation: ' + googl(map_url) + '\nPassenger Phone Number: ' \
+                  + str(complaint_phone_number) + '\nOrigin: ' + str(googl(complaint.origin_area)) + '\nDestination: ' \
+                  + str(destination_area) + '\nVALVDATA'
+        message1 = 'Your Complaint has been registered.\nTaxi Number: ' + str(number_plate) + '\nDriver Name: ' \
+                   + str(driver_name) + '\nDriver Phone Number: ' + str(driver_phone_number + '\nVALVDATA')
         if vehicleObj.city.sms:
             m = send_sms(message,phone_number,'complaint')
             n = send_sms(message1, complaint_phone_number, 'ack')
@@ -912,7 +910,11 @@ def taxi_emergency(request):
 
             
             # message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.google.co.in/maps/place/'+str(lat)+','+str(lon)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
-            message = 'Emergency SOS\nName: '+str(driver.driver_name)+'\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Phone Number:'+str(driver.phone_number)+'\nLocation: '+str(googl('https://www.mytaxisafe.com/get_taxi_location/'+str(cs_id)+''))+'\nPassenger Phone Number:'+str(p_phone)+'\nOrigin:'+str(p_origin)+'\nDestination:'+str(p_destination) +'\nVALVDATA'
+            message = 'Emergency SOS\nName: ' + str(driver.driver_name) + '\nTaxi Number: ' + str(vehicle.number_plate)\
+                      + '\nDriver Phone Number:' + str(driver.phone_number) + '\nLocation: ' \
+                      + str(googl('https://www.mytaxisafe.com/get_taxi_location/' + str(cs_id) + '')) \
+                      + '\nPassenger Phone Number:' + str(p_phone) + '\nOrigin:' + str(googl(p_origin)) \
+                      + '\nDestination:' + str(p_destination) + '\nVALVDATA'
             message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nVALVDATA'
             # message1 = 'Your SOS has been registered.\nTaxi Number: '+str(vehicle.number_plate)+'\nDriver Name: '+str(driver.driver_name)+'\nDriver Phone Number: '+str(driver.phone_number)+'\nLocation: http://localhost:8001/get_taxi_location/'+str(cs_id)+'/ \nVALVDATA'
             if vehicle.city.sms:
