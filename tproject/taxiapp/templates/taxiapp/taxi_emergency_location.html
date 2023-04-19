@@ -33,20 +33,20 @@
                 });
             });
         }
-        // setInterval(sendLocation, 25000);
-        var intervalId = setInterval(sendLocation, 25000);
+        // setInterval(sendLocation, 25000); Update Location
+        var intervalId = setInterval(sendLocation, 2000);
         localStorage.setItem('intervalId', intervalId);
 
-        // set up the page refresh interval
+        // set up the page refresh interval -- Refresh Rate
         var pageRefreshInterval = setInterval(function() {
             location.reload();
-        }, 30000);
+        }, 3000);
 
         // retrieve the interval ID from localStorage after a page refresh
         var storedIntervalId = localStorage.getItem('intervalId');
         if (storedIntervalId) {
             clearInterval(storedIntervalId); // clear any existing interval with this ID
-            setInterval(sendLocation, 25000); // set up a new interval
+            setInterval(sendLocation, 2000); // set up a new interval
         }
 
         // handle the page refresh event to clear the intervals and remove the stored ID
