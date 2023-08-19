@@ -8,7 +8,10 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.sites.models import Site
 from taxiapp.models import MyUser,Vehicle,Driver,Owner,Active,Vehicle_type,Rating_Type,Rating_Reason,Customer_Rating
-from django.core.urlresolvers import reverse
+#from django.core.urlresolvers import reverse
+###################################################
+from django.urls import reverse
+###############################################
 from imagekit.admin import AdminThumbnail
 
 

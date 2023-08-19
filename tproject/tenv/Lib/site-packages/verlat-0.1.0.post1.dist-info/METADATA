@@ -1,0 +1,49 @@
+Metadata-Version: 2.1
+Name: verlat
+Version: 0.1.0.post1
+Summary: Get info about the latest release of a package on PyPI.
+Home-page: https://github.com/aahnik/verlat
+License: MIT
+Keywords: python,package,pypi
+Author: aahnik
+Author-email: daw@aahnik.dev
+Requires-Python: >=3.8,<4.0
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Dist: pydantic (>=1.8.2,<2.0.0)
+Requires-Dist: requests (>=2.25.1,<3.0.0)
+Project-URL: Repository, https://github.com/aahnik/verlat
+Description-Content-Type: text/markdown
+
+# verlat
+
+Get info about the latest release of a package on PyPI.
+
+[![Code Quality](https://github.com/aahnik/verlat/actions/workflows/quality.yml/badge.svg)](https://github.com/aahnik/verlat/actions/workflows/quality.yml)
+[![Tests](https://github.com/aahnik/verlat/actions/workflows/test.yml/badge.svg)](https://github.com/aahnik/verlat/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/aahnik/verlat/branch/main/graph/badge.svg?token=RO18ZS775L)](https://codecov.io/gh/aahnik/verlat)
+
+## Installation
+
+```shell
+pip install verlat
+```
+
+## Usage
+
+```python
+from verlat import latest_release
+
+release = latest_release("verlat")
+
+print(release.version)
+```
+

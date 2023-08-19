@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'taxiapp.apps.TaxiappConfig',
     'location_field.apps.DefaultConfig',
     'bootstrap3',
-    'mod_wsgi.server',
+   # 'mod_wsgi.server',
     'storages',
     'rest_framework',
     'rest_framework_swagger',

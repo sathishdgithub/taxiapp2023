@@ -15,22 +15,22 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d
 
-  taxi-web:
-    container_name: taxi-web
-    build:
-      dockerfile: Dockerfile
-    image: taxiapp:latest
-    command: >
-      bash -c "nginx -g 'daemon on;'
-      && python manage.py runserver 0.0.0.0:8000"
-    restart: always
-    depends_on:
-      - taxi-db
-    ports:
-      - 80:80
-      - 443:443
-    environment:
-      POSTGRES_DB: taxidb
-      POSTGRES_USER: valv_admin
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_HOST: taxi-db
+  # taxi-web:
+  #   container_name: taxi-web
+  #   build:
+  #     dockerfile: Dockerfile
+  #   image: taxiapp:latest
+  #   command: >
+  #     bash -c "nginx -g 'daemon on;'
+  #     && python manage.py runserver 0.0.0.0:8000"
+  #   restart: always
+  #   depends_on:
+  #     - taxi-db
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   environment:
+  #     POSTGRES_DB: taxidb
+  #     POSTGRES_USER: valv_admin
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_HOST: taxi-db
