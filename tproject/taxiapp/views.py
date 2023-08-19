@@ -4,23 +4,35 @@ from django.template import loader
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.files import File
-from django.contrib.auth.views import password_change
-from forms import *
-from models import *
-import urllib2, simplejson
+# from django.contrib.auth.views import password_change
+# from forms import *
+# from models import *
+# import urllib2, 
+import urllib3
+#########################
+import simplejson
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 import sys
 import requests
 from django.views.decorators.csrf import csrf_exempt
-from urlparse import urlparse
+# from urlparse import urlparse
+#####################################
+from urllib.parse import urlparse
+#######################################
+
 from whatsapp import Client
+
 import pandas as pd
 import random,datetime
 from rest_framework import viewsets
 from rest_framework.views import APIView
-from serializers import TaxiDriverOwnerSerialize
-from serializers import TaxiComplaintsSerialize
+
+#######################################
+#from serializers import TaxiDriverOwnerSerialize
+#from serializers import TaxiComplaintsSerialize
+#######################################
+
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -29,9 +41,19 @@ from rest_framework.filters import BaseFilterBackend
 import coreapi
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import boto3
+
 from botocore.exceptions import NoCredentialsError
+
+
+#import StringIO
+import io
+##########################
+
+import client
+
+
 from io import StringIO
-import StringIO
+
 from . import constants
 import urllib,shutil,os,zipfile
 from datetime import date, tzinfo, datetime, timedelta
@@ -80,7 +102,10 @@ def home(request):
     if request.method == "POST":
         form = TaxisearchForm(request.POST)
         taxi_id = request.POST.get('taxi_id', '')
-        print taxi_id
+        #print taxi_id
+        ######################################
+        print(taxi_id)
+        #######################################
         return HttpResponseRedirect("/taxi/"+taxi_id)
     else:
         form = TaxisearchForm()
@@ -94,12 +119,12 @@ def admin_login(request):
     if request.user.is_authenticated():
         return HttpResponseRedirect("/"+nex)
     if request.method == 'POST':
-    	form 	 = AdminLoginForm(request.POST)
-    	username = ''
-    	password = ''
-    	if form.is_valid():
-    		username = request.POST.get('username', '')
-    		password = request.POST.get('password', '') 
+        form 	 = AdminLoginForm(request.POST)
+        username = ''
+        password = ''
+        if form.is_valid():
+            username = request.POST.get('username', '')
+            password = request.POST.get('password', '') 
 
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -112,7 +137,7 @@ def admin_login(request):
             else:
                 return HttpResponse("You're account is disabled.")
         else:
-            print  "Invalid Login Details " + username + " " + password
+            print("Invalid Login Details " + username + " " + password)
             return render(request, 'taxiapp/admin_login.html', {'form': form,'nex':nex})
     else:
         form = AdminLoginForm()
@@ -261,7 +286,7 @@ def send_sms(message,phone_number,kind):
 
 def send_whatsapp(message,phone_number):
     k = client.send_message('91'+str(phone_number), message=message)
-    print message,k
+    print(message,k)
     return k 
 
 def complaint_success(request,pk):
